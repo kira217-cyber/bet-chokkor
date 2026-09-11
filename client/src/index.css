@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────────
+   BetChokkor design tokens
+
+   মূল সাইটের সাইজিং সিস্টেম হুবহু: মোবাইলে ১ ইউনিট = ১vw (স্ক্রিনের
+   সাথে স্কেল করে), ডেস্কটপে ১ ইউনিট = 3.75px (ফিক্সড)। ৩৭৫px
+   viewport এ দুটো এক — তাই একই টোকেন দুই জায়গাতেই কাজ করে।
+   ──────────────────────────────────────────────────────────────── */
+
+:root {
+  /* মূল সাইটের বেস ইউনিট — মোবাইলে 1vw (স্ক্রিনের সাথে স্কেল করে),
+     ৪৮০px এর উপরে ফিক্সড 3.75px। ৩৭৫px viewport এ দুটো সমান, তাই
+     সব সাইজ এই একক দিয়ে লেখা যায়: calc(var(--u) * 13.333) = ৫০px।
+
+     মূল সাইট এটা html এর font-size বদলে করে; আমরা আলাদা ভেরিয়েবল
+     ব্যবহার করছি যাতে rem ১৬px ই থাকে এবং Tailwind এর rem-ভিত্তিক
+     ইউটিলিটিগুলো (h-7, px-3, gap-2) ঠিকভাবে কাজ করে। */
+  --u: 1vw;
+
+  /* neutral */
+  --neutral100: #ffffff;
+  --neutral200: #ebebea;
+  --neutral300: #cdcdcb;
+  --neutral400: #a8a8a4;
+  --neutral500: #7e7e77;
+  --neutral600: #4c4d48;
+  --neutral700: #3d3d39;
+  --neutral800: #383835;
+  --neutral900: #292926;
+  --neutral1000: #1c1c1a;
+
+  /* brand gold */
+  --primary300: #f8e4a9;
+  --primary400: #f0c64c;
+  --primary500: #f9b901;
+  --primary600: #e38614;
+
+  --secondary500: #e2cc94;
+  --secondary600: #f8d888;
+
+  /* status */
+  --status-danger: #ff777c;
+  --status-info: #409fff;
+  --status-pending: #d8a845;
+  --status-success: #38ba9d;
+  --status-warning: #ffa05f;
+
+  /* semantic */
+  --text-primary: var(--neutral200);
+  --text-secondary: var(--neutral300);
+  --text-muted: var(--neutral400);
+  --text-disabled: var(--neutral500);
+  --text-link: var(--primary400);
+
+  --content-bg: var(--neutral900);
+  --header-bg: var(--neutral900);
+  --form-box-bg: var(--neutral800);
+  --modal-mask-bg: color-mix(in srgb, var(--neutral1000), transparent 40%);
+
+  --btn-primary-bg: var(--primary500);
+  --btn-primary-txt: var(--neutral600);
+  --btn-secondary-bg: var(--neutral700);
+  --btn-secondary-txt: var(--neutral200);
+
+  /* radius */
+  --radius-1: calc(var(--u) * 0.2666666667);
+  --radius-3: calc(var(--u) * 0.8);
+  --radius-5: calc(var(--u) * 1.3333333333);
+  --radius-10: calc(var(--u) * 2.6666666667);
+  --radius-70: calc(var(--u) * 18.6666666667);
+
+  /* font size */
+  --fs-h1: calc(var(--u) * 9.3333333333);
+  --fs-h2: calc(var(--u) * 6.4);
+  --fs-h3: calc(var(--u) * 5.3333333333);
+  --fs-h4: calc(var(--u) * 4.8);
+  --fs-body: calc(var(--u) * 4.2666666667);
+  --fs-larger: calc(var(--u) * 3.7333333333);
+  --fs-normal: calc(var(--u) * 3.2);
+  --fs-small: calc(var(--u) * 2.6666666667);
+  --fs-mini: calc(var(--u) * 2.1333333333);
+
+  /* layout — মূল সাইট থেকে মাপা */
+  --header-height: calc(var(--u) * 13.333);   /* মোবাইল ৫২px */
+  --bottom-bar-height: calc(var(--u) * 13.333);
+  --side-nav-width: 68px;
+  --side-nav-width-open: 350px;
+  --desktop-header-height: 64px;
+
+  /* ডেস্কটপে কনটেন্ট কলাম ১২০০px, দুই পাশে ১৬px প্যাডিং নিয়ে ১২৩২ */
+  --content-width: 1232px;
+}
+
+/* ৪৮০px ছাড়ালে vw-স্কেলিং বন্ধ, নাহলে ট্যাবলেট/ডেস্কটপে লেখা
+   অস্বাভাবিক বড় হয়ে যায় */
+@media (min-width: 480px) {
+  :root {
+    --u: 3.75px;
+  }
+}
+
+html,
+body {
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--neutral1000);
+  color: var(--text-primary);
+  font-family: Outfit, "Helvetica Neue", Helvetica, Tahoma, "Nirmala UI",
+    "Noto Sans Bengali", sans-serif;
+}
+
+/* ── লেআউট ──
+   মোবাইলে কনটেন্ট পুরো প্রস্থ জুড়ে, প্রতিটি সেকশন নিজের প্যাডিং দেয়।
+   ডেস্কটপে কলামটা ১২৩২px এ ক্যাপ করা ও সেন্টারড — ১৬px প্যাডিং বাদে
+   ভেতরের কনটেন্ট ঠিক ১২০০px, মূল সাইটের মতোই। */
+.bc-page {
+  width: 100%;
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .bc-page {
+    max-width: var(--content-width);
+    padding-inline: 16px;
+  }
+}
+
+/* সেকশনগুলোর সাইড প্যাডিং (মূল সাইট থেকে মাপা) */
+.bc-pad {
+  padding-inline: calc(var(--u) * 4.267);
+}
+
+.bc-pad--carousel {
+  padding-inline: calc(var(--u) * 4);
+}
+
+/* ── font-size utility (মূল সাইটের টোকেন নামেই) ── */
+.fs-h1 { font-size: var(--fs-h1); }
+.fs-h2 { font-size: var(--fs-h2); }
+.fs-h3 { font-size: var(--fs-h3); }
+.fs-h4 { font-size: var(--fs-h4); }
+.fs-body { font-size: var(--fs-body); }
+.fs-larger { font-size: var(--fs-larger); }
+.fs-normal { font-size: var(--fs-normal); }
+.fs-small { font-size: var(--fs-small); }
+.fs-mini { font-size: var(--fs-mini); }
+
+/* ── scrollbar ── */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.thin-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+}
+
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

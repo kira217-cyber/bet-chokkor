@@ -1,0 +1,36 @@
+# ── ডিপেন্ডেন্সি ও বিল্ড ──
+node_modules/
+dist/
+dist-ssr/
+build/
+.vite/
+
+# ── এনভায়রনমেন্ট ──
+# .env.local এ শুধু লোকাল URL থাকে; নমুনার জন্য .env.example দেখুন
+*.local
+.env
+.env.*
+!.env.example
+
+# ── লগ ──
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── সার্ভারের আপলোড ──
+server/uploads/
+
+# ── এডিটর ও OS ──
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
