@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/* ────────────────────────────────────────────────────────────────
+   BetChokkor Admin — ক্লায়েন্ট সাইটের একই ডার্ক + গোল্ড প্যালেট।
+   ব্যাকঅফিসে পড়ার সুবিধার জন্য টাইপোগ্রাফি ফিক্সড px (client এর
+   vw-স্কেলিং এখানে দরকার নেই)।
+   ──────────────────────────────────────────────────────────────── */
+
+:root {
+  --neutral100: #ffffff;
+  --neutral200: #ebebea;
+  --neutral300: #cdcdcb;
+  --neutral400: #a8a8a4;
+  --neutral500: #7e7e77;
+  --neutral600: #4c4d48;
+  --neutral700: #3d3d39;
+  --neutral800: #383835;
+  --neutral900: #292926;
+  --neutral1000: #1c1c1a;
+
+  --primary300: #f8e4a9;
+  --primary400: #f0c64c;
+  --primary500: #f9b901;
+  --primary600: #e38614;
+
+  --status-danger: #ff777c;
+  --status-info: #409fff;
+  --status-pending: #d8a845;
+  --status-success: #38ba9d;
+
+  --text-primary: var(--neutral200);
+  --text-secondary: var(--neutral300);
+  --text-muted: var(--neutral400);
+  --text-disabled: var(--neutral500);
+
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--neutral1000);
+  color: var(--text-primary);
+  font-family: Outfit, "Helvetica Neue", Helvetica, Tahoma, "Nirmala UI",
+    "Noto Sans Bengali", sans-serif;
+}
+
+/* ── শেয়ার্ড ব্লক ── */
+
+.ad-card {
+  position: relative;
+  border-radius: 16px;
+  background: var(--neutral900);
+  padding: 20px;
+  overflow: hidden;
+}
+
+.ad-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.ad-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ad-input {
+  width: 100%;
+  height: 46px;
+  padding-inline: 14px;
+  border-radius: 12px;
+  background: var(--neutral800);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.ad-input::placeholder {
+  color: var(--text-disabled);
+}
+
+.ad-input:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary500), transparent 60%);
+}
+
+.ad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding-inline: 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 0.15s ease, background 0.15s ease;
+}
+
+.ad-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ad-btn--primary {
+  background: var(--primary500);
+  color: var(--neutral600);
+}
+
+.ad-btn--primary:not(:disabled):hover {
+  filter: brightness(1.06);
+}
+
+.ad-btn--ghost {
+  border: 1px solid var(--neutral600);
+  color: var(--neutral200);
+}
+
+.ad-btn--ghost:not(:disabled):hover {
+  background: var(--neutral800);
+}
+
+.ad-btn--danger {
+  background: var(--status-danger);
+  color: var(--neutral1000);
+}
+
+.ad-btn--sm {
+  height: 36px;
+  padding-inline: 14px;
+  font-size: 13px;
+}
+
+/* ── স্ক্রলবার ── */
+.ad-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ad-scroll::-webkit-scrollbar-thumb {
+  background: var(--neutral700);
+  border-radius: 20px;
+}
+
+.ad-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
