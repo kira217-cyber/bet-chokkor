@@ -169,13 +169,33 @@ const RootLayout = () => {
             />
           </Link>
 
-          {role === "viewer" && (
-            <span className="ms-auto flex items-center gap-2 rounded-full border border-[var(--primary500)]/30 bg-[var(--primary500)]/10 px-3 py-1.5 text-[12px] font-semibold text-[var(--primary500)]">
-              <Eye size={14} />
-              <span className="hidden sm:inline">View only — no changes allowed</span>
-              <span className="sm:hidden">View only</span>
-            </span>
-          )}
+          <div className="ms-auto flex items-center gap-3">
+            {role === "viewer" && (
+              <span className="flex items-center gap-2 rounded-full border border-[var(--primary500)]/30 bg-[var(--primary500)]/10 px-3 py-1.5 text-[12px] font-semibold text-[var(--primary500)]">
+                <Eye size={14} />
+                <span className="hidden sm:inline">
+                  View only — no changes allowed
+                </span>
+                <span className="sm:hidden">View only</span>
+              </span>
+            )}
+
+            {/* নিজের প্রোফাইল — সাইডবারে নয়, ডান কোণেই */}
+            <NavLink
+              to="/profile"
+              title="My Profile"
+              aria-label="My Profile"
+              className={({ isActive }) =>
+                `flex h-10 w-10 items-center justify-center rounded-full transition ${
+                  isActive
+                    ? "bg-gradient-to-r from-[var(--primary400)] to-[var(--primary600)] text-[var(--neutral1000)] shadow-[0_8px_22px_rgba(249,185,1,0.28)]"
+                    : "border border-[var(--primary500)]/30 bg-white/[0.06] text-[var(--primary500)] hover:bg-white/[0.12]"
+                }`
+              }
+            >
+              <User size={18} />
+            </NavLink>
+          </div>
         </header>
 
         <main className="p-4 lg:p-6">
