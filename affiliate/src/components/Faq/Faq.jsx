@@ -1,0 +1,58 @@
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { ChevronDown } from "lucide-react";
+
+import Section from "../Section/Section";
+import { useLanguage } from "../../Context/LanguageProvider";
+import { selectFaqs } from "../../features/global/globalSelectors";
+
+/** সাধারণ প্রশ্ন — একসাথে একটাই খোলা থাকে */
+const Faq = () => {
+  const { t, tv } = useLanguage();
+  const faqs = useSelector(selectFaqs);
+
+  const [openKey, setOpenKey] = useState(faqs[0]?.key || null);
+
+  return (
+    <Section id="faq" eyebrow={t("navFaq")} title={t("faqTitle")}>
+      <div className="mx-auto flex max-w-3xl flex-col gap-3">
+        {faqs.map((item) => {
+          const isOpen = openKey === item.key;
+
+          return (
+            <div key={item.key} className="aff-card !p-0">
+              <button
+                type="button"
+                onClick={() => setOpenKey(isOpen ? null : item.key)}
+                aria-expanded={isOpen}
+                className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-start"
+              >
+                <span className="text-[15px] font-semibold text-[var(--neutral100)] lg:text-[16px]">
+                  {tv(item.q)}
+                </span>
+
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 text-[var(--primary500)] transition-transform duration-300 ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <div
+                className="grid transition-[grid-template-rows] duration-300 ease-in-out"
+                style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+              >
+                <div className="overflow-hidden">
+                  <p className="aff-body px-5 pb-5">{tv(item.a)}</p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Section>
+  );
+};
+
+export default Faq;
