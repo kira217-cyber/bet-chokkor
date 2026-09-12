@@ -83,9 +83,9 @@ const Login = () => {
   const copyValue = async (value, label) => {
     try {
       await navigator.clipboard.writeText(value);
-      toast.success(`${label} কপি হয়েছে`);
+      toast.success(`${label} copied`);
     } catch {
-      toast.error("কপি করা গেল না");
+      toast.error("Copy failed");
     }
   };
 
@@ -93,7 +93,7 @@ const Login = () => {
     event.preventDefault();
 
     if (!form.email.trim() || !form.password) {
-      toast.error("ইমেইল ও পাসওয়ার্ড দুটোই লাগবে");
+      toast.error("Email and password are required");
       return;
     }
 
@@ -109,15 +109,15 @@ const Login = () => {
       const admin = data?.data?.admin;
 
       if (!token || !admin?.email) {
-        toast.error("লগইন রেসপন্স ঠিক নেই");
+        toast.error("Login response invalid");
         return;
       }
 
       dispatch(setCredentials({ admin, token }));
-      toast.success("লগইন সফল");
+      toast.success("Login successful");
       navigate(from, { replace: true });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "লগইন ব্যর্থ");
+      toast.error(error?.response?.data?.message || "Login failed");
     } finally {
       setSubmitting(false);
     }
@@ -158,11 +158,11 @@ const Login = () => {
                   "linear-gradient(to right, var(--primary300), var(--primary500) 50%, var(--primary600))",
               }}
             >
-              অ্যাডমিন
+              Admin
             </h1>
 
             <p className="mt-2 text-sm text-[var(--text-secondary)]">
-              কন্ট্রোল প্যানেলে নিরাপদ প্রবেশ
+              Secure access to your control panel
             </p>
           </div>
 
@@ -217,7 +217,7 @@ const Login = () => {
               <div className="mb-6 rounded-2xl border-2 border-[var(--status-danger)] bg-black/40 px-4 py-4">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <span className="text-sm font-black text-[var(--primary500)]">
-                    ডেমো ইমেইল :
+                    DEMO E-Mail :
                   </span>
 
                   <span className="text-sm text-[var(--text-secondary)]">
@@ -226,16 +226,16 @@ const Login = () => {
 
                   <button
                     type="button"
-                    onClick={() => copyValue(demo.email, "ইমেইল")}
+                    onClick={() => copyValue(demo.email, "Email")}
                     className="login-copy"
                   >
-                    কপি
+                    Copy
                   </button>
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
                   <span className="text-sm font-black text-[var(--primary500)]">
-                    ডেমো পাসওয়ার্ড :
+                    DEMO Password :
                   </span>
 
                   <span className="text-sm text-[var(--text-secondary)]">
@@ -244,15 +244,15 @@ const Login = () => {
 
                   <button
                     type="button"
-                    onClick={() => copyValue(demo.password, "পাসওয়ার্ড")}
+                    onClick={() => copyValue(demo.password, "Password")}
                     className="login-copy"
                   >
-                    কপি
+                    Copy
                   </button>
                 </div>
 
                 <p className="mt-3 text-[12px] text-[var(--text-disabled)]">
-                  এই অ্যাকাউন্ট শুধু দেখার জন্য — কিছু বদলানো যাবে না।
+                  This account is view only — nothing can be changed.
                 </p>
               </div>
             )}
@@ -264,7 +264,7 @@ const Login = () => {
                   className="mb-2 block text-sm font-semibold text-[var(--text-primary)]"
                   htmlFor="admin-email"
                 >
-                  ইমেইল
+                  Email Address
                 </label>
 
                 <div className="login-field">
@@ -287,7 +287,7 @@ const Login = () => {
                   className="mb-2 block text-sm font-semibold text-[var(--text-primary)]"
                   htmlFor="admin-password"
                 >
-                  পাসওয়ার্ড
+                  Password
                 </label>
 
                 <div className="login-field">
@@ -299,14 +299,14 @@ const Login = () => {
                     autoComplete="current-password"
                     value={form.password}
                     onChange={update("password")}
-                    placeholder="পাসওয়ার্ড দিন"
+                    placeholder="Enter password"
                     className="w-full bg-transparent text-sm text-white outline-none placeholder:text-[var(--text-disabled)]"
                   />
 
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? "পাসওয়ার্ড লুকান" : "পাসওয়ার্ড দেখান"}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     className="shrink-0 cursor-pointer text-[var(--text-secondary)] transition hover:text-white"
                   >
                     {showPassword ? (
@@ -330,12 +330,12 @@ const Login = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    লগইন হচ্ছে...
+                    Logging in...
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="h-5 w-5" />
-                    অ্যাডমিন প্যানেলে লগইন
+                    Login to Admin Panel
                   </>
                 )}
               </button>
@@ -343,7 +343,7 @@ const Login = () => {
           </div>
 
           <p className="mt-5 text-center text-xs text-[var(--text-disabled)]">
-            অ্যাডমিন সিকিউর কন্ট্রোল সিস্টেম
+            Admin Secure Control System
           </p>
 
           <p className="mt-1 text-center text-xs font-bold text-[var(--status-success)]">
