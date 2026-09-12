@@ -35,6 +35,12 @@ const loginLimiter = rateLimit({
 const isStrongEnough = (password) =>
   typeof password === "string" && password.trim().length >= MIN_PASSWORD;
 
+/** লগইন পেজে দেখানো ডেমো অ্যাকাউন্ট — .env থেকে, ডেটাবেসে নয় */
+const demoEmail = () =>
+  String(process.env.DEMO_ADMIN_EMAIL || "").toLowerCase().trim();
+
+const isDemoAccount = (email) => Boolean(demoEmail()) && email === demoEmail();
+
 /* =========================
    প্রথম mother অ্যাডমিন
    ========================= */
@@ -88,6 +94,44 @@ router.post("/create-first-time", async (req, res) => {
 });
 
 /* =========================
+   ডেমো ক্রেডেনশিয়াল
+   ========================= */
+
+/**
+ * লগইন পেজের ডেমো বাক্সের জন্য। ইচ্ছে করেই খোলা রুট — এই অ্যাকাউন্টের
+ * পাসওয়ার্ড সবাইকে দেখানোই উদ্দেশ্য।
+ *
+ * নিরাপত্তার শর্ত: .env এ যে ইমেইল দেওয়া আছে সেটি ডেটাবেসে থাকতে হবে,
+ * রোল হতে হবে viewer এবং অ্যাকাউন্ট সক্রিয় থাকতে হবে। অ্যাকাউন্টটি মুছে
+ * ফেললে বা রোল বদলে দিলে API সাথে সাথেই কিছু দেওয়া বন্ধ করে, তাই ভুল
+ * করেও mother বা sub অ্যাকাউন্টের পাসওয়ার্ড এখান দিয়ে বেরোতে পারে না।
+ */
+router.get("/demo-credentials", async (req, res) => {
+  try {
+    const email = demoEmail();
+    const password = process.env.DEMO_ADMIN_PASSWORD || "";
+
+    if (!email || !password) {
+      return successResponse(res, "No demo account configured", { demo: null });
+    }
+
+    const admin = await Admin.findOne({ email })
+      .select("role isActive")
+      .lean();
+
+    if (!admin || admin.role !== "viewer" || !admin.isActive) {
+      return successResponse(res, "No demo account available", { demo: null });
+    }
+
+    return successResponse(res, "Demo credentials loaded", {
+      demo: { email, password },
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+/* =========================
    লগইন
    ========================= */
 router.post("/login", loginLimiter, async (req, res) => {
@@ -108,7 +152,12 @@ router.post("/login", loginLimiter, async (req, res) => {
       return errorResponse(res, "Invalid email or password", 401);
     }
 
-    if (admin.lockedUntil && admin.lockedUntil > new Date()) {
+    // ডেমো অ্যাকাউন্টের পাসওয়ার্ড লগইন পেজেই লেখা থাকে, তাই লক করে
+    // brute force ঠেকানোর কিছু নেই — উল্টো যে কেউ ইচ্ছে করে ভুল পাসওয়ার্ড
+    // দিয়ে ডেমো বন্ধ করে দিতে পারত
+    const skipLock = isDemoAccount(admin.email);
+
+    if (!skipLock && admin.lockedUntil && admin.lockedUntil > new Date()) {
       const minutes = Math.ceil((admin.lockedUntil - Date.now()) / 60000);
 
       return errorResponse(
@@ -123,7 +172,7 @@ router.post("/login", loginLimiter, async (req, res) => {
     if (!isMatch) {
       admin.failedLoginAttempts = (admin.failedLoginAttempts || 0) + 1;
 
-      if (admin.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
+      if (!skipLock && admin.failedLoginAttempts >= MAX_FAILED_ATTEMPTS) {
         admin.lockedUntil = new Date(Date.now() + LOCK_MINUTES * 60000);
         admin.failedLoginAttempts = 0;
       }
