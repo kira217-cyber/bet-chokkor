@@ -50,27 +50,37 @@ body {
     "Noto Sans Bengali", sans-serif;
 }
 
-/* ── শেয়ার্ড ব্লক ── */
+/* ── শেয়ার্ড ব্লক ──
+   লগইন পেজের চেহারাই পুরো প্যানেলে: কাচের কার্ড, সোনালি বর্ডার,
+   গ্রেডিয়েন্ট বোতাম। এক জায়গায় বদলালে সব পেজে বদলায়। */
 
 .ad-card {
   position: relative;
-  border-radius: 16px;
-  background: var(--neutral900);
+  border: 1px solid color-mix(in srgb, var(--primary500), transparent 80%);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.06);
   padding: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+
+  /* ভিতরের চওড়া জিনিস (যেমন চার্ট) যেন কার্ড ছাড়িয়ে পেজ চওড়া না করে —
+     নিজের scroll container হয়ে ভিতরেই স্ক্রল করে */
   overflow: hidden;
 }
 
-.ad-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
+/* গ্রেডিয়েন্ট শিরোনাম — লগইন পেজের "Admin" লেখার মতো */
+.ad-title {
+  background-image: linear-gradient(
+    to right,
+    var(--primary300),
+    var(--primary500) 50%,
+    var(--primary600)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 900;
 }
 
 .ad-label {
@@ -78,19 +88,38 @@ body {
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
+/* ইনপুটের খোলস — ভিতরে আইকন আর ইনপুট বসে */
+.ad-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.35);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ad-field:focus-within {
+  border-color: color-mix(in srgb, var(--primary500), transparent 40%);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--primary500), transparent 80%);
+}
+
+/* একক ইনপুট — খোলস ছাড়া ব্যবহার করার জন্য একই চেহারা */
 .ad-input {
   width: 100%;
   height: 46px;
-  padding-inline: 14px;
-  border-radius: 12px;
-  background: var(--neutral800);
+  padding-inline: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.35);
   color: var(--text-primary);
   font-size: 14px;
   outline: none;
-  transition: box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ad-input::placeholder {
@@ -98,22 +127,25 @@ body {
 }
 
 .ad-input:focus-visible {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary500), transparent 60%);
+  border-color: color-mix(in srgb, var(--primary500), transparent 40%);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--primary500), transparent 80%);
 }
 
 .ad-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding-inline: 18px;
-  border-radius: 12px;
+  height: 46px;
+  padding-inline: 20px;
+  border-radius: 16px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
+  overflow: hidden;
   cursor: pointer;
-  transition: filter 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
 }
 
 .ad-btn:disabled {
@@ -122,21 +154,51 @@ body {
 }
 
 .ad-btn--primary {
-  background: var(--primary500);
-  color: var(--neutral600);
+  background: linear-gradient(
+    to right,
+    var(--primary400),
+    var(--primary500) 50%,
+    var(--primary600)
+  );
+  color: var(--neutral1000);
+  font-weight: 900;
+  box-shadow: 0 18px 40px rgba(249, 185, 1, 0.22);
+}
+
+/* বোতামের উপর দিয়ে আলো চলে যাওয়া */
+.ad-btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transition: transform 0.7s ease;
+  pointer-events: none;
 }
 
 .ad-btn--primary:not(:disabled):hover {
-  filter: brightness(1.06);
+  transform: scale(1.01);
+}
+
+.ad-btn--primary:not(:disabled):hover::after {
+  transform: translateX(100%);
 }
 
 .ad-btn--ghost {
-  border: 1px solid var(--neutral600);
+  border: 1px solid color-mix(in srgb, var(--primary500), transparent 70%);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--neutral200);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .ad-btn--ghost:not(:disabled):hover {
-  background: var(--neutral800);
+  background: rgba(255, 255, 255, 0.09);
 }
 
 .ad-btn--danger {
@@ -144,10 +206,35 @@ body {
   color: var(--neutral1000);
 }
 
+.ad-btn--danger:not(:disabled):hover {
+  filter: brightness(1.06);
+}
+
 .ad-btn--sm {
-  height: 36px;
-  padding-inline: 14px;
+  height: 38px;
+  padding-inline: 16px;
+  border-radius: 12px;
   font-size: 13px;
+}
+
+/* ── পেজের পেছনের সোনালি আভা ──
+   লগইন পেজের মতো, কিন্তু পুরো প্যানেলের পেছনে একবার বসে */
+.ad-glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(249, 185, 1, 0.14),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(227, 134, 20, 0.12),
+      transparent 38%
+    );
 }
 
 /* ── স্ক্রলবার ── */
@@ -238,22 +325,6 @@ body {
   transform: translateX(100%);
 }
 
-.login-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.35);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.login-field:focus-within {
-  border-color: color-mix(in srgb, var(--primary500), transparent 40%);
-  box-shadow: 0 0 25px color-mix(in srgb, var(--primary500), transparent 80%);
-}
-
 .login-copy {
   margin-inline-start: auto;
   padding: 4px 12px;
@@ -277,7 +348,8 @@ body {
     animation: none;
   }
 
-  .login-shine::after {
+  .login-shine::after,
+  .ad-btn--primary::after {
     transition: none;
   }
 }

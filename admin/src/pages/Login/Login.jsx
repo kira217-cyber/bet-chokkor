@@ -151,13 +151,7 @@ const Login = () => {
               />
             </div>
 
-            <h1
-              className="bg-clip-text text-3xl font-black text-transparent md:text-4xl"
-              style={{
-                backgroundImage:
-                  "linear-gradient(to right, var(--primary300), var(--primary500) 50%, var(--primary600))",
-              }}
-            >
+            <h1 className="ad-title text-3xl md:text-4xl">
               Admin
             </h1>
 
@@ -267,7 +261,7 @@ const Login = () => {
                   Email Address
                 </label>
 
-                <div className="login-field">
+                <div className="ad-field">
                   <Mail className="h-5 w-5 shrink-0 text-[var(--primary500)]" />
 
                   <input
@@ -290,7 +284,7 @@ const Login = () => {
                   Password
                 </label>
 
-                <div className="login-field">
+                <div className="ad-field">
                   <Lock className="h-5 w-5 shrink-0 text-[var(--primary500)]" />
 
                   <input
@@ -321,11 +315,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                className="login-shine relative flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-2xl px-5 py-3.5 text-sm font-black text-[var(--neutral1000)] shadow-[0_18px_50px_rgba(249,185,1,0.25)] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-                style={{
-                  background:
-                    "linear-gradient(to right, var(--primary400), var(--primary500) 50%, var(--primary600))",
-                }}
+                className="ad-btn ad-btn--primary h-[50px] w-full text-sm"
               >
                 {submitting ? (
                   <>

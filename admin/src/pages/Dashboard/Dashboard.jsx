@@ -89,7 +89,7 @@ const Dashboard = () => {
     <div className="mx-auto max-w-[1400px]">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-extrabold text-[var(--neutral100)] lg:text-[28px]">
+          <h1 className="ad-title text-[26px] lg:text-[30px]">
             Dashboard
           </h1>
           <p className="mt-1 text-[14px] text-[var(--text-muted)]">
@@ -116,7 +116,7 @@ const Dashboard = () => {
           return (
             <div key={card.key} className="ad-card">
               <div className="flex items-start justify-between gap-3">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[var(--neutral800)] text-[var(--primary500)]">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-[var(--primary500)]/25 bg-[var(--primary500)]/10 text-[var(--primary500)]">
                   <Icon size={18} />
                 </span>
               </div>
@@ -135,8 +135,8 @@ const Dashboard = () => {
 
       <div className="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-[1.4fr_1fr]">
         {/* ── ৭ দিনের চার্ট ── */}
-        <div className="ad-card">
-          <h2 className="text-[16px] font-bold text-[var(--neutral100)]">
+        <div className="ad-card flex flex-col">
+          <h2 className="text-[16px] font-extrabold text-[var(--neutral100)]">
             Last 7 days
           </h2>
 
@@ -151,11 +151,11 @@ const Dashboard = () => {
             </span>
           </div>
 
-          <div className="ad-scroll mt-6 overflow-x-auto">
-            <div className="flex min-w-[420px] items-end gap-3">
+          <div className="ad-scroll mt-6 flex-1 overflow-x-auto">
+            <div className="flex h-full min-w-[420px] items-end gap-3">
               {chart.map((row) => (
-                <div key={row.day} className="flex flex-1 flex-col items-center gap-2">
-                  <div className="flex h-40 w-full items-end justify-center gap-1.5">
+                <div key={row.day} className="flex h-full flex-1 flex-col items-center gap-2">
+                  <div className="flex min-h-[150px] w-full flex-1 items-end justify-center gap-1.5">
                     <span
                       className="w-full max-w-[16px] rounded-t-[4px] bg-[var(--primary500)]"
                       style={{ height: `${(row.deposit / peak) * 100}%` }}
@@ -179,7 +179,7 @@ const Dashboard = () => {
 
         {/* ── সাম্প্রতিক কার্যক্রম ── */}
         <div className="ad-card">
-          <h2 className="text-[16px] font-bold text-[var(--neutral100)]">
+          <h2 className="text-[16px] font-extrabold text-[var(--neutral100)]">
             Recent activity
           </h2>
 
@@ -187,7 +187,7 @@ const Dashboard = () => {
             {activity.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center justify-between gap-3 rounded-[12px] bg-[var(--neutral800)] px-4 py-3"
+                className="flex items-center justify-between gap-3 rounded-[14px] border border-white/5 bg-black/25 px-4 py-3"
               >
                 <div className="min-w-0">
                   <p className="truncate text-[14px] font-semibold text-[var(--neutral100)]">

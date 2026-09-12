@@ -165,7 +165,7 @@ const Admins = () => {
         {allPermissions.map((perm) => (
           <label
             key={perm.key}
-            className="flex cursor-pointer items-start gap-3 rounded-[12px] bg-[var(--neutral800)] px-4 py-3 transition-colors hover:bg-[var(--neutral700)]"
+            className="flex cursor-pointer items-start gap-3 rounded-[14px] border border-white/5 bg-black/25 px-4 py-3 transition-colors hover:border-[var(--primary500)]/30 hover:bg-white/[0.06]"
           >
             <input
               type="checkbox"
@@ -190,7 +190,7 @@ const Admins = () => {
 
   return (
     <div className="mx-auto max-w-[1100px]">
-      <h1 className="text-[24px] font-extrabold text-[var(--neutral100)] lg:text-[28px]">
+      <h1 className="ad-title text-[26px] lg:text-[30px]">
         Admin Accounts
       </h1>
       <p className="mt-1 text-[14px] text-[var(--text-muted)]">
@@ -200,7 +200,7 @@ const Admins = () => {
       {/* ── নতুন অ্যাডমিন ── */}
       <div className="ad-card mt-6">
         <div className="mb-5 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[var(--neutral800)] text-[var(--primary500)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[var(--primary500)]/25 bg-[var(--primary500)]/10 text-[var(--primary500)]">
             <Plus size={18} />
           </span>
 
@@ -228,7 +228,7 @@ const Admins = () => {
             <div>
               <label className="ad-label">Password</label>
 
-              <div className="flex items-center gap-3 rounded-[12px] bg-[var(--neutral800)] px-4">
+              <div className="ad-field !px-4 !py-0">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={form.password}
@@ -329,7 +329,7 @@ const Admins = () => {
               return (
                 <div
                   key={admin._id}
-                  className="rounded-[14px] bg-[var(--neutral800)] p-4"
+                  className="rounded-[16px] border border-white/5 bg-black/25 p-4"
                 >
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
@@ -482,7 +482,7 @@ const Admins = () => {
       {deleteId && (
         <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/70 p-4">
           <div className="ad-card w-full max-w-[400px]">
-            <span className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[var(--neutral800)] text-[var(--status-danger)]">
+            <span className="flex h-11 w-11 items-center justify-center rounded-[14px] border border-[var(--status-danger)]/30 bg-[var(--status-danger)]/10 text-[var(--status-danger)]">
               <Trash2 size={19} />
             </span>
 

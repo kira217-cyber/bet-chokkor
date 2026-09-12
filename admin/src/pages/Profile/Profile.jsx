@@ -57,7 +57,7 @@ const Profile = () => {
     <div>
       <label className="ad-label">{label}</label>
 
-      <div className="flex items-center gap-3 rounded-[12px] bg-[var(--neutral800)] px-4">
+      <div className="ad-field !px-4 !py-0">
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -81,7 +81,7 @@ const Profile = () => {
 
   return (
     <div className="mx-auto max-w-[900px]">
-      <h1 className="text-[24px] font-extrabold text-[var(--neutral100)] lg:text-[28px]">
+      <h1 className="ad-title text-[26px] lg:text-[30px]">
         My Profile
       </h1>
       <p className="mt-1 text-[14px] text-[var(--text-muted)]">
@@ -120,7 +120,7 @@ const Profile = () => {
 
         <div className="ad-card">
           {!canWrite && (
-            <div className="mb-5 flex items-start gap-3 rounded-[12px] bg-[var(--neutral800)] p-4">
+            <div className="mb-5 flex items-start gap-3 rounded-[14px] border border-[var(--primary500)]/20 bg-[var(--primary500)]/[0.07] p-4">
               <ShieldAlert size={18} className="mt-0.5 shrink-0 text-[var(--primary500)]" />
               <p className="text-[13px] leading-relaxed text-[var(--text-secondary)]">
                 A view only admin cannot change anything, not even its own

@@ -51,14 +51,17 @@ const RootLayout = () => {
 
   const sidebar = (
     <>
-      <div className="flex h-[var(--topbar-height)] shrink-0 items-center gap-2 px-5">
-        <img
-          src="/assets/brand/header-logo.png"
-          alt="BET CHOKKOR"
-          className="h-8 w-auto object-contain"
-          draggable="false"
-        />
-        <span className="text-[12px] font-bold uppercase tracking-widest text-[var(--primary500)]">
+      <div className="flex h-[var(--topbar-height)] shrink-0 items-center gap-2.5 px-5">
+        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[var(--primary500)]/30 bg-white/10 shadow-[0_0_25px_rgba(249,185,1,0.20)] backdrop-blur">
+          <img
+            src="/assets/brand/header-logo.png"
+            alt="BET CHOKKOR"
+            className="h-6 w-auto object-contain"
+            draggable="false"
+          />
+        </span>
+
+        <span className="ad-title text-[13px] uppercase tracking-widest">
           Admin
         </span>
       </div>
@@ -74,10 +77,10 @@ const RootLayout = () => {
               end={item.path === "/"}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex h-11 items-center gap-3 rounded-[12px] px-4 text-[14px] font-medium transition-colors ${
+                `flex h-11 items-center gap-3 rounded-[14px] px-4 text-[14px] transition ${
                   isActive
-                    ? "bg-[var(--primary500)] text-[var(--neutral600)]"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--neutral800)] hover:text-[var(--neutral100)]"
+                    ? "bg-gradient-to-r from-[var(--primary400)] via-[var(--primary500)] to-[var(--primary600)] font-black text-[var(--neutral1000)] shadow-[0_10px_26px_rgba(249,185,1,0.22)]"
+                    : "font-medium text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
                 }`
               }
             >
@@ -88,7 +91,7 @@ const RootLayout = () => {
         })}
       </nav>
 
-      <div className="shrink-0 border-t border-[var(--neutral800)] p-3">
+      <div className="shrink-0 border-t border-white/[0.07] p-3">
         <div className="mb-3 px-2">
           <p className="truncate text-[13px] font-semibold text-[var(--neutral100)]">
             {admin?.email}
@@ -111,9 +114,10 @@ const RootLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--neutral1000)]">
+    <div className="relative min-h-screen bg-[var(--neutral1000)]">
+      <div className="ad-glow" aria-hidden="true" />
       {/* ── ডেস্কটপ সাইডবার ── */}
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--neutral800)] bg-[var(--neutral900)] lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] flex-col border-r border-[var(--primary500)]/15 bg-white/[0.04] backdrop-blur-xl lg:flex">
         {sidebar}
       </aside>
 
@@ -129,14 +133,14 @@ const RootLayout = () => {
       />
 
       <aside
-        className="fixed inset-y-0 left-0 z-[51] flex w-[264px] max-w-[84vw] flex-col bg-[var(--neutral900)] transition-transform duration-300 lg:hidden"
+        className="fixed inset-y-0 left-0 z-[51] flex w-[264px] max-w-[84vw] flex-col border-r border-[var(--primary500)]/15 bg-[var(--neutral900)]/95 backdrop-blur-xl transition-transform duration-300 lg:hidden"
         style={{ transform: open ? "translateX(0)" : "translateX(-100%)" }}
       >
         <button
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Close menu"
-          className="absolute right-3 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] bg-[var(--neutral800)] text-[var(--primary500)]"
+          className="absolute right-3 top-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-[12px] border border-[var(--primary500)]/25 bg-white/[0.06] text-[var(--primary500)]"
         >
           <X size={18} />
         </button>
@@ -144,14 +148,14 @@ const RootLayout = () => {
         {sidebar}
       </aside>
 
-      <div className="lg:ps-[var(--sidebar-width)]">
+      <div className="relative z-10 lg:ps-[var(--sidebar-width)]">
         {/* ── টপবার ── */}
-        <header className="sticky top-0 z-30 flex h-[var(--topbar-height)] items-center gap-3 border-b border-[var(--neutral800)] bg-[var(--neutral900)] px-4 lg:px-6">
+        <header className="sticky top-0 z-30 flex h-[var(--topbar-height)] items-center gap-3 border-b border-[var(--primary500)]/15 bg-[var(--neutral1000)]/70 px-4 backdrop-blur-xl lg:px-6">
           <button
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] bg-[var(--neutral800)] text-[var(--text-primary)] lg:hidden"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[12px] border border-[var(--primary500)]/25 bg-white/[0.06] text-[var(--primary500)] lg:hidden"
           >
             <Menu size={18} />
           </button>
@@ -166,7 +170,7 @@ const RootLayout = () => {
           </Link>
 
           {role === "viewer" && (
-            <span className="ms-auto flex items-center gap-2 rounded-full bg-[var(--neutral800)] px-3 py-1.5 text-[12px] font-semibold text-[var(--primary500)]">
+            <span className="ms-auto flex items-center gap-2 rounded-full border border-[var(--primary500)]/30 bg-[var(--primary500)]/10 px-3 py-1.5 text-[12px] font-semibold text-[var(--primary500)]">
               <Eye size={14} />
               <span className="hidden sm:inline">View only — no changes allowed</span>
               <span className="sm:hidden">View only</span>
