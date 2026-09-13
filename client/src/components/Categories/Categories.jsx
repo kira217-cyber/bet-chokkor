@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
+import { useComingSoon } from "../../Context/comingSoonContext";
 import { useSelector } from "react-redux";
 import { ChevronRight } from "lucide-react";
 
@@ -27,6 +28,7 @@ import {
  */
 const Categories = () => {
   const { t, tv } = useLanguage();
+  const { openComingSoon } = useComingSoon();
 
   const categories = useSelector(selectGameCategories);
   const loading = useSelector(selectGlobalGameLoading);
@@ -152,19 +154,25 @@ const Categories = () => {
             className="cat-grid grid grid-cols-3 lg:grid-cols-5"
             style={{ gap: "calc(var(--u) * 2.133)" }}
           >
-            {active.vendors.map((vendor) => (
-              <Link
-                key={`${active.key}-${vendor.key}`}
-                to={`/games/${active.key}?vendor=${vendor.key}`}
-                className="vendor-cell relative flex flex-col overflow-hidden bg-[var(--neutral800)] transition-colors hover:bg-[var(--neutral700)]"
-                style={{
+            {active.vendors.map((vendor) => {
+              // স্পোর্টসের কার্ডগুলো প্রোভাইডার নয়, গেম — তাই ক্লিকে
+              // গেম লিস্টে না গিয়ে "শীঘ্রই আসছে" মডাল খোলে
+              const isSports = active.key === "sports";
+
+              const cellProps = {
+                className:
+                  "vendor-cell relative flex flex-col overflow-hidden bg-[var(--neutral800)] text-start transition-colors hover:bg-[var(--neutral700)]",
+                style: {
                   height: "calc(var(--u) * 25.37)",
                   padding: "calc(var(--u) * 3.2)",
                   gap: "calc(var(--u) * 3.467)",
                   borderRadius: "var(--radius-10)",
                   "--vendor-icon": `url(${vendor.icon})`,
-                }}
-              >
+                },
+              };
+
+              const inner = (
+                <>
                 <span
                   className="z-[1] flex shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]"
                   style={{
@@ -187,8 +195,38 @@ const Categories = () => {
                 >
                   {tv(vendor.name)}
                 </span>
-              </Link>
-            ))}
+                </>
+              );
+
+              if (isSports) {
+                return (
+                  <button
+                    key={`${active.key}-${vendor.key}`}
+                    type="button"
+                    onClick={() =>
+                      openComingSoon({
+                        name: vendor.name,
+                        image: vendor.icon,
+                      })
+                    }
+                    {...cellProps}
+                    className={`${cellProps.className} cursor-pointer`}
+                  >
+                    {inner}
+                  </button>
+                );
+              }
+
+              return (
+                <Link
+                  key={`${active.key}-${vendor.key}`}
+                  to={`/games/${active.key}?vendor=${vendor.key}`}
+                  {...cellProps}
+                >
+                  {inner}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

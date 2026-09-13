@@ -118,14 +118,6 @@ const Games = () => {
       );
     }
 
-    const text = query.trim().toLowerCase();
-
-    if (text.length >= MIN_SEARCH) {
-      list = list.filter((game) =>
-        String(game.gameName || "").toLowerCase().includes(text),
-      );
-    }
-
     if (sortKey === "az" || sortKey === "za") {
       list = [...list].sort((a, b) =>
         String(a.gameName || "").localeCompare(String(b.gameName || "")),
@@ -136,7 +128,19 @@ const Games = () => {
     }
 
     return list;
-  }, [records, selectedVendors, query, sortKey, tv]);
+  }, [records, selectedVendors, sortKey, tv]);
+
+  // সার্চের ফল — মূল গ্রিড নয়, ড্রপডাউনের ভিতরে দেখানো হয়
+  const searchText = query.trim().toLowerCase();
+  const searching = searchText.length >= MIN_SEARCH;
+
+  const searchResults = useMemo(() => {
+    if (!searching) return [];
+
+    return records.filter((game) =>
+      String(game.gameName || "").toLowerCase().includes(searchText),
+    );
+  }, [records, searching, searchText]);
 
   // বাইরে ক্লিক করলে খোলা মেনুগুলো বন্ধ
   useEffect(() => {
@@ -240,8 +244,68 @@ const Games = () => {
   );
 
   const shown = games.length;
-  const totalShown = selectedVendors.length > 1 || query ? shown : total;
-  const progress = totalShown ? Math.min(1, shown / totalShown) : 0;
+  const totalShown = selectedVendors.length > 1 ? shown : total;
+  /** মূল সাইটের মতো সোনালি বার + "কতটির মধ্যে কতটি" */
+  const countBar = (count, outOf) => (
+    <div
+      className="flex flex-col items-center"
+      style={{ gap: "calc(var(--u) * 3.2)" }}
+    >
+      <div
+        className="overflow-hidden bg-[var(--neutral800)]"
+        style={{
+          height: "calc(var(--u) * 0.8)",
+          width: "calc(var(--u) * 53.333)",
+          maxWidth: "100%",
+          borderRadius: "999px",
+        }}
+      >
+        <div
+          className="h-full bg-[var(--primary500)] transition-[width] duration-300"
+          style={{ width: `${(outOf ? Math.min(1, count / outOf) : 0) * 100}%` }}
+        />
+      </div>
+
+      <p
+        className="text-[var(--text-muted)]"
+        style={{ fontSize: "var(--fs-larger)" }}
+      >
+        {tv({
+          bn: `${outOf}টি গেমের মধ্যে ${count}টি`,
+          en: `Shown ${count} of ${outOf} games`,
+        })}
+      </p>
+    </div>
+  );
+
+  /** গেম কার্ড — মূল গ্রিড আর সার্চ দুই জায়গাতেই */
+  const gameCard = (game) => (
+    // গেম খেলা এখনো চালু হয়নি — ক্লিকে "শীঘ্রই আসছে" মডাল
+    <button
+      key={game.gameId}
+      type="button"
+      onClick={() =>
+        openComingSoon({
+          name: game.gameName,
+          image: game.icon,
+          vendor: game.vendorName,
+        })
+      }
+      className="group relative block w-full cursor-pointer overflow-hidden"
+      style={{
+        aspectRatio: "139 / 184.91",
+        borderRadius: "var(--radius-10)",
+      }}
+    >
+      <img
+        src={game.icon}
+        alt={game.gameName}
+        loading="lazy"
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        draggable="false"
+      />
+    </button>
+  );
 
   return (
     <div className="bc-page" style={{ paddingBottom: "calc(var(--u) * 4.267)" }}>
@@ -423,8 +487,10 @@ const Games = () => {
               <Search size={18} />
             </span>
 
+            {/* type="search" দিলে ব্রাউজার নিজের ক্লিয়ার × বসায় — তখন
+                দুটো × দেখা যেত, তাই সাধারণ text */}
             <input
-              type="search"
+              type="text"
               value={query}
               // ফোকাস থাকা অবস্থায় আবার ক্লিক করলে onFocus চলে না, তাই
               // onClick ও লাগে — নইলে Enter এর পর প্যানেল আর খোলে না
@@ -438,9 +504,24 @@ const Games = () => {
                 }
               }}
               placeholder={t("searchGames")}
-              className="h-full w-full bg-transparent pe-4 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
+              className="h-full w-full bg-transparent text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
               style={{ fontSize: "var(--fs-larger)" }}
             />
+
+            {query ? (
+              <button
+                type="button"
+                aria-label={t("close")}
+                onClick={() => setQuery("")}
+                className="flex shrink-0 cursor-pointer items-center justify-center text-[var(--text-muted)] transition-colors hover:text-[var(--neutral100)]"
+                style={{
+                  height: "calc(var(--u) * 13.333)",
+                  width: "calc(var(--u) * 13.333)",
+                }}
+              >
+                <X size={18} />
+              </button>
+            ) : null}
           </div>
 
           {/* সার্চ ড্রপডাউন — মূল সাইটের মতো */}
@@ -454,6 +535,35 @@ const Games = () => {
                 boxShadow: "0 18px 40px rgba(0,0,0,.5)",
               }}
             >
+              {searching ? (
+                // ── ফলাফল ── মূল সাইটে ফল ড্রপডাউনের ভিতরেই দেখায়
+                searchResults.length ? (
+                  <div
+                    className="flex flex-col"
+                    style={{ gap: "calc(var(--u) * 5.333)" }}
+                  >
+                    <div
+                      className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8"
+                      style={{ gap: "calc(var(--u) * 2.133)" }}
+                    >
+                      {searchResults.map(gameCard)}
+                    </div>
+
+                    {countBar(searchResults.length, searchResults.length)}
+                  </div>
+                ) : (
+                  <p
+                    className="text-center text-[var(--text-muted)]"
+                    style={{
+                      fontSize: "var(--fs-larger)",
+                      paddingBlock: "calc(var(--u) * 8)",
+                    }}
+                  >
+                    {t("noGamesFound")}
+                  </p>
+                )
+              ) : (
+                <>
               <p
                 className="font-semibold text-[var(--neutral100)]"
                 style={{ fontSize: "var(--fs-larger)" }}
@@ -532,6 +642,8 @@ const Games = () => {
                   ))}
                 </div>
               ) : null}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -582,33 +694,7 @@ const Games = () => {
             className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-8"
             style={{ gap: "calc(var(--u) * 2.133)" }}
           >
-            {games.map((game) => (
-              // গেম খেলা এখনো চালু হয়নি — ক্লিকে "শীঘ্রই আসছে" মডাল
-              <button
-                key={game.gameId}
-                type="button"
-                onClick={() =>
-                  openComingSoon({
-                    name: game.gameName,
-                    image: game.icon,
-                    vendor: game.vendorName,
-                  })
-                }
-                className="group relative block w-full cursor-pointer overflow-hidden"
-                style={{
-                  aspectRatio: "139 / 184.91",
-                  borderRadius: "var(--radius-10)",
-                }}
-              >
-                <img
-                  src={game.icon}
-                  alt={game.gameName}
-                  loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  draggable="false"
-                />
-              </button>
-            ))}
+            {games.map(gameCard)}
           </div>
         ) : (
           <p
@@ -648,31 +734,7 @@ const Games = () => {
               </button>
             ) : null}
 
-            {/* কতটুকু দেখানো হয়েছে — সোনালি বার */}
-            <div
-              className="overflow-hidden bg-[var(--neutral800)]"
-              style={{
-                height: "calc(var(--u) * 0.8)",
-                width: "calc(var(--u) * 53.333)",
-                maxWidth: "100%",
-                borderRadius: "999px",
-              }}
-            >
-              <div
-                className="h-full bg-[var(--primary500)] transition-[width] duration-300"
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-
-            <p
-              className="text-[var(--text-muted)]"
-              style={{ fontSize: "var(--fs-larger)" }}
-            >
-              {tv({
-                bn: `${totalShown}টি গেমের মধ্যে ${shown}টি`,
-                en: `Shown ${shown} of ${totalShown} games`,
-              })}
-            </p>
+            {countBar(shown, totalShown)}
           </div>
         ) : null}
       </div>
