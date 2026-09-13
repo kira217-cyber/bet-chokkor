@@ -74,7 +74,7 @@ const adaptProvider = (provider = {}) => {
    ক্যাটাগরি + তার ভেন্ডর
    ────────────────────────────────────────────── */
 
-const adaptCategory = (category = {}, providersByCategory = {}) => {
+const adaptCategory = (category = {}, providersByCategory = {}, sports = []) => {
   const categoryId = text(category._id);
   const name = pickLangText(category.categoryName, category.categoryTitle);
 
@@ -88,6 +88,9 @@ const adaptCategory = (category = {}, providersByCategory = {}) => {
     ? providersByCategory[categoryId]
     : [];
 
+  // Sports ক্যাটাগরি প্রোভাইডার নয়, স্পোর্টস এন্ট্রি দিয়ে ভরে
+  const isSports = slugify(name.en) === "sports";
+
   return {
     key: slugify(name.en, categoryId),
     id: categoryId,
@@ -97,7 +100,28 @@ const adaptCategory = (category = {}, providersByCategory = {}) => {
     // master আলাদা active আইকন দেয় না — একই ছবি, CSS ই পার্থক্য দেখায়
     activeIcon: icon,
     order: Number(category.order) || 0,
-    vendors: providers.filter(isActive).map(adaptProvider),
+    vendors: isSports
+      ? sports.map(adaptSport).filter((item) => item.name.en)
+      : providers.filter(isActive).map(adaptProvider),
+  };
+};
+
+/**
+ * স্পোর্টস এন্ট্রি → ভেন্ডর কার্ডের আকার।
+ *
+ * Sports ক্যাটাগরিতে কোনো প্রোভাইডার থাকে না; white-label এর
+ * "Add Sports Game" থেকে আসা এন্ট্রিগুলোই ওখানে কার্ড হয়ে বসে —
+ * মূল সাইটেও ক্রিকেট / FB Sports / SV388 এভাবেই দেখায়।
+ */
+const adaptSport = (sport = {}) => {
+  const name = pickLangText(sport.name);
+
+  return {
+    key: slugify(name.en, sport._id),
+    id: text(sport._id),
+    code: text(sport.gameId),
+    name,
+    icon: pickImage(sport.iconImageUrl, sport.iconImage),
   };
 };
 
@@ -172,9 +196,13 @@ export const adaptGameData = (payload = {}) => {
         return acc;
       }, {});
 
+  const sports = (Array.isArray(data.sports) ? data.sports : []).filter(
+    (item) => item?.isActive !== false,
+  );
+
   const gameCategories = categories
     .filter(isActive)
-    .map((category) => adaptCategory(category, groupedProviders))
+    .map((category) => adaptCategory(category, groupedProviders, sports))
     .sort((a, b) => a.order - b.order);
 
   const homeProviderList = Array.isArray(data.homeProviders)
@@ -191,19 +219,10 @@ export const adaptGameData = (payload = {}) => {
     };
   });
 
-  // হোম পেজের "ফিচার্ড গেমস" — master এ hot, না থাকলে popular
-  const featuredSource = Array.isArray(data.hotGames) && data.hotGames.length
-    ? data.hotGames
-    : Array.isArray(data.popularGames)
-      ? data.popularGames
-      : [];
-
-  const featuredGames = featuredSource
-    .filter(isActive)
-    .map(adaptGame)
-    .filter((game) => game.name && game.image);
-
-  const popularGames = (Array.isArray(data.popularGames) ? data.popularGames : [])
+  // হোম পেজের "ফিচার্ড গেমস" সারি — master এর একটাই তালিকা
+  const featuredGames = (
+    Array.isArray(data.featuredGames) ? data.featuredGames : []
+  )
     .filter(isActive)
     .map(adaptGame)
     .filter((game) => game.name && game.image);
@@ -212,13 +231,14 @@ export const adaptGameData = (payload = {}) => {
     gameCategories,
     homeProviders,
     featuredGames,
-    popularGames,
     // master ইভেন্ট দেয় না — ক্লায়েন্ট নিজের স্ট্যাটিক তালিকাই রাখে
     events: [],
     meta: {
       totalCategories: gameCategories.length,
       totalProviders: providers.length,
+      totalSports: sports.length,
       totalGames: Array.isArray(data.games) ? data.games.length : 0,
+      totalFeatured: featuredGames.length,
     },
   };
 };
