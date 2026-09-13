@@ -29,6 +29,9 @@ import { selectGameCategories } from "../../features/globalGame/globalGameSelect
  */
 
 const RECENT_KEY = "bc_recent_searches";
+
+/** মূল সাইটে ফিল্টার প্যানেল ৩২৫px চওড়া — মেপে নেওয়া */
+const FILTER_WIDTH = 325;
 const MIN_SEARCH = 3;
 
 const SORTS = [
@@ -110,12 +113,8 @@ const Games = () => {
     let list = records;
 
     if (selectedVendors.length > 1) {
-      const names = new Set(
-        selectedVendors.map((item) => tv(item.name).toLowerCase()),
-      );
-      list = list.filter((game) =>
-        names.has(String(game.vendorName || "").toLowerCase()),
-      );
+      const ids = new Set(selectedVendors.map((item) => item.id));
+      list = list.filter((game) => ids.has(game.providerId));
     }
 
     if (sortKey === "az" || sortKey === "za") {
@@ -128,7 +127,7 @@ const Games = () => {
     }
 
     return list;
-  }, [records, selectedVendors, sortKey, tv]);
+  }, [records, selectedVendors, sortKey]);
 
   // সার্চের ফল — মূল গ্রিড নয়, ড্রপডাউনের ভিতরে দেখানো হয়
   const searchText = query.trim().toLowerCase();
@@ -158,13 +157,6 @@ const Games = () => {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = filterOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [filterOpen]);
-
   const go = (nextVendors, nextSort = sortKey) => {
     const params = new URLSearchParams();
     if (nextVendors.length) params.set("vendor", nextVendors.join(","));
@@ -184,11 +176,15 @@ const Games = () => {
   };
 
   /** এই প্রোভাইডারের কতগুলো গেম এখন হাতে আছে */
-  const vendorCount = (item) => {
-    const name = tv(item.name).toLowerCase();
-    return records.filter(
-      (game) => String(game.vendorName || "").toLowerCase() === name,
-    ).length;
+  const vendorCount = (item) =>
+    records.filter((game) => game.providerId === item.id).length;
+
+  /** গেমের প্রোভাইডারের নাম — কার্ডে ও মডালে দেখানোর জন্য */
+  const vendorNameOf = (game) => {
+    if (game.vendorName) return game.vendorName;
+
+    const found = vendors.find((item) => item.id === game.providerId);
+    return found ? tv(found.name) : "";
   };
 
   const toolButton = (label, children, badge, onClick, active) => (
@@ -288,7 +284,7 @@ const Games = () => {
         openComingSoon({
           name: game.gameName,
           image: game.icon,
-          vendor: game.vendorName,
+          vendor: vendorNameOf(game),
         })
       }
       className="group relative block w-full cursor-pointer overflow-hidden"
@@ -308,7 +304,21 @@ const Games = () => {
   );
 
   return (
-    <div className="bc-page" style={{ paddingBottom: "calc(var(--u) * 4.267)" }}>
+    <div
+      className="transition-[padding] duration-300 ease-out"
+      style={{
+        // ফিল্টার প্যানেল ওভারলে নয় — পাশে বসে, তাই পেজ ততটাই সরু হয়
+        paddingInlineEnd: filterOpen ? `${FILTER_WIDTH}px` : 0,
+      }}
+    >
+    <div
+      className="bc-page"
+      style={{
+        paddingBottom: "calc(var(--u) * 4.267)",
+        // সরু অবস্থায় bc-page এর ১৬px প্যাডিং বাদ, নইলে গ্রিড আরও সরু হয়ে যায়
+        ...(filterOpen ? { paddingInline: 0, maxWidth: "none" } : null),
+      }}
+    >
       {/* মূল সাইটে হেডারের নিচে ৪৭px ফাঁকা তারপর টুলবার — মেপে নেওয়া */}
       <div
         className="bc-pad lg:px-0"
@@ -321,7 +331,11 @@ const Games = () => {
         <div
           ref={toolbarRef}
           className="relative flex items-center justify-between"
-          style={{ height: "calc(var(--u) * 16)" }}
+          // সার্চ বারের মতোই ডানে ১৬px কম — মূল সাইটে টুলবার ১১৫২, গ্রিড ১১৬৮
+          style={{
+            height: "calc(var(--u) * 16)",
+            width: "calc(100% - var(--u) * 4.267)",
+          }}
         >
           <div
             className="relative flex min-w-0 items-center"
@@ -473,6 +487,19 @@ const Games = () => {
           </div>
         </div>
 
+        {/* সার্চ প্যানেল খোলা থাকলে পেছনের কনটেন্ট ব্লার — মূল সাইটের মতো */}
+        {searchOpen && (
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setSearchOpen(false)}
+            style={{
+              background: "rgba(0,0,0,.45)",
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
+            }}
+          />
+        )}
+
         {/* ── সার্চ ──
             মূল সাইটে সার্চ বার গ্রিডের চেয়ে দুই পাশে ৮px করে ভিতরে */}
         <div
@@ -480,7 +507,10 @@ const Games = () => {
           className="relative"
           // মূল সাইটে সার্চ বারের বাঁ দিক গ্রিডের সাথে মেলানো, শুধু
           // ডানে ১৬px কম — কেন্দ্রে বসানো নয়
-          style={{ width: "calc(100% - var(--u) * 4.267)" }}
+          style={{
+            width: "calc(100% - var(--u) * 4.267)",
+            zIndex: searchOpen ? 40 : "auto",
+          }}
         >
           <div
             className="flex items-center overflow-hidden bg-[var(--form-box-bg)] transition-shadow"
@@ -754,23 +784,17 @@ const Games = () => {
         ) : null}
       </div>
 
-      {/* ── ফিল্টার ড্রয়ার ── */}
-      <div
-        className="fixed inset-0 z-[120] bg-black/60 transition-opacity duration-200"
-        onClick={() => setFilterOpen(false)}
-        style={{
-          opacity: filterOpen ? 1 : 0,
-          visibility: filterOpen ? "visible" : "hidden",
-          pointerEvents: filterOpen ? "auto" : "none",
-        }}
-      />
-
+      {/* ── ফিল্টার প্যানেল ──
+          ওভারলে নয়; হেডারের নিচে ডানে ডক করা থাকে আর পেজ ততটা সরু হয়।
+          মোবাইলে জায়গা নেই, তাই ওখানে পুরো পর্দা জুড়ে আসে। */}
       <aside
-        className="fixed inset-y-0 end-0 z-[121] flex flex-col bg-[var(--neutral900)] transition-transform duration-300"
+        className="fixed end-0 z-[121] flex flex-col bg-[var(--content-bg)] transition-transform duration-300 ease-out"
         style={{
-          width: "calc(var(--u) * 88)",
-          maxWidth: "88vw",
-          transform: filterOpen ? "translateX(0)" : "translateX(110%)",
+          top: "var(--header-height)",
+          bottom: 0,
+          width: `${FILTER_WIDTH}px`,
+          maxWidth: "100vw",
+          transform: filterOpen ? "translateX(0)" : "translateX(101%)",
         }}
       >
         <div
@@ -932,6 +956,7 @@ const Games = () => {
           </button>
         </div>
       </aside>
+    </div>
     </div>
   );
 };

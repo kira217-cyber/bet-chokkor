@@ -16,6 +16,9 @@ const toPageShape = (game) => ({
   gameCode: game.gameUId || game.key,
   gameName: game.name,
   vendorName: game.vendor,
+  // master গেমের সাথে প্রোভাইডারের নাম পাঠায় না, আইডি পাঠায় —
+  // তাই ফিল্টার ও গণনা এই আইডি ধরেই হয়
+  providerId: game.providerId,
   icon: game.image,
 });
 
