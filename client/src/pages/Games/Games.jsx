@@ -13,6 +13,7 @@ import {
 
 import { useLanguage } from "../../Context/LanguageProvider";
 import { useComingSoon } from "../../Context/comingSoonContext";
+import { usePanel } from "../../Context/panelContext";
 import { useGameList } from "../../features/globalGame/useGameList";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
 
@@ -62,6 +63,7 @@ const writeRecent = (list) => {
 const Games = () => {
   const { t, tv } = useLanguage();
   const { openComingSoon } = useComingSoon();
+  const { setPanelWidth } = usePanel();
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -157,6 +159,13 @@ const Games = () => {
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
+  // প্যানেল খুললে RootLayout কনটেন্ট এলাকাটা ততটা সরু করে নেয়
+  useEffect(() => {
+    setPanelWidth(filterOpen ? FILTER_WIDTH : 0);
+
+    return () => setPanelWidth(0);
+  }, [filterOpen, setPanelWidth]);
+
   const go = (nextVendors, nextSort = sortKey) => {
     const params = new URLSearchParams();
     if (nextVendors.length) params.set("vendor", nextVendors.join(","));
@@ -248,9 +257,9 @@ const Games = () => {
       style={{ gap: "calc(var(--u) * 3.2)" }}
     >
       <div
-        className="overflow-hidden bg-[var(--neutral800)]"
+        className="overflow-hidden bg-[var(--neutral700)]"
         style={{
-          height: "calc(var(--u) * 0.8)",
+          height: "calc(var(--u) * 1.067)",
           width: "calc(var(--u) * 53.333)",
           maxWidth: "100%",
           borderRadius: "999px",
@@ -305,18 +314,18 @@ const Games = () => {
 
   return (
     <div
-      className="transition-[padding] duration-300 ease-out"
-      style={{
-        // ফিল্টার প্যানেল ওভারলে নয় — পাশে বসে, তাই পেজ ততটাই সরু হয়
-        paddingInlineEnd: filterOpen ? `${FILTER_WIDTH}px` : 0,
-      }}
-    >
-    <div
       className="bc-page"
       style={{
         paddingBottom: "calc(var(--u) * 4.267)",
-        // সরু অবস্থায় bc-page এর ১৬px প্যাডিং বাদ, নইলে গ্রিড আরও সরু হয়ে যায়
-        ...(filterOpen ? { paddingInline: 0, maxWidth: "none" } : null),
+        // সরু অবস্থায় bc-page এর ১৬px প্যাডিং বাদ, নইলে গ্রিড আরও সরু হয়।
+        // max-width তুলে দেওয়া যাবে না — তাহলে চওড়া পর্দায় কনটেন্ট ছড়িয়ে
+        // কার্ড ১৩৯px এর চেয়ে বড় হয়ে যেত। মূল সাইটে কলাম ১২০০ তেই থাকে।
+        ...(filterOpen
+          ? {
+              paddingInline: 0,
+              maxWidth: "calc(var(--content-width) - var(--u) * 8.533)",
+            }
+          : null),
       }}
     >
       {/* মূল সাইটে হেডারের নিচে ৪৭px ফাঁকা তারপর টুলবার — মেপে নেওয়া */}
@@ -770,7 +779,7 @@ const Games = () => {
                 className="cursor-pointer bg-[var(--neutral800)] text-[var(--text-primary)] transition-colors hover:bg-[var(--neutral700)] disabled:cursor-not-allowed disabled:opacity-60"
                 style={{
                   height: "calc(var(--u) * 11.733)",
-                  paddingInline: "calc(var(--u) * 8.533)",
+                  paddingInline: "calc(var(--u) * 6.4)",
                   borderRadius: "var(--radius-10)",
                   fontSize: "var(--fs-larger)",
                 }}
@@ -956,7 +965,6 @@ const Games = () => {
           </button>
         </div>
       </aside>
-    </div>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import FloatWidget from "../components/FloatWidget/FloatWidget";
 import SiteIdentity from "../components/SiteIdentity/SiteIdentity";
 import SiteLoader from "../components/SiteLoader/SiteLoader";
 import ComingSoonProvider from "../Context/ComingSoonProvider";
+import { PanelContext } from "../Context/panelContext";
 import MaintenanceModal from "../components/MaintenanceModal/MaintenanceModal";
 
 import { fetchGlobalClientData } from "../features/global/globalSlice";
@@ -27,6 +28,9 @@ import {
 
 const RootLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // ডানে ডক করা প্যানেল (গেম পেজের ফিল্টার) কত চওড়া — ০ মানে খোলা নেই
+  const [panelWidth, setPanelWidth] = useState(0);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(false);
 
   const dispatch = useDispatch();
@@ -65,8 +69,11 @@ const RootLayout = () => {
     return <MaintenanceModal setting={maintenance} />;
   }
 
+  const panelValue = { panelWidth, setPanelWidth };
+
   return (
     <ComingSoonProvider>
+      <PanelContext.Provider value={panelValue}>
       <div className="min-h-screen bg-[var(--content-bg)]">
         <SiteIdentity />
 
@@ -79,27 +86,45 @@ const RootLayout = () => {
         <Navber setDesktopOpen={setDesktopSidebarOpen} />
 
         <main
-          className={`min-h-screen pt-[var(--header-height)] transition-[padding] duration-300 ease-in-out lg:pt-[var(--desktop-header-height)] ${
+          className={`pt-[var(--header-height)] transition-[padding] duration-300 ease-in-out lg:pt-[var(--desktop-header-height)] ${
+            panelWidth ? "" : "min-h-screen"
+          } ${
             desktopSidebarOpen
               ? "lg:ps-[var(--side-nav-width-open)]"
               : "lg:ps-[var(--side-nav-width)]"
           }`}
         >
-          <Outlet />
-
-          <Footer />
-
-          {/* bottom bar এর নিচে কনটেন্ট যেন না ঢাকা পড়ে */}
+          {/* প্যানেল খোলা থাকলে কনটেন্ট নিজেই স্ক্রল করে — তাতে
+              স্ক্রলবারটা প্যানেলের বাঁয়ে পড়ে, উইন্ডোর ডান কিনারায় নয় */}
           <div
-            className="lg:hidden"
-            style={{ height: "var(--bottom-bar-height)" }}
-          />
+            className="ad-scroll"
+            style={
+              panelWidth
+                ? {
+                    width: `calc(100% - ${panelWidth}px)`,
+                    height: "calc(100vh - var(--desktop-header-height))",
+                    overflowY: "auto",
+                  }
+                : undefined
+            }
+          >
+            <Outlet />
+
+            <Footer />
+
+            {/* bottom bar এর নিচে কনটেন্ট যেন না ঢাকা পড়ে */}
+            <div
+              className="lg:hidden"
+              style={{ height: "var(--bottom-bar-height)" }}
+            />
+          </div>
         </main>
 
         <FloatWidget />
 
         <BottomNavbar setSidebarOpen={setSidebarOpen} />
       </div>
+      </PanelContext.Provider>
     </ComingSoonProvider>
   );
 };

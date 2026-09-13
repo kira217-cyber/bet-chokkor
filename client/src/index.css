@@ -172,3 +172,17 @@ body {
 .thin-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ডক করা প্যানেলের পাশের স্ক্রল এলাকা — সরু স্ক্রলবার */
+.ad-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ad-scroll::-webkit-scrollbar-thumb {
+  background: var(--neutral700);
+  border-radius: 20px;
+}
+
+.ad-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
