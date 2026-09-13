@@ -100,6 +100,7 @@ export const locale = {
   clearAll: { bn: "সব মুছুন", en: "Clear all" },
   filter: { bn: "ফিল্টার", en: "Filter" },
   providers: { bn: "প্রোভাইডার", en: "Providers" },
+  badges: { bn: "ব্যাজ", en: "Badges" },
   applyFilters: { bn: "ফিল্টার প্রয়োগ করুন", en: "Apply filters" },
   noGamesFound: { bn: "কোনো গেম পাওয়া যায়নি", en: "No games found" },
 

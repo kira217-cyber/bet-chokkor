@@ -35,6 +35,14 @@ const RECENT_KEY = "bc_recent_searches";
 const FILTER_WIDTH = 325;
 const MIN_SEARCH = 3;
 
+/** white-label এর "Show badge / filter" টগলগুলো */
+const BADGES = [
+  { key: "isHot", bn: "হট", en: "Hot" },
+  { key: "isFavorites", bn: "ফেভারিট", en: "Favorites" },
+  { key: "isLatest", bn: "লেটেস্ট", en: "Latest" },
+  { key: "isAZ", bn: "A-Z", en: "A-Z" },
+];
+
 const SORTS = [
   { key: "recommend", bn: "সুপারিশ", en: "Recommend" },
   { key: "az", bn: "A - Z", en: "A - Z" },
@@ -92,9 +100,15 @@ const Games = () => {
 
   const sortKey = searchParams.get("sort") || "recommend";
 
+  const badgeKeys = (searchParams.get("badge") || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
   // ড্রয়ার খোলার সময়ের বাছাই — Apply চাপলে তবেই URL এ যায়।
   // ড্রয়ার খোলার মুহূর্তে এখনকার বাছাই দিয়ে ভরা হয়, effect এ নয়।
   const [draft, setDraft] = useState(vendorKeys);
+  const [draftBadges, setDraftBadges] = useState(badgeKeys);
 
   const vendors = activeCategory?.vendors || [];
 
@@ -119,17 +133,28 @@ const Games = () => {
       list = list.filter((game) => ids.has(game.providerId));
     }
 
+    // white-label এ যে গেমগুলোর ব্যাজ চালু, শুধু সেগুলো
+    if (badgeKeys.length) {
+      list = list.filter((game) => badgeKeys.every((key) => game[key]));
+    }
+
     if (sortKey === "az" || sortKey === "za") {
       list = [...list].sort((a, b) =>
         String(a.gameName || "").localeCompare(String(b.gameName || "")),
       );
       if (sortKey === "za") list.reverse();
-    } else if (sortKey === "old") {
-      list = [...list].reverse();
+    } else if (sortKey === "new" || sortKey === "old") {
+      // তারিখ ধরে — আগে শুধু উল্টে দেওয়া হতো, সেটা ভুল ছিল
+      list = [...list].sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime(),
+      );
+      if (sortKey === "old") list.reverse();
     }
 
     return list;
-  }, [records, selectedVendors, sortKey]);
+  }, [records, selectedVendors, badgeKeys, sortKey]);
 
   // সার্চের ফল — মূল গ্রিড নয়, ড্রপডাউনের ভিতরে দেখানো হয়
   const searchText = query.trim().toLowerCase();
@@ -166,10 +191,11 @@ const Games = () => {
     return () => setPanelWidth(0);
   }, [filterOpen, setPanelWidth]);
 
-  const go = (nextVendors, nextSort = sortKey) => {
+  const go = (nextVendors, nextSort = sortKey, nextBadges = badgeKeys) => {
     const params = new URLSearchParams();
     if (nextVendors.length) params.set("vendor", nextVendors.join(","));
     if (nextSort && nextSort !== "recommend") params.set("sort", nextSort);
+    if (nextBadges.length) params.set("badge", nextBadges.join(","));
 
     const qs = params.toString();
     navigate(`/games/${activeCategory?.key || "slot"}${qs ? `?${qs}` : ""}`);
@@ -443,9 +469,10 @@ const Games = () => {
             {toolButton(
               "filter",
               <SlidersHorizontal size={16} />,
-              selectedVendors.length || null,
+              selectedVendors.length + badgeKeys.length || null,
               () => {
                 setDraft(vendorKeys);
+                setDraftBadges(badgeKeys);
                 setFilterOpen(true);
               },
             )}
@@ -928,6 +955,83 @@ const Games = () => {
           </div>
         </div>
 
+        {/* ── ব্যাজ ── white-label এ যেগুলো চালু করা আছে */}
+        <div
+          style={{
+            paddingInline: "calc(var(--u) * 4.267)",
+            paddingBottom: "calc(var(--u) * 4.267)",
+          }}
+        >
+          <div
+            className="bg-[var(--neutral800)]"
+            style={{
+              borderRadius: "var(--radius-10)",
+              padding: "calc(var(--u) * 2.133)",
+            }}
+          >
+            <p
+              className="text-[var(--neutral100)]"
+              style={{
+                paddingInline: "calc(var(--u) * 2.133)",
+                paddingBlock: "calc(var(--u) * 2.133)",
+                fontSize: "var(--fs-larger)",
+              }}
+            >
+              {t("badges")}
+            </p>
+
+            {BADGES.map((item) => {
+              const checked = draftBadges.includes(item.key);
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() =>
+                    setDraftBadges((prev) =>
+                      prev.includes(item.key)
+                        ? prev.filter((key) => key !== item.key)
+                        : [...prev, item.key],
+                    )
+                  }
+                  className="flex w-full cursor-pointer items-center text-[var(--text-primary)] transition-colors hover:bg-[var(--neutral700)]"
+                  style={{
+                    height: "calc(var(--u) * 11.733)",
+                    gap: "calc(var(--u) * 2.667)",
+                    paddingInline: "calc(var(--u) * 2.133)",
+                    borderRadius: "var(--radius-10)",
+                    fontSize: "var(--fs-larger)",
+                  }}
+                >
+                  <span
+                    className="flex shrink-0 items-center justify-center"
+                    style={{
+                      height: "calc(var(--u) * 5.333)",
+                      width: "calc(var(--u) * 5.333)",
+                      borderRadius: "calc(var(--u) * 1.067)",
+                      background: checked
+                        ? "var(--primary500)"
+                        : "var(--neutral700)",
+                      color: "var(--neutral900)",
+                    }}
+                  >
+                    {checked ? <Check size={13} strokeWidth={3} /> : null}
+                  </span>
+
+                  <span className="truncate">{tv(item)}</span>
+
+                  <span
+                    className="ms-auto shrink-0 text-[var(--text-muted)]"
+                    style={{ fontSize: "var(--fs-larger)" }}
+                  >
+                    {records.filter((game) => game[item.key]).length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div
           className="flex shrink-0 items-center"
           style={{
@@ -937,7 +1041,10 @@ const Games = () => {
         >
           <button
             type="button"
-            onClick={() => setDraft([])}
+            onClick={() => {
+              setDraft([]);
+              setDraftBadges([]);
+            }}
             className="flex-1 cursor-pointer bg-[var(--neutral800)] text-[var(--text-primary)] transition-colors hover:bg-[var(--neutral700)]"
             style={{
               height: "calc(var(--u) * 11.733)",
@@ -952,7 +1059,7 @@ const Games = () => {
             type="button"
             onClick={() => {
               setFilterOpen(false);
-              go(draft);
+              go(draft, sortKey, draftBadges);
             }}
             className="flex-1 cursor-pointer bg-[var(--primary500)] font-bold text-[var(--neutral900)] transition-[filter] hover:brightness-[1.06]"
             style={{

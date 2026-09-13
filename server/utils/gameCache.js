@@ -12,8 +12,14 @@
 
 const store = new Map();
 
-/** ডিফল্ট ৫ মিনিট — master এ ক্যাটাগরি/গেম এর চেয়ে ঘনঘন বদলায় না */
-export const DEFAULT_TTL_MS = 5 * 60 * 1000;
+/**
+ * ডিফল্ট ৩০ সেকেন্ড।
+ *
+ * অ্যাডমিন white-label এ ক্রম বা ব্যাজ বদলালে সেটা প্রায় সাথে সাথেই
+ * সাইটে দেখা দরকার, তাই ক্যাশ ছোট রাখা। তবু master এ প্রতিটা ভিজিটে
+ * কল যায় না — একই আধা মিনিটে যতজনই আসুক, একবারই যায়।
+ */
+export const DEFAULT_TTL_MS = 30 * 1000;
 
 export const getCached = (key) => {
   const hit = store.get(key);

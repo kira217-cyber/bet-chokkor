@@ -164,6 +164,19 @@ export const adaptGame = (item = {}) => {
     image,
     categoryId: text(item.categoryId) || text(game.categoryId),
     providerId: text(item.providerDbId) || text(game.providerDbId),
+
+    // white-label এর "Show badge / filter" টগলগুলো — ক্লায়েন্টে ব্যাজ
+    // ও ফিল্টার দুটোতেই কাজে লাগে
+    isHot: Boolean(item.isHot ?? game.isHot),
+    isFavorites: Boolean(item.isFavorites ?? game.isFavorites),
+    isLatest: Boolean(item.isLatest ?? game.isLatest),
+    isAZ: Boolean(item.isAZ ?? game.isAZ),
+
+    // "All Page Order" ও "Provider Page Order" — সার্ভার এই ক্রমেই
+    // পাঠায়, তবু রাখা হলো যাতে ক্লায়েন্টেও দরকারে কাজে লাগে
+    categoryOrder: Number(item.categoryOrder ?? game.categoryOrder) || 0,
+    providerOrder: Number(item.providerOrder ?? game.providerOrder) || 0,
+    createdAt: text(item.createdAt) || text(game.createdAt),
   };
 };
 

@@ -20,6 +20,13 @@ const toPageShape = (game) => ({
   // তাই ফিল্টার ও গণনা এই আইডি ধরেই হয়
   providerId: game.providerId,
   icon: game.image,
+
+  // white-label এর ব্যাজ/ফিল্টার টগল
+  isHot: game.isHot,
+  isFavorites: game.isFavorites,
+  isLatest: game.isLatest,
+  isAZ: game.isAZ,
+  createdAt: game.createdAt,
 });
 
 /** এক পেজ গেম আনে — কম্পোনেন্টের বাইরে, যাতে effect থেকে ডাকলে sync setState না হয় */
