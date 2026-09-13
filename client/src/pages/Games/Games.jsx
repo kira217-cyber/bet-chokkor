@@ -309,9 +309,13 @@ const Games = () => {
 
   return (
     <div className="bc-page" style={{ paddingBottom: "calc(var(--u) * 4.267)" }}>
+      {/* মূল সাইটে হেডারের নিচে ৪৭px ফাঁকা তারপর টুলবার — মেপে নেওয়া */}
       <div
         className="bc-pad lg:px-0"
-        style={{ paddingBlock: "calc(var(--u) * 4.267)" }}
+        style={{
+          paddingTop: "calc(var(--u) * 12.533)",
+          paddingBottom: "calc(var(--u) * 4.267)",
+        }}
       >
         {/* ── টুলবার ── */}
         <div
@@ -363,7 +367,11 @@ const Games = () => {
             {/* ক্যাটাগরি ড্রপডাউন */}
             {categoryOpen &&
               menuPanel(
-                categories.map((item) => {
+                // স্পোর্টসের আলাদা গেম লিস্ট পেজ নেই, তাই মূল সাইটের
+                // মতোই এই ড্রপডাউনে সেটা দেখানো হয় না
+                categories
+                  .filter((item) => item.key !== "sports")
+                  .map((item) => {
                   const isActive = item.key === activeCategory?.key;
 
                   return (
@@ -400,7 +408,7 @@ const Games = () => {
                       {tv(item.name)}
                     </button>
                   );
-                }),
+                  }),
                 { left: 0 },
               )}
           </div>
@@ -465,8 +473,15 @@ const Games = () => {
           </div>
         </div>
 
-        {/* ── সার্চ ── */}
-        <div ref={searchRef} className="relative">
+        {/* ── সার্চ ──
+            মূল সাইটে সার্চ বার গ্রিডের চেয়ে দুই পাশে ৮px করে ভিতরে */}
+        <div
+          ref={searchRef}
+          className="relative"
+          // মূল সাইটে সার্চ বারের বাঁ দিক গ্রিডের সাথে মেলানো, শুধু
+          // ডানে ১৬px কম — কেন্দ্রে বসানো নয়
+          style={{ width: "calc(100% - var(--u) * 4.267)" }}
+        >
           <div
             className="flex items-center overflow-hidden bg-[var(--form-box-bg)] transition-shadow"
             style={{
