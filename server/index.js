@@ -8,6 +8,7 @@ import connectDB from "./config/db.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import gameApiKeyRoutes from "./routes/gameApiKeyRoutes.js";
+import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 
 dotenv.config();
 
@@ -73,6 +74,7 @@ app.get("/health", (req, res) => {
 app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin/game-api-key", gameApiKeyRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

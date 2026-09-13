@@ -10,6 +10,7 @@ import {
 import { successResponse, errorResponse } from "../utils/response.js";
 import { adaptGameData, adaptGameList } from "../utils/gameAdapter.js";
 import { getCached, setCached, clearCache } from "../utils/gameCache.js";
+import { noteApiFailure, noteApiSuccess } from "../utils/maintenance.js";
 
 const router = express.Router();
 
@@ -290,12 +291,20 @@ router.get("/client/game-data", async (req, res) => {
     const adapted = adaptGameData(raw);
     setCached(cacheKey, adapted);
 
+    // master সাড়া দিচ্ছে — অটো মেইনটেন্যান্স থাকলে নামিয়ে দাও
+    await noteApiSuccess();
+
     return successResponse(res, "Game data loaded", {
       configured: true,
       cached: false,
       data: adapted,
     });
   } catch (error) {
+    // পরপর কয়েকবার ব্যর্থ হলে সাইট নিজে থেকেই মেইনটেন্যান্সে যাবে
+    await noteApiFailure(
+      error?.response?.data?.message || error.message || "Game API failed",
+    );
+
     return errorResponse(
       res,
       error?.response?.data?.message || error.message || "Master request failed",

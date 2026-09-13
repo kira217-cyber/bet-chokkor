@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
+import Maintenance from "../pages/Maintenance/Maintenance";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
 export const routes = createBrowserRouter([
@@ -28,6 +29,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <Admins />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "maintenance",
+        element: (
+          <PrivateRoute motherOnly>
+            <Maintenance />
           </PrivateRoute>
         ),
       },

@@ -6,6 +6,7 @@ import {
   UserCog,
   Gamepad2,
   KeyRound,
+  Wrench,
   ChevronDown,
   User,
   Menu,
@@ -18,7 +19,7 @@ import { navItems, roleLabels } from "../data/navigation";
 import { logout } from "../features/auth/authSlice";
 import { selectAdmin } from "../features/auth/authSelectors";
 
-const ICONS = { LayoutDashboard, UserCog, Gamepad2, KeyRound, User };
+const ICONS = { LayoutDashboard, UserCog, Gamepad2, KeyRound, Wrench, User };
 
 /** একটা মেনু লিংকের চেহারা — সাধারণ আইটেম আর ড্রপডাউনের ভিতরের লিংক দুটোতেই */
 const linkClass = ({ isActive }) =>

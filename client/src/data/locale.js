@@ -74,8 +74,28 @@ export const locale = {
   continue: { bn: "চালিয়ে যান", en: "Continue" },
   register: { bn: "রেজিস্টার করুন", en: "Register" },
 
+  // ── রক্ষণাবেক্ষণ ──
+  maintenanceTitle: {
+    bn: "সাইট রক্ষণাবেক্ষণে আছে",
+    en: "Site is under maintenance",
+  },
+  maintenanceText: {
+    bn: "আমরা কিছু কাজ করছি। অল্প কিছুক্ষণের মধ্যেই সাইট আবার চালু হবে — একটু পরে আবার দেখুন।",
+    en: "We are doing some work. The site will be back shortly — please check again in a little while.",
+  },
+  tryAgain: { bn: "আবার চেষ্টা করুন", en: "Try again" },
+
+  // ── গেম খেলা এখনো আসেনি ──
+  comingSoonTitle: { bn: "গেম খেলা শীঘ্রই আসছে", en: "Game play coming soon" },
+  comingSoonText: {
+    bn: "এই গেমটি এখনো খেলার জন্য চালু হয়নি। খুব শীঘ্রই চালু হবে — সাথে থাকুন।",
+    en: "This game is not playable yet. It will open very soon — stay tuned.",
+  },
+  gotIt: { bn: "বুঝেছি", en: "Got it" },
+
   // ── গেম পেজ ──
   searchGames: { bn: "গেম খুঁজুন", en: "Search games" },
+  loadMore: { bn: "আরও লোড করুন", en: "Load more" },
   noGamesFound: { bn: "কোনো গেম পাওয়া যায়নি", en: "No games found" },
 
   // ── 404 ──

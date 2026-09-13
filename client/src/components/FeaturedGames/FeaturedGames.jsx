@@ -1,13 +1,14 @@
 import React from "react";
-import { Link } from "react-router";
 import { useSelector } from "react-redux";
 
 import { useLanguage } from "../../Context/LanguageProvider";
+import { useComingSoon } from "../../Context/comingSoonContext";
 import LabeledCarousel from "../LabeledCarousel/LabeledCarousel";
 import { selectFeaturedGames } from "../../features/globalGame/globalGameSelectors";
 
 const FeaturedGames = () => {
   const { t } = useLanguage();
+  const { openComingSoon } = useComingSoon();
   const games = useSelector(selectFeaturedGames);
 
   return (
@@ -17,7 +18,12 @@ const FeaturedGames = () => {
       aspect="114.27 / 152"
       slidesPerView={[3, 7.65]}
       renderItem={(item) => (
-        <Link to={`/play-game/${item.key}`} className="block h-full">
+        // গেম খেলা এখনো চালু হয়নি — ক্লিকে "শীঘ্রই আসছে" মডাল
+        <button
+          type="button"
+          onClick={() => openComingSoon(item)}
+          className="block h-full w-full cursor-pointer text-start"
+        >
           <img
             src={item.image}
             alt={item.name}
@@ -25,7 +31,7 @@ const FeaturedGames = () => {
             style={{ borderRadius: "var(--radius-10)" }}
             draggable="false"
           />
-        </Link>
+        </button>
       )}
     />
   );

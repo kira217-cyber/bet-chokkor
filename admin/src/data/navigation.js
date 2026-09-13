@@ -15,6 +15,8 @@ export const navItems = [
   { key: "dashboard", path: "/", label: "Dashboard", icon: "LayoutDashboard", perm: "dashboard" },
   { key: "admins", path: "/admins", label: "Admin Accounts", icon: "UserCog", motherOnly: true },
 
+  { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
+
   {
     key: "game",
     label: "Game",
