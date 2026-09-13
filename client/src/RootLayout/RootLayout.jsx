@@ -16,33 +16,13 @@ import { selectGlobalLoaded } from "../features/global/globalSelectors";
 import { fetchGlobalGameData } from "../features/globalGame/globalGameSlice";
 import { selectGlobalGameLoaded } from "../features/globalGame/globalGameSelectors";
 
-// ডেটা তাৎক্ষণিক এলেও লোডারটা অন্তত এতক্ষণ দেখানো হয়, নাহলে এক ঝলকে
-// মিলিয়ে যায় আর সাইট লোড হওয়াটা বোঝা যায় না
-const MIN_LOADER_MS = 2000;
-
-// পেজ লোডে একবারই — লগইন/রেজিস্টার থেকে হোমে ফিরলে RootLayout আবার
-// mount হয়, তখন যেন নতুন করে লোডার না দেখায়
-let minLoaderDone = false;
-
 const RootLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(false);
-  const [minTimePassed, setMinTimePassed] = useState(minLoaderDone);
 
   const dispatch = useDispatch();
   const loaded = useSelector(selectGlobalLoaded);
   const gameLoaded = useSelector(selectGlobalGameLoaded);
-
-  useEffect(() => {
-    if (minLoaderDone) return undefined;
-
-    const timer = setTimeout(() => {
-      minLoaderDone = true;
-      setMinTimePassed(true);
-    }, MIN_LOADER_MS);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!gameLoaded) {
@@ -56,7 +36,8 @@ const RootLayout = () => {
     }
   }, [dispatch, loaded]);
 
-  if (!loaded || !gameLoaded || !minTimePassed) {
+  // ডেটা এলেই সাথে সাথে সাইট — কোনো কৃত্রিম দেরি নেই
+  if (!loaded || !gameLoaded) {
     return <SiteLoader />;
   }
 

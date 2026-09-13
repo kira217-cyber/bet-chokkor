@@ -4,6 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   LayoutDashboard,
   UserCog,
+  Gamepad2,
+  KeyRound,
+  ChevronDown,
   User,
   Menu,
   X,
@@ -15,7 +18,15 @@ import { navItems, roleLabels } from "../data/navigation";
 import { logout } from "../features/auth/authSlice";
 import { selectAdmin } from "../features/auth/authSelectors";
 
-const ICONS = { LayoutDashboard, UserCog, User };
+const ICONS = { LayoutDashboard, UserCog, Gamepad2, KeyRound, User };
+
+/** একটা মেনু লিংকের চেহারা — সাধারণ আইটেম আর ড্রপডাউনের ভিতরের লিংক দুটোতেই */
+const linkClass = ({ isActive }) =>
+  `flex h-11 items-center gap-3 rounded-[14px] px-4 text-[14px] transition ${
+    isActive
+      ? "bg-gradient-to-r from-[var(--primary400)] via-[var(--primary500)] to-[var(--primary600)] font-black text-[var(--neutral1000)] shadow-[0_10px_26px_rgba(249,185,1,0.22)]"
+      : "font-medium text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
+  }`;
 
 /**
  * অ্যাডমিন শেল — ডেস্কটপে বাঁয়ে স্থায়ী সাইডবার, মোবাইলে ড্রয়ার।
@@ -27,6 +38,20 @@ const RootLayout = () => {
   const admin = useSelector(selectAdmin);
 
   const [open, setOpen] = useState(false);
+
+  // কোন ড্রপডাউনগুলো খোলা। এখনকার পেজ যে গ্রুপের ভিতরে, সেটা শুরুতেই খোলা
+  const [openGroups, setOpenGroups] = useState(() =>
+    navItems
+      .filter((item) =>
+        item.children?.some((child) => child.path === window.location.pathname),
+      )
+      .map((item) => item.key),
+  );
+
+  const toggleGroup = (key) =>
+    setOpenGroups((prev) =>
+      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key],
+    );
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -70,19 +95,58 @@ const RootLayout = () => {
         {visibleItems.map((item) => {
           const Icon = ICONS[item.icon] || LayoutDashboard;
 
+          // ── ড্রপডাউন ──
+          if (item.children?.length) {
+            const isOpen = openGroups.includes(item.key);
+
+            return (
+              <div key={item.key}>
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(item.key)}
+                  className="flex h-11 w-full cursor-pointer items-center gap-3 rounded-[14px] px-4 text-[14px] font-medium text-[var(--text-secondary)] transition hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
+                >
+                  <Icon size={18} className="shrink-0" />
+                  {item.label}
+
+                  <ChevronDown
+                    size={16}
+                    className={`ms-auto shrink-0 transition-transform ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div className="mt-1 space-y-1 border-s border-[var(--primary500)]/20 ps-3">
+                    {item.children.map((child) => {
+                      const ChildIcon = ICONS[child.icon] || LayoutDashboard;
+
+                      return (
+                        <NavLink
+                          key={child.key}
+                          to={child.path}
+                          onClick={() => setOpen(false)}
+                          className={linkClass}
+                        >
+                          <ChildIcon size={17} className="shrink-0" />
+                          {child.label}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <NavLink
               key={item.key}
               to={item.path}
               end={item.path === "/"}
               onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `flex h-11 items-center gap-3 rounded-[14px] px-4 text-[14px] transition ${
-                  isActive
-                    ? "bg-gradient-to-r from-[var(--primary400)] via-[var(--primary500)] to-[var(--primary600)] font-black text-[var(--neutral1000)] shadow-[0_10px_26px_rgba(249,185,1,0.22)]"
-                    : "font-medium text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
-                }`
-              }
+              className={linkClass}
             >
               <Icon size={18} className="shrink-0" />
               {item.label}
