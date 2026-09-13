@@ -1,46 +1,16 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { api } from "../../api/axios";
 import { gameData } from "../../data/gameData";
 
-/** সার্ভারের প্রক্সি — আসল কী সার্ভারে থাকে, ব্রাউজারে কখনো আসে না */
-const GAME_PROXY_API = "/api/admin/game-api-key/client";
-
-/**
- * ক্যাটাগরি, প্রোভাইডার ও ফিচার্ড গেম আনে।
- *
- * অ্যাডমিনে গেম API key বসানো না থাকলে (বা সার্ভার বন্ধ থাকলে) সাইট
- * আগের মতোই স্ট্যাটিক ডেটা দেখায় — এই thunk কখনো reject করে না, তাই
- * কী বসার আগে-পরে হোম পেজ একইভাবে চলে, কোথাও ভাঙে না।
- */
+// TODO(server): server তৈরি হলে static import সরিয়ে game-proxy API কল হবে —
+// const res = await api.get(`${GAME_PROXY_API}/game-data`);
+// return res?.data?.data || {};
 export const fetchGlobalGameData = createAsyncThunk(
   "globalGame/fetchGlobalGameData",
-  async () => {
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get(`${GAME_PROXY_API}/game-data`);
-      const payload = res?.data?.data;
-      const live = payload?.configured ? payload.data : null;
-
-      if (!live || !Array.isArray(live.gameCategories) || !live.gameCategories.length) {
-        return { ...gameData, source: "static" };
-      }
-
-      // master এর কোনো তালিকা খালি এলে সেটুকু স্ট্যাটিক থেকেই নেওয়া হয়,
-      // যাতে হোম পেজে ফাঁকা সেকশন না দেখায়
-      return {
-        gameCategories: live.gameCategories,
-        homeProviders: live.homeProviders?.length
-          ? live.homeProviders
-          : gameData.homeProviders,
-        featuredGames: live.featuredGames?.length
-          ? live.featuredGames
-          : gameData.featuredGames,
-        // master ইভেন্ট দেয় না — এটা আমাদের নিজের তালিকা
-        events: gameData.events,
-        source: "live",
-      };
-    } catch {
-      // সার্ভার বন্ধ বা নেটওয়ার্ক সমস্যা — সাইট তবু চলবে
-      return { ...gameData, source: "static" };
+      return gameData;
+    } catch (error) {
+      return rejectWithValue(error?.message || "Failed to load game data");
     }
   },
 );
@@ -50,9 +20,6 @@ const initialState = {
   homeProviders: [],
   featuredGames: [],
   events: [],
-
-  // "live" মানে master থেকে, "static" মানে বিল্ট-ইন নমুনা ডেটা
-  source: "static",
 
   loading: false,
   loaded: false,
@@ -90,7 +57,6 @@ const globalGameSlice = createSlice({
           ? data.featuredGames
           : [];
         state.events = Array.isArray(data.events) ? data.events : [];
-        state.source = data.source || "static";
       })
       .addCase(fetchGlobalGameData.rejected, (state, action) => {
         state.loading = false;

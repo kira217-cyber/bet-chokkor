@@ -11,7 +11,6 @@
 export const navItems = [
   { key: "dashboard", path: "/", label: "Dashboard", icon: "LayoutDashboard", perm: "dashboard" },
   { key: "admins", path: "/admins", label: "Admin Accounts", icon: "UserCog", motherOnly: true },
-  { key: "game-api-key", path: "/game-api-key", label: "Game API Key", icon: "KeyRound", motherOnly: true },
 ];
 
 /** CreateAdmin পেজে দেখানো পারমিশন তালিকা */

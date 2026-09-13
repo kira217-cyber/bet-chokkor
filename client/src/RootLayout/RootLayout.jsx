@@ -9,7 +9,6 @@ import Footer from "../components/Footer/Footer";
 import FloatWidget from "../components/FloatWidget/FloatWidget";
 import SiteIdentity from "../components/SiteIdentity/SiteIdentity";
 import SiteLoader from "../components/SiteLoader/SiteLoader";
-import ComingSoonProvider from "../Context/ComingSoonProvider";
 
 import { fetchGlobalClientData } from "../features/global/globalSlice";
 import { selectGlobalLoaded } from "../features/global/globalSelectors";
@@ -62,41 +61,39 @@ const RootLayout = () => {
   }
 
   return (
-    <ComingSoonProvider>
-      <div className="min-h-screen bg-[var(--content-bg)]">
-        <SiteIdentity />
+    <div className="min-h-screen bg-[var(--content-bg)]">
+      <SiteIdentity />
 
-        <Sidebar
-          open={sidebarOpen}
-          setOpen={setSidebarOpen}
-          desktopOpen={desktopSidebarOpen}
+      <Sidebar
+        open={sidebarOpen}
+        setOpen={setSidebarOpen}
+        desktopOpen={desktopSidebarOpen}
+      />
+
+      <Navber setDesktopOpen={setDesktopSidebarOpen} />
+
+      <main
+        className={`min-h-screen pt-[var(--header-height)] transition-[padding] duration-300 ease-in-out lg:pt-[var(--desktop-header-height)] ${
+          desktopSidebarOpen
+            ? "lg:ps-[var(--side-nav-width-open)]"
+            : "lg:ps-[var(--side-nav-width)]"
+        }`}
+      >
+        <Outlet />
+
+        <Footer />
+
+        {/* bottom bar এর নিচে কনটেন্ট যেন না ঢাকা পড়ে */}
+        <div
+          className="lg:hidden"
+          style={{ height: "var(--bottom-bar-height)" }}
         />
+      </main>
 
-        <Navber setDesktopOpen={setDesktopSidebarOpen} />
+      <FloatWidget />
 
-        <main
-          className={`min-h-screen pt-[var(--header-height)] transition-[padding] duration-300 ease-in-out lg:pt-[var(--desktop-header-height)] ${
-            desktopSidebarOpen
-              ? "lg:ps-[var(--side-nav-width-open)]"
-              : "lg:ps-[var(--side-nav-width)]"
-          }`}
-        >
-          <Outlet />
-
-          <Footer />
-
-          {/* bottom bar এর নিচে কনটেন্ট যেন না ঢাকা পড়ে */}
-          <div
-            className="lg:hidden"
-            style={{ height: "var(--bottom-bar-height)" }}
-          />
-        </main>
-
-        <FloatWidget />
-
-        <BottomNavbar setSidebarOpen={setSidebarOpen} />
-      </div>
-    </ComingSoonProvider>
+      <BottomNavbar setSidebarOpen={setSidebarOpen} />
+    </div>
   );
 };
 

@@ -4,9 +4,7 @@ import { useSelector } from "react-redux";
 import { ChevronDown, Search, SlidersHorizontal, ArrowUpDown, X } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
-import { useComingSoon } from "../../Context/comingSoonContext";
 import { gameListPage } from "../../data/gameListData";
-import { useGameList } from "../../features/globalGame/useGameList";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
 
 /**
@@ -21,7 +19,6 @@ import { selectGameCategories } from "../../features/globalGame/globalGameSelect
  */
 const Games = () => {
   const { t, tv } = useLanguage();
-  const { openComingSoon } = useComingSoon();
   const { category } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -37,20 +34,13 @@ const Games = () => {
 
   const vendorLabel = vendor ? tv(vendor.name) : gameListPage.vendor.name;
 
-  // অ্যাডমিনে গেম API key বসানো থাকলে ক্যাটাগরির আসল আইডি পাওয়া যায়,
-  // তখন তালিকা সার্ভার থেকে আসে; নইলে বিল্ট-ইন স্ট্যাটিক তালিকাই
-  const { records, total, hasMore, loading, loadMore, isLive } = useGameList({
-    categoryId: activeCategory?.id,
-    providerId: vendor?.id,
-  });
-
   const games = useMemo(() => {
     const text = query.trim().toLowerCase();
-    if (!text) return records;
-    return records.filter((g) =>
-      String(g.gameName || "").toLowerCase().includes(text),
+    if (!text) return gameListPage.records;
+    return gameListPage.records.filter((g) =>
+      g.gameName.toLowerCase().includes(text),
     );
-  }, [query, records]);
+  }, [query]);
 
   const toolButton = (label, children, badge) => (
     <button
@@ -198,18 +188,10 @@ const Games = () => {
             style={{ gap: "calc(var(--u) * 2.133)" }}
           >
             {games.map((game) => (
-              // গেম খেলা এখনো চালু হয়নি — ক্লিকে "শীঘ্রই আসছে" মডাল
-              <button
+              <Link
                 key={game.gameId}
-                type="button"
-                onClick={() =>
-                  openComingSoon({
-                    name: game.gameName,
-                    image: game.icon,
-                    vendor: game.vendorName,
-                  })
-                }
-                className="group relative block w-full cursor-pointer overflow-hidden"
+                to={`/play-game/${game.gameCode}`}
+                className="group relative block overflow-hidden"
                 style={{
                   aspectRatio: "139 / 184.91",
                   borderRadius: "var(--radius-10)",
@@ -222,7 +204,7 @@ const Games = () => {
                   className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   draggable="false"
                 />
-              </button>
+              </Link>
             ))}
           </div>
         ) : (
@@ -233,45 +215,9 @@ const Games = () => {
               paddingBlock: "calc(var(--u) * 13.333)",
             }}
           >
-            {loading ? t("loading") : t("noGamesFound")}
+            {t("noGamesFound")}
           </p>
         )}
-
-        {/* মূল সাইটের মতো — কতগুলোর মধ্যে কতগুলো দেখানো হচ্ছে, আর আরও আনার
-            বোতাম। স্ট্যাটিক তালিকায় আনার মতো কিছু নেই, তাই দেখানোও হয় না */}
-        {isLive && games.length ? (
-          <div
-            className="flex flex-col items-center"
-            style={{ gap: "calc(var(--u) * 2.133)", paddingBlock: "calc(var(--u) * 5.333)" }}
-          >
-            {hasMore ? (
-              <button
-                type="button"
-                onClick={loadMore}
-                disabled={loading}
-                className="cursor-pointer bg-[var(--neutral800)] text-[var(--text-primary)] transition-colors hover:bg-[var(--neutral700)] disabled:cursor-not-allowed disabled:opacity-60"
-                style={{
-                  height: "calc(var(--u) * 10.667)",
-                  paddingInline: "calc(var(--u) * 8)",
-                  borderRadius: "var(--radius-10)",
-                  fontSize: "var(--fs-base)",
-                }}
-              >
-                {loading ? t("loading") : t("loadMore")}
-              </button>
-            ) : null}
-
-            <p
-              className="text-[var(--text-muted)]"
-              style={{ fontSize: "var(--fs-small)" }}
-            >
-              {tv({
-                bn: `${total}টি গেমের মধ্যে ${games.length}টি`,
-                en: `${games.length} of ${total} games`,
-              })}
-            </p>
-          </div>
-        ) : null}
       </div>
     </div>
   );

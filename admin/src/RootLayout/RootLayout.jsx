@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   LayoutDashboard,
   UserCog,
-  KeyRound,
   User,
   Menu,
   X,
@@ -16,7 +15,7 @@ import { navItems, roleLabels } from "../data/navigation";
 import { logout } from "../features/auth/authSlice";
 import { selectAdmin } from "../features/auth/authSelectors";
 
-const ICONS = { LayoutDashboard, UserCog, KeyRound, User };
+const ICONS = { LayoutDashboard, UserCog, User };
 
 /**
  * অ্যাডমিন শেল — ডেস্কটপে বাঁয়ে স্থায়ী সাইডবার, মোবাইলে ড্রয়ার।
