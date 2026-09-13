@@ -96,6 +96,11 @@ export const locale = {
   // ── গেম পেজ ──
   searchGames: { bn: "গেম খুঁজুন", en: "Search games" },
   loadMore: { bn: "আরও লোড করুন", en: "Load more" },
+  recentSearches: { bn: "সাম্প্রতিক সার্চ", en: "Recent searches" },
+  clearAll: { bn: "সব মুছুন", en: "Clear all" },
+  filter: { bn: "ফিল্টার", en: "Filter" },
+  providers: { bn: "প্রোভাইডার", en: "Providers" },
+  applyFilters: { bn: "ফিল্টার প্রয়োগ করুন", en: "Apply filters" },
   noGamesFound: { bn: "কোনো গেম পাওয়া যায়নি", en: "No games found" },
 
   // ── 404 ──
