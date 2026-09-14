@@ -8,7 +8,8 @@ import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import PrivateRoute from "../PrivateRoute/PrivateRoute";
 import Deposit from "../pages/Deposit/Deposit";
-import DepositGroup from "../pages/Deposit/DepositGroup";
+import ManualDeposit from "../pages/Deposit/ManualDeposit";
+import AutoDeposit from "../pages/Deposit/AutoDeposit";
 import Profile from "../pages/Member/Profile";
 
 export const routes = createBrowserRouter([
@@ -45,10 +46,18 @@ export const routes = createBrowserRouter([
         ),
       },
       {
-        path: "member/wallet/deposit/:group",
+        path: "member/wallet/deposit/manual",
         element: (
           <PrivateRoute>
-            <DepositGroup />
+            <ManualDeposit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/wallet/deposit/auto",
+        element: (
+          <PrivateRoute>
+            <AutoDeposit />
           </PrivateRoute>
         ),
       },

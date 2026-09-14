@@ -1,5 +1,8 @@
 import express from "express";
+import fs from "node:fs";
+import path from "node:path";
 
+import upload from "../config/multer.js";
 import DepositMethod from "../models/DepositMethod.js";
 import DepositFieldConfig from "../models/DepositFieldConfig.js";
 import DepositBonusTurnover from "../models/DepositBonusTurnover.js";
@@ -19,6 +22,32 @@ const langText = (input = {}, current = {}) => ({
   bn: text(input?.bn) || current?.bn || "",
   en: text(input?.en) || current?.en || "",
 });
+
+/**
+ * ফর্ম-ডেটায় সব কিছু স্ট্রিং হয়ে আসে।
+ *
+ * ছবি পাঠাতে হলে multipart লাগে, আর তখন nested অবজেক্ট/অ্যারে JSON
+ * স্ট্রিং হিসেবে আসে — তাই খুলে নিতে হয়।
+ */
+const parseMaybeJSON = (value, fallback) => {
+  if (value === undefined || value === null) return fallback;
+  if (typeof value !== "string") return value;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
+/** পুরোনো লোগো মুছে ফেলা — নইলে বদলাতে বদলাতে ফোল্ডার ভরে যেত */
+const removeOldLogo = (logoUrl) => {
+  if (!logoUrl || !logoUrl.startsWith("/uploads/")) return;
+
+  const target = path.join("uploads", path.basename(logoUrl));
+
+  fs.promises.unlink(target).catch(() => {});
+};
 
 const cleanContacts = (list) => {
   if (!Array.isArray(list)) return [];
@@ -111,6 +140,7 @@ router.post(
   protectAdmin,
   requireMother,
   requireWrite,
+  upload.single("logo"),
   async (req, res) => {
     try {
       const body = req.body || {};
@@ -124,15 +154,15 @@ router.post(
 
       const method = await DepositMethod.create({
         methodId,
-        methodName: langText(body.methodName),
+        methodName: langText(parseMaybeJSON(body.methodName, {})),
         methodType: body.methodType === "personal" ? "personal" : "agent",
         group: ["crypto", "bank"].includes(body.group) ? body.group : "ewallet",
-        logoUrl: text(body.logoUrl),
+        logoUrl: req.file ? `/uploads/${req.file.filename}` : text(body.logoUrl),
         minDepositAmount: Math.max(0, num(body.minDepositAmount)),
         maxDepositAmount: Math.max(0, num(body.maxDepositAmount)),
-        contacts: cleanContacts(body.contacts),
+        contacts: cleanContacts(parseMaybeJSON(body.contacts, [])),
         sort: Math.max(0, num(body.sort)),
-        isActive: body.isActive !== false,
+        isActive: body.isActive !== false && body.isActive !== "false",
       });
 
       return successResponse(res, "Method created", { method }, 201);
@@ -147,6 +177,7 @@ router.put(
   protectAdmin,
   requireMother,
   requireWrite,
+  upload.single("logo"),
   async (req, res) => {
     try {
       const method = await DepositMethod.findById(req.params.id);
@@ -155,8 +186,10 @@ router.put(
 
       const body = req.body || {};
 
-      if (body.methodName) {
-        method.methodName = langText(body.methodName, method.methodName);
+      const methodName = parseMaybeJSON(body.methodName, null);
+
+      if (methodName) {
+        method.methodName = langText(methodName, method.methodName);
       }
       if (body.methodType) {
         method.methodType = body.methodType === "personal" ? "personal" : "agent";
@@ -164,18 +197,32 @@ router.put(
       if (body.group && ["ewallet", "crypto", "bank"].includes(body.group)) {
         method.group = body.group;
       }
-      if (body.logoUrl !== undefined) method.logoUrl = text(body.logoUrl);
+      if (req.file) {
+        removeOldLogo(method.logoUrl);
+        method.logoUrl = `/uploads/${req.file.filename}`;
+      } else if (body.logoUrl !== undefined) {
+        const next = text(body.logoUrl);
+
+        // খালি পাঠানো মানে "লোগোটা সরিয়ে দাও"
+        if (!next && method.logoUrl) removeOldLogo(method.logoUrl);
+
+        method.logoUrl = next;
+      }
       if (body.minDepositAmount !== undefined) {
         method.minDepositAmount = Math.max(0, num(body.minDepositAmount));
       }
       if (body.maxDepositAmount !== undefined) {
         method.maxDepositAmount = Math.max(0, num(body.maxDepositAmount));
       }
-      if (Array.isArray(body.contacts)) {
-        method.contacts = cleanContacts(body.contacts);
-      }
+      const contacts = parseMaybeJSON(body.contacts, null);
+
+      if (Array.isArray(contacts)) method.contacts = cleanContacts(contacts);
+
       if (body.sort !== undefined) method.sort = Math.max(0, num(body.sort));
-      if (typeof body.isActive === "boolean") method.isActive = body.isActive;
+
+      if (body.isActive !== undefined) {
+        method.isActive = body.isActive !== false && body.isActive !== "false";
+      }
 
       await method.save();
 
@@ -199,6 +246,8 @@ router.delete(
 
       // মেথডের সাথে তার ফর্ম ও বোনাসের নিয়মও যায় — নইলে অনাথ কনফিগ
       // পড়ে থাকত যা কোনো পেজেই আর দেখা যেত না
+      removeOldLogo(method.logoUrl);
+
       await Promise.all([
         DepositMethod.deleteOne({ _id: method._id }),
         DepositFieldConfig.deleteOne({ depositMethod: method._id }),

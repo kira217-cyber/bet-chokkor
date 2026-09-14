@@ -21,20 +21,30 @@ export const fetchMyDeposits = async (limit = 20) => {
   return data?.data?.requests || [];
 };
 
-/** মূল সাইটের মতো দুটো ভাগ — ই-ওয়ালেট ও ক্রিপ্টো */
-export const GROUPS = [
-  { key: "ewallet", labelKey: "groupEwallet" },
-  { key: "crypto", labelKey: "groupCrypto" },
-  { key: "bank", labelKey: "groupBank" },
-];
+/** অটো ডিপোজিট চালু কিনা আর কী কী বোনাস বাছা যায় */
+export const fetchAutoStatus = async () => {
+  try {
+    const { data } = await api.get("/api/auto-deposit/status");
+    return data?.data || { active: false, bonuses: [] };
+  } catch {
+    // জানা না গেলে অটো বন্ধ ধরে নেওয়া — ম্যানুয়াল দিয়ে কাজ চলে
+    return { active: false, bonuses: [] };
+  }
+};
+
+/** গেটওয়ের পেমেন্ট পাতা চাওয়া */
+export const startAutoDeposit = async (payload) => {
+  const { data } = await api.post("/api/auto-deposit/create", payload);
+  return data?.data || {};
+};
 
 /**
- * একটা ভাগের সবচেয়ে বড় বোনাসের হার।
+ * সবচেয়ে বড় বোনাসের হার।
  *
- * ভাগের সারিতে "১০০% পর্যন্ত" লেখাটা এখান থেকেই আসে — ভিতরের কোনো
- * মেথডে যত বেশি বোনাস আছে, সেটাই দেখানো হয়।
+ * সারিতে "১০০% পর্যন্ত" লেখাটা এখান থেকেই আসে — ভিতরে যত বেশি বোনাস
+ * আছে, সেটাই দেখানো হয়।
  */
-export const groupTopPercent = (methods) => {
+export const topPercent = (methods = [], bonuses = []) => {
   let top = 0;
 
   methods.forEach((method) => {
@@ -47,6 +57,12 @@ export const groupTopPercent = (methods) => {
         top = Math.max(top, Number(promo.bonusValue || 0));
       }
     });
+  });
+
+  bonuses.forEach((bonus) => {
+    if (bonus.bonusType === "percent") {
+      top = Math.max(top, Number(bonus.bonusValue || 0));
+    }
   });
 
   return top;

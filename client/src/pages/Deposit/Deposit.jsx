@@ -1,38 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ChevronRight, Loader2, Wallet } from "lucide-react";
+import { ChevronRight, Loader2, Wallet, Zap } from "lucide-react";
 
 import MemberPage from "./MemberPage";
 import { useLanguage } from "../../Context/LanguageProvider";
 import {
-  GROUPS,
+  fetchAutoStatus,
   fetchDepositMethods,
-  groupTopPercent,
+  topPercent,
 } from "../../features/deposit/depositApi";
 
 /**
- * ডিপোজিটের প্রথম পর্দা — কোন ধরনের উপায়ে টাকা দেবেন।
+ * ডিপোজিটের প্রথম পর্দা — কোন পথে টাকা দেবেন।
  *
- * মূল সাইট থেকে মাপা: সারি ১৬u উঁচু (bg neutral800, radius --radius-10,
- * ভিতরে দুপাশে ৪.২৬৭u), সারির মাঝে ২.১৩৩u ফাঁক, ডানে সোনালি
- * "১০০% পর্যন্ত" ৩.২u আর একটা শেভরন।
+ * Bajiman এ এই দুটো ট্যাব হয়ে থাকে (ডিপোজিট / অটো ডিপোজিট); এখানে
+ * সেটাই দুটো সারি, কারণ মূল সাইটের member পেজগুলো মডাল নয়, পাতা।
  *
- * যে ভাগে একটাও চালু উপায় নেই সেটা দেখানো হয় না — নইলে ঢুকে খালি
- * পর্দা পাওয়া যেত।
+ * মূল সাইট থেকে মাপা: সারি ১৬u উঁচু (bg neutral800, radius
+ * --radius-10, ভিতরে দুপাশে ৪.২৬৭u), মাঝে ২.১৩৩u ফাঁক, ডানে সোনালি
+ * "১০০% পর্যন্ত" আর একটা শেভরন।
+ *
+ * অটো বন্ধ থাকলে সারিটা দেখানো হয় না — নইলে ঢুকে খালি পর্দা মিলত।
  */
 const Deposit = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [methods, setMethods] = useState([]);
+  const [auto, setAuto] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
 
-    fetchDepositMethods()
-      .then((list) => alive && setMethods(list))
-      .catch(() => alive && setMethods([]))
+    Promise.all([fetchDepositMethods(), fetchAutoStatus()])
+      .then(([list, status]) => {
+        if (!alive) return;
+
+        setMethods(list);
+        setAuto(status);
+      })
+      .catch(() => {})
       .finally(() => alive && setLoading(false));
 
     return () => {
@@ -40,18 +48,42 @@ const Deposit = () => {
     };
   }, []);
 
-  const rows = GROUPS.map((group) => {
-    const inGroup = methods.filter((method) => method.group === group.key);
-
-    return { ...group, methods: inGroup, percent: groupTopPercent(inGroup) };
-  }).filter((group) => group.methods.length > 0);
+  const rows = [
+    ...(methods.length
+      ? [
+          {
+            key: "manual",
+            label: t("manualDeposit"),
+            hint: t("manualDepositHint"),
+            percent: topPercent(methods),
+            Icon: Wallet,
+            path: "/member/wallet/deposit/manual",
+          },
+        ]
+      : []),
+    ...(auto?.active
+      ? [
+          {
+            key: "auto",
+            label: t("autoDeposit"),
+            hint: t("autoDepositHint"),
+            percent: topPercent([], auto.bonuses),
+            Icon: Zap,
+            path: "/member/wallet/deposit/auto",
+          },
+        ]
+      : []),
+  ];
 
   return (
     <MemberPage title={t("deposit")} onBack={() => navigate("/")}>
       {loading ? (
         <div
           className="flex items-center justify-center text-[var(--text-muted)]"
-          style={{ gap: "calc(var(--u) * 2.133)", paddingBlock: "calc(var(--u) * 10.667)" }}
+          style={{
+            gap: "calc(var(--u) * 2.133)",
+            paddingBlock: "calc(var(--u) * 10.667)",
+          }}
         >
           <Loader2 size={18} className="animate-spin" />
           {t("loading")}
@@ -74,39 +106,52 @@ const Deposit = () => {
         </div>
       ) : (
         <div className="flex flex-col" style={{ gap: "calc(var(--u) * 2.133)" }}>
-          {rows.map((group) => (
+          {rows.map((row) => (
             <button
-              key={group.key}
+              key={row.key}
               type="button"
-              onClick={() => navigate(`/member/wallet/deposit/${group.key}`)}
+              onClick={() => navigate(row.path)}
               className="flex w-full cursor-pointer items-center justify-between bg-[var(--neutral800)] transition-colors hover:bg-[var(--neutral700)]"
               style={{
-                height: "calc(var(--u) * 16)",
+                minHeight: "calc(var(--u) * 16)",
                 borderRadius: "var(--radius-10)",
                 paddingInline: "calc(var(--u) * 4.267)",
+                paddingBlock: "calc(var(--u) * 2.133)",
               }}
             >
               <span
-                className="flex items-center font-semibold text-[var(--neutral100)]"
-                style={{
-                  gap: "calc(var(--u) * 2.133)",
-                  fontSize: "var(--fs-larger)",
-                }}
+                className="flex items-center text-start"
+                style={{ gap: "calc(var(--u) * 3.2)" }}
               >
-                <Wallet size={16} className="text-[var(--primary500)]" />
-                {t(group.labelKey)}
+                <row.Icon size={18} className="shrink-0 text-[var(--primary500)]" />
+
+                <span className="flex flex-col">
+                  <span
+                    className="font-semibold text-[var(--neutral100)]"
+                    style={{ fontSize: "var(--fs-larger)" }}
+                  >
+                    {row.label}
+                  </span>
+
+                  <span
+                    className="text-[var(--text-disabled)]"
+                    style={{ fontSize: "var(--fs-small)" }}
+                  >
+                    {row.hint}
+                  </span>
+                </span>
               </span>
 
               <span
-                className="flex items-center"
+                className="flex shrink-0 items-center"
                 style={{ gap: "calc(var(--u) * 1.6)" }}
               >
-                {group.percent > 0 && (
+                {row.percent > 0 && (
                   <span
                     className="text-[var(--primary500)]"
                     style={{ fontSize: "var(--fs-small)" }}
                   >
-                    {t("upToPercent").replace("{n}", group.percent)}
+                    {t("upToPercent").replace("{n}", row.percent)}
                   </span>
                 )}
 

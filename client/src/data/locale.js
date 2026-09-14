@@ -119,9 +119,24 @@ export const locale = {
   // ── ডিপোজিট ──
   deposit: { bn: "ডিপোজিট", en: "Deposit" },
   withdraw: { bn: "উইথড্র", en: "Withdraw" },
-  groupEwallet: { bn: "ই-ওয়ালেট", en: "E-Wallet" },
-  groupCrypto: { bn: "ক্রিপ্টো", en: "Crypto" },
-  groupBank: { bn: "ব্যাংক", en: "Bank" },
+  manualDeposit: { bn: "ম্যানুয়াল ডিপোজিট", en: "Manual Deposit" },
+  manualDepositHint: {
+    bn: "নিজে টাকা পাঠিয়ে তথ্য দিন",
+    en: "Send the money yourself, then tell us",
+  },
+  autoDeposit: { bn: "অটো ডিপোজিট", en: "Auto Deposit" },
+  autoDepositHint: {
+    bn: "পেমেন্ট পাতায় গিয়ে সাথে সাথেই",
+    en: "Pay on the gateway page, credited at once",
+  },
+  payNow: { bn: "পেমেন্ট করুন", en: "Pay now" },
+  selectBonus: { bn: "বোনাস বেছে নিন", en: "Select a bonus" },
+  noBonus: { bn: "বোনাস ছাড়া", en: "No bonus" },
+  selectMethod: { bn: "উপায় বেছে নিন", en: "Select a method" },
+  autoOffNow: {
+    bn: "অটো ডিপোজিট এখন বন্ধ আছে",
+    en: "Auto deposit is off right now",
+  },
   upToPercent: { bn: "{n}% পর্যন্ত", en: "Up to {n}%" },
   selectPromotion: { bn: "প্রমোশন সিলেক্ট করুন", en: "Select a promotion" },
   promotionLabel: { bn: "প্রমোশন", en: "Promotion" },

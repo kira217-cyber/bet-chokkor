@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  ImagePlus,
   Loader2,
   Pencil,
   Plus,
@@ -12,6 +13,15 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+/** সার্ভারে রাখা ছবির পুরো ঠিকানা */
+const imageUrl = (url) => {
+  if (!url) return "";
+
+  return url.startsWith("http") ? url : `${API_URL}${url}`;
+};
 
 const fetchMethods = async () => {
   const { data } = await api.get("/api/deposit-methods");
@@ -68,6 +78,30 @@ const DepositMethods = () => {
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState(emptyDraft);
 
+  // বাছা ফাইল আর তার পূর্বরূপ — সেভ না করা পর্যন্ত সার্ভারে যায় না
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState("");
+  const fileRef = useRef(null);
+
+  const pickLogo = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Choose an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be 5MB or smaller");
+      return;
+    }
+
+    setLogoFile(file);
+    setLogoPreview(URL.createObjectURL(file));
+  };
+
   useEffect(() => {
     let alive = true;
 
@@ -112,6 +146,9 @@ const DepositMethods = () => {
   const close = () => {
     setEditing(null);
     setDraft(emptyDraft);
+    setLogoFile(null);
+    setLogoPreview("");
+    if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleSubmit = async (event) => {
@@ -127,26 +164,35 @@ const DepositMethods = () => {
       return;
     }
 
-    const payload = {
-      methodId: draft.methodId.trim().toLowerCase(),
-      methodName: { bn: draft.nameBn, en: draft.nameEn },
-      methodType: draft.methodType,
-      group: draft.group,
-      logoUrl: draft.logoUrl,
-      minDepositAmount: Number(draft.minDepositAmount) || 0,
-      maxDepositAmount: Number(draft.maxDepositAmount) || 0,
-      sort: Number(draft.sort) || 0,
-      isActive: draft.isActive,
-      contacts: draft.contacts
-        .filter((contact) => contact.number.trim())
-        .map((contact, index) => ({
-          id: contact.id || "",
-          label: { bn: contact.labelBn, en: contact.labelEn },
-          number: contact.number.trim(),
-          isActive: contact.isActive,
-          sort: index,
-        })),
-    };
+    const contacts = draft.contacts
+      .filter((contact) => contact.number.trim())
+      .map((contact, index) => ({
+        id: contact.id || "",
+        label: { bn: contact.labelBn, en: contact.labelEn },
+        number: contact.number.trim(),
+        isActive: contact.isActive,
+        sort: index,
+      }));
+
+    // ছবির সাথে পাঠাতে multipart লাগে, তাই nested অংশগুলো JSON স্ট্রিং
+    // হয়ে যায় — সার্ভার সেগুলো খুলে নেয়
+    const payload = new FormData();
+
+    payload.append("methodId", draft.methodId.trim().toLowerCase());
+    payload.append(
+      "methodName",
+      JSON.stringify({ bn: draft.nameBn, en: draft.nameEn }),
+    );
+    payload.append("methodType", draft.methodType);
+    payload.append("group", draft.group);
+    payload.append("logoUrl", draft.logoUrl);
+    payload.append("minDepositAmount", Number(draft.minDepositAmount) || 0);
+    payload.append("maxDepositAmount", Number(draft.maxDepositAmount) || 0);
+    payload.append("sort", Number(draft.sort) || 0);
+    payload.append("isActive", draft.isActive ? "true" : "false");
+    payload.append("contacts", JSON.stringify(contacts));
+
+    if (logoFile) payload.append("logo", logoFile);
 
     try {
       setBusy("save");
@@ -360,27 +406,74 @@ const DepositMethods = () => {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
-              <div>
-                <label className="ad-label" htmlFor="dm-logo">
-                  Logo URL
-                </label>
-                <input
-                  id="dm-logo"
-                  value={draft.logoUrl}
-                  onChange={set("logoUrl")}
-                  className="ad-input"
-                />
-              </div>
+            {/* ── লোগো ── */}
+            <div className="rounded-[14px] border border-white/[0.07] p-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/[0.08] bg-black/30">
+                  {logoPreview || draft.logoUrl ? (
+                    <img
+                      src={logoPreview || imageUrl(draft.logoUrl)}
+                      alt=""
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <ImagePlus size={20} className="text-[var(--text-disabled)]" />
+                  )}
+                </span>
 
-              <label className="flex items-end gap-2 pb-3 text-[14px] text-[var(--text-secondary)]">
-                <input
-                  type="checkbox"
-                  checked={draft.isActive}
-                  onChange={set("isActive")}
-                />
-                Active
-              </label>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-bold text-[var(--neutral100)]">
+                    Logo
+                  </p>
+                  <p className="text-[12px] text-[var(--text-muted)]">
+                    png, jpg, webp, svg or gif — up to 5MB
+                  </p>
+
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="ad-btn ad-btn--ghost ad-btn--sm"
+                    >
+                      <ImagePlus size={14} />
+                      {logoPreview || draft.logoUrl ? "Change" : "Choose image"}
+                    </button>
+
+                    {(logoPreview || draft.logoUrl) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLogoFile(null);
+                          setLogoPreview("");
+                          setDraft((prev) => ({ ...prev, logoUrl: "" }));
+                          if (fileRef.current) fileRef.current.value = "";
+                        }}
+                        className="ad-btn ad-btn--danger ad-btn--sm"
+                      >
+                        <Trash2 size={14} />
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={pickLogo}
+                    className="hidden"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 text-[14px] text-[var(--text-secondary)]">
+                  <input
+                    type="checkbox"
+                    checked={draft.isActive}
+                    onChange={set("isActive")}
+                  />
+                  Active
+                </label>
+              </div>
             </div>
 
             {/* ── নম্বর ── */}
@@ -510,7 +603,16 @@ const DepositMethods = () => {
           {methods.map((method) => (
             <div key={method._id} className="ad-card">
               <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-start gap-3">
+                  {method.logoUrl && (
+                    <img
+                      src={imageUrl(method.logoUrl)}
+                      alt=""
+                      className="h-10 w-10 shrink-0 rounded-[10px] object-contain"
+                    />
+                  )}
+
+                  <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-[16px] font-extrabold text-[var(--neutral100)]">
                       {method.methodName?.en || method.methodId}
@@ -548,6 +650,7 @@ const DepositMethods = () => {
                     <span>{method.contacts?.length || 0} number(s)</span>
                     <span>Order {method.sort}</span>
                   </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
@@ -555,6 +658,8 @@ const DepositMethods = () => {
                     type="button"
                     onClick={() => {
                       setDraft(draftFrom(method));
+                      setLogoFile(null);
+                      setLogoPreview("");
                       setEditing(method._id);
                     }}
                     className="ad-btn ad-btn--ghost ad-btn--sm"

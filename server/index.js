@@ -62,6 +62,18 @@ app.use(
 
 // বড় পে-লোড দিয়ে মেমরি ভরানো ঠেকাতে সীমা
 app.use(express.json({ limit: "1mb" }));
+
+// আপলোড করা ছবি সরাসরি পরিবেশন — helmet এর crossOriginResourcePolicy
+// ডিফল্টে same-origin, তাই অন্য পোর্টের অ্যাডমিন/ক্লায়েন্ট থেকে ছবি
+// দেখা যেত না
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static("uploads"),
+);
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 // পুরো API তে সাধারণ সীমা (লগইনে আলাদা কড়া সীমা আছে)

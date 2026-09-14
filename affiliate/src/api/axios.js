@@ -10,6 +10,13 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  // ফাইল পাঠানোর সময় ব্রাউজারকেই Content-Type বসাতে দিতে হয় —
+  // multipart এর boundary ওখান থেকেই আসে, আমরা json বসিয়ে রাখলে
+  // সার্ভার ফাইলটা খুঁজেই পায় না
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+
   const token = localStorage.getItem("user_token");
 
   if (token) {

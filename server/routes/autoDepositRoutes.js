@@ -1,4 +1,5 @@
 import express from "express";
+import axios from "axios";
 
 import AutoDepositToken from "../models/AutoDepositToken.js";
 import AutoDeposit from "../models/AutoDeposit.js";
@@ -170,7 +171,7 @@ router.post("/create", protectUser, async (req, res) => {
 
     const invoiceNumber = `BC${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-    const deposit = await AutoDeposit.create({
+    await AutoDeposit.create({
       user: user._id,
       userIdText: user.userId,
       amount,
@@ -180,12 +181,70 @@ router.post("/create", protectUser, async (req, res) => {
       calc: { ...calc, affiliateDepositCommission: commission },
     });
 
-    return successResponse(
-      res,
-      "Auto deposit started",
-      { deposit: { invoiceNumber, amount, calc: deposit.calc } },
-      201,
-    );
+    // গেটওয়ে থেকে পেমেন্ট পাতার ঠিকানা নেওয়া
+    const server = (process.env.PUBLIC_SERVER_URL || "").replace(/\/+$/, "");
+    const client = (process.env.PUBLIC_CLIENT_URL || "").replace(/\/+$/, "");
+
+    try {
+      const { data } = await axios.post(
+        process.env.OPAY_URL,
+        {
+          payment_amount: amount,
+          user_identity_address: String(user._id),
+          callback_url: `${server}/api/auto-deposit/webhook`,
+          success_redirect_url: `${client}/member/profile`,
+          invoice_number: invoiceNumber,
+          checkout_items: {
+            userId: user.userId,
+            selectedBonusId: selectedBonus.bonusId || "",
+            selectedBonusTitleBn: selectedBonus.title?.bn || "",
+            selectedBonusTitleEn: selectedBonus.title?.en || "",
+          },
+        },
+        {
+          timeout: 20000,
+          headers: {
+            "X-Opay-Business-Token": String(setting.businessToken || "").trim(),
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (!data?.success || !data?.payment_page_url) {
+        // গেটওয়ে পাতা দিতে না পারলে লেনদেনটা ঝুলিয়ে রাখার মানে নেই
+        await AutoDeposit.updateOne(
+          { invoiceNumber },
+          { $set: { status: "FAILED" } },
+        );
+
+        setting.lastError = data?.message || "Gateway did not return a page";
+        await setting.save();
+
+        return errorResponse(res, "Could not start the payment", 400);
+      }
+
+      if (setting.lastError) {
+        setting.lastError = "";
+        await setting.save();
+      }
+
+      return successResponse(res, "Auto deposit started", {
+        invoiceNumber,
+        amount,
+        paymentUrl: data.payment_page_url,
+      });
+    } catch (gatewayError) {
+      await AutoDeposit.updateOne(
+        { invoiceNumber },
+        { $set: { status: "FAILED" } },
+      );
+
+      setting.lastError =
+        gatewayError?.response?.data?.message || gatewayError.message;
+      await setting.save();
+
+      return errorResponse(res, "Could not reach the payment gateway", 502);
+    }
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
