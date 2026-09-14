@@ -13,6 +13,7 @@ import {
 } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 import { num, money } from "../utils/depositCalc.js";
+import { normalizePhone } from "../utils/phone.js";
 
 const router = express.Router();
 
@@ -253,7 +254,7 @@ router.patch(
         user.userId = userId;
       }
 
-      const phone = text(body.phone).replace(/\D/g, "");
+      const phone = normalizePhone(body.phone, user.countryCode);
 
       if (phone && phone !== user.phone) {
         const taken = await User.exists({

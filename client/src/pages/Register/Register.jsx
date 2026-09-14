@@ -31,6 +31,18 @@ import {
  */
 const STEPS = ["stepContact", "stepPersonal", "stepPassword"];
 
+/**
+ * নম্বরটা ঠিক আছে কিনা।
+ *
+ * মূল সাইটের মতো ১১ ডিজিট (০১৭...) ধরা হয়, কিন্তু কেউ শুরুর শূন্য ছাড়া
+ * ১০ ডিজিট লিখলেও চলে — সার্ভার দুটোকেই একই রূপে বসায়।
+ */
+const isPhoneOk = (value) => {
+  const digits = String(value).replace(/\D/g, "").replace(/^0+/, "");
+
+  return digits.length === 10;
+};
+
 const Register = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -97,7 +109,7 @@ const Register = () => {
 
   // ধাপ অনুযায়ী কোন কোন ঘর পূরণ হলে পরের ধাপে যাওয়া যাবে
   const stepValid = [
-    form.phone.trim().length === 11,
+    isPhoneOk(form.phone),
     form.fullName.trim() && form.username.trim().length >= 4,
     form.password.trim().length >= 6 && form.password === form.confirmPassword,
   ];
@@ -334,7 +346,7 @@ const Register = () => {
             <FormField
               label={t("phoneNumber")}
               error={
-                form.phone && form.phone.length !== 11
+                form.phone && !isPhoneOk(form.phone)
                   ? t("phoneLengthError")
                   : ""
               }

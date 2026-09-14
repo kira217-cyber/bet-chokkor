@@ -1,22 +1,25 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Eye, EyeOff, LogOut, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Plus, RefreshCw } from "lucide-react";
 
 import { api } from "../../api/axios";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { selectUser } from "../../features/auth/authSelectors";
-import { logout, updateUser } from "../../features/auth/authSlice";
+import { updateUser } from "../../features/auth/authSlice";
 
 /**
  * লগইন করা অবস্থায় হেডারের ডান পাশ।
  *
  * মূল সাইট থেকে মাপা: ব্যালেন্সের বড়ি ৯.০৬৭u উঁচু (bg neutral900,
- * radius --radius-10), ভিতরে চোখ ও রিফ্রেশ আইকন, তারপর আউটলাইন
- * "উইথড্র" আর সোনালি "ডিপোজিট" বাটন — দুটোই ৯.০৬৭u উঁচু।
+ * radius --radius-10), ভিতরে চোখ ও রিফ্রেশ আইকন, তারপর সোনালি
+ * ডিপোজিট বাটন — মোবাইলে শুধু একটা "+", ডেস্কটপে পুরো লেখা, কারণ
+ * মোবাইলে জায়গা কম আর মূল সাইটও তাই করে।
  *
  * টাকার অঙ্ক লুকানোর সুইচটা মূল সাইটেই আছে — কেউ পাশে থাকলে ব্যালেন্স
  * ঢেকে রাখা যায়।
+ *
+ * লগআউট এখানে নেই — সেটা প্রোফাইল পেজে, মূল সাইটের মতোই।
  */
 const UserBar = () => {
   const { t } = useLanguage();
@@ -80,31 +83,19 @@ const UserBar = () => {
 
       <Link
         to="/member/wallet/deposit"
-        className="auth-btn auth-btn--primary flex cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
+        aria-label={t("deposit")}
+        className="auth-btn auth-btn--primary flex shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
         style={{
           height: "calc(var(--u) * 9.067)",
-          minWidth: "calc(var(--u) * 24)",
-          padding: "0 calc(var(--u) * 2.667)",
           borderRadius: "var(--radius-10)",
           fontSize: "var(--fs-larger)",
+          paddingInline: "calc(var(--u) * 2.667)",
         }}
       >
-        {t("deposit")}
+        <Plus size={16} className="lg:hidden" />
+        <span className="hidden lg:inline">{t("deposit")}</span>
       </Link>
 
-      <button
-        type="button"
-        onClick={() => dispatch(logout())}
-        aria-label={t("logout")}
-        className="flex shrink-0 cursor-pointer items-center justify-center bg-[var(--neutral800)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--neutral700)] hover:text-[var(--neutral100)]"
-        style={{
-          height: "calc(var(--u) * 9.067)",
-          width: "calc(var(--u) * 9.067)",
-          borderRadius: "var(--radius-10)",
-        }}
-      >
-        <LogOut size={15} />
-      </button>
     </>
   );
 };

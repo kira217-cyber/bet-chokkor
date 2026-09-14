@@ -51,11 +51,22 @@ export const sliders = [
   },
 ];
 
+// মূল সাইটে লগইনের পর "প্রমোশন" সরে গিয়ে "ডিপোজিট" ও "প্রোফাইল" আসে,
+// তাই দুটো আলাদা তালিকা — কোনটা দেখাবে সেটা BottomNavbar ঠিক করে
 export const bottomNavItems = [
   { key: "menu", name: { bn: "মেনু", en: "Menu" }, icon: "/assets/icons/menu/chrome/icon-menu.png", path: "/menu" },
   { key: "casino", name: { bn: "ক্যাসিনো", en: "Casino" }, icon: "/assets/icons/menu/chrome/icon-casino.png", path: "/games/casino" },
   { key: "slot", name: { bn: "স্লট", en: "Slot" }, icon: "/assets/icons/menu/chrome/icon-slot.png", path: "/games/slot" },
   { key: "promotion", name: { bn: "প্রমোশন", en: "Promotion" }, icon: "/assets/icons/menu/chrome/icon-promotion.png", path: "/promotion" },
+];
+
+/** লগইন করা অবস্থায় নিচের বার — মেনু · ক্যাসিনো · স্লট · ডিপোজিট · প্রোফাইল */
+export const bottomNavItemsAuth = [
+  { key: "menu", name: { bn: "মেনু", en: "Menu" }, icon: "/assets/icons/menu/chrome/icon-menu.png", path: "/menu" },
+  { key: "casino", name: { bn: "ক্যাসিনো", en: "Casino" }, icon: "/assets/icons/menu/chrome/icon-casino.png", path: "/games/casino" },
+  { key: "slot", name: { bn: "স্লট", en: "Slot" }, icon: "/assets/icons/menu/chrome/icon-slot.png", path: "/games/slot" },
+  { key: "deposit", name: { bn: "ডিপোজিট", en: "Deposit" }, lucide: "Wallet", path: "/member/wallet/deposit" },
+  { key: "profile", name: { bn: "প্রোফাইল", en: "Profile" }, lucide: "UserRound", path: "/member/profile" },
 ];
 
 // সাইডবারে দুটো আলাদা গ্রুপ — মাঝে বিভাজক রেখা (মূল সাইটের মতো)
@@ -142,6 +153,7 @@ export const siteData = {
   notice,
   sliders,
   bottomNavItems,
+  bottomNavItemsAuth,
   sideNavLinks,
   footerSetting,
   socialLinks,

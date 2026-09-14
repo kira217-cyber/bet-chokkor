@@ -14,6 +14,11 @@ import {
   verifyOtp,
 } from "../utils/otp.js";
 import { grantRegisterBonus } from "../utils/registerBonus.js";
+import {
+  displayPhone,
+  normalizeCountryCode,
+  normalizePhone,
+} from "../utils/phone.js";
 
 const router = express.Router();
 
@@ -76,11 +81,12 @@ const makeGamePlayName = async () => {
 const issueToken = (user) =>
   generateToken({ id: user._id, kind: "user", role: user.role });
 
-/** ০১৭****৮৯০১ — ব্যবহারকারী নিজের নম্বর চিনবেন, অন্য কেউ পড়তে পারবে না */
+/** ০১৭****৯৮৬২ — ব্যবহারকারী নিজের নম্বর চিনবেন, অন্য কেউ পড়তে পারবে না */
 const maskPhone = (phone = "") => {
-  const value = String(phone);
+  // ব্যবহারকারী যেভাবে নম্বরটা চেনেন সেভাবেই — শুরুর শূন্যসহ
+  const value = displayPhone(phone);
 
-  if (value.length < 6) return "****";
+  if (value.length < 8) return "****";
 
   return `${value.slice(0, 3)}${"*".repeat(value.length - 7)}${value.slice(-4)}`;
 };
@@ -102,9 +108,13 @@ const resolveTarget = async ({ userId, countryCode, phone }) => {
 
   if (!phone) return null;
 
-  const user = await User.findOne({ countryCode, phone });
+  // লেখার ধরন যাই হোক, খোঁজা হয় একই রূপে
+  const code = normalizeCountryCode(countryCode);
+  const local = normalizePhone(phone, countryCode);
 
-  return { user, countryCode, phone };
+  const user = await User.findOne({ countryCode: code, phone: local });
+
+  return { user, countryCode: code, phone: local };
 };
 
 /* =========================
@@ -120,8 +130,8 @@ router.post("/otp/send", otpLimiter, async (req, res) => {
     const flow = text(req.body?.flow);
     const site = req.body?.site === "affiliate" ? "affiliate" : "client";
     const userId = text(req.body?.userId);
-    const inputCode = text(req.body?.countryCode) || "+880";
-    const inputPhone = text(req.body?.phone);
+    const inputCode = normalizeCountryCode(req.body?.countryCode);
+    const inputPhone = normalizePhone(req.body?.phone, inputCode);
 
     if (!flow || (!inputPhone && !userId)) {
       return errorResponse(res, "Flow and phone are required", 400, "missingFields");
@@ -172,8 +182,8 @@ router.post("/otp/verify", otpLimiter, async (req, res) => {
   try {
     const flow = text(req.body?.flow);
     const userId = text(req.body?.userId);
-    const inputCode = text(req.body?.countryCode) || "+880";
-    const inputPhone = text(req.body?.phone);
+    const inputCode = normalizeCountryCode(req.body?.countryCode);
+    const inputPhone = normalizePhone(req.body?.phone, inputCode);
     const otp = text(req.body?.otp);
 
     if (!flow || (!inputPhone && !userId) || !otp) {
@@ -209,8 +219,8 @@ router.post("/register", authLimiter, async (req, res) => {
   try {
     const userId = text(req.body?.userId).toLowerCase();
     const password = text(req.body?.password);
-    const countryCode = text(req.body?.countryCode) || "+880";
-    const phone = text(req.body?.phone);
+    const countryCode = normalizeCountryCode(req.body?.countryCode);
+    const phone = normalizePhone(req.body?.phone, countryCode);
     const referralCode = text(req.body?.referralCode).toUpperCase();
 
     if (!userId || !password || !phone) {
@@ -394,8 +404,8 @@ router.post("/login", authLimiter, async (req, res) => {
 router.post("/forgot-password", authLimiter, async (req, res) => {
   try {
     const userId = text(req.body?.userId);
-    const inputCode = text(req.body?.countryCode) || "+880";
-    const inputPhone = text(req.body?.phone);
+    const inputCode = normalizeCountryCode(req.body?.countryCode);
+    const inputPhone = normalizePhone(req.body?.phone, inputCode);
     const newPassword = text(req.body?.newPassword);
 
     if ((!inputPhone && !userId) || !newPassword) {

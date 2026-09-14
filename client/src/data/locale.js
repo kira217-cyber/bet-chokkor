@@ -155,6 +155,20 @@ export const locale = {
     en: "Enter an amount within the limit",
   },
 
+  // ── প্রোফাইল ──
+  profileTitle: { bn: "প্রোফাইল", en: "Profile" },
+  balanceLabel: { bn: "আপনার ব্যালেন্স", en: "Your balance" },
+  runningTurnover: { bn: "চলতি টার্নওভার", en: "Running turnover" },
+  recentDeposits: { bn: "সাম্প্রতিক ডিপোজিট", en: "Recent deposits" },
+  noDepositYet: { bn: "এখনো কোনো ডিপোজিট নেই", en: "No deposit yet" },
+  logoutConfirm: {
+    bn: "আপনি কি লগআউট করতে চান?",
+    en: "Do you want to log out?",
+  },
+  status_pending: { bn: "অপেক্ষমাণ", en: "Pending" },
+  status_approved: { bn: "অনুমোদিত", en: "Approved" },
+  status_rejected: { bn: "বাতিল", en: "Rejected" },
+
   // ── সার্ভারের ভুলের বার্তা (code → লেখা) ──
   errMissingFields: {
     bn: "সব ঘর পূরণ করুন",

@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import PrivateRoute from "../PrivateRoute/PrivateRoute";
 import Deposit from "../pages/Deposit/Deposit";
 import DepositGroup from "../pages/Deposit/DepositGroup";
+import Profile from "../pages/Member/Profile";
 
 export const routes = createBrowserRouter([
   {
@@ -32,6 +33,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Deposit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/profile",
+        element: (
+          <PrivateRoute>
+            <Profile />
           </PrivateRoute>
         ),
       },

@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import OtpSetting from "../models/OtpSetting.js";
+import { buildSmsPhone, normalizeCountryCode, normalizePhone } from "./phone.js";
 
 /**
  * OTP পাঠানো ও মেলানো।
@@ -21,12 +22,16 @@ const MAX_TRIES = 5;
 
 const store = new Map();
 
+/**
+ * মেমরির চাবি।
+ *
+ * নম্বরটা normalise করেই বসে, তাই কেউ 01755909862 দিয়ে কোড চেয়ে
+ * 1755909862 দিয়ে মেলাতে চাইলেও একই ঘরে গিয়ে পড়ে।
+ */
 const keyOf = (flow, countryCode, phone) =>
-  `${flow}:${String(countryCode || "").trim()}:${String(phone || "").trim()}`;
+  `${flow}:${normalizeCountryCode(countryCode)}:${normalizePhone(phone, countryCode)}`;
 
-/** o-sms নম্বর চায় দেশের কোডসহ, কিন্তু + ছাড়া */
-export const buildSmsPhone = (countryCode = "", phone = "") =>
-  `${String(countryCode).replace(/\D/g, "")}${String(phone).replace(/\D/g, "")}`;
+export { buildSmsPhone };
 
 /**
  * এই ফ্লোতে OTP লাগবে কিনা।
