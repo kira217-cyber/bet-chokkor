@@ -15,6 +15,35 @@ export const navItems = [
   { key: "dashboard", path: "/", label: "Dashboard", icon: "LayoutDashboard", perm: "dashboard" },
   { key: "admins", path: "/admins", label: "Admin Accounts", icon: "UserCog", motherOnly: true },
 
+  {
+    key: "user",
+    label: "User",
+    icon: "Users",
+    children: [
+      {
+        key: "users",
+        path: "/users",
+        label: "Users",
+        icon: "Users",
+        perm: "users",
+      },
+      {
+        key: "affiliates",
+        path: "/affiliates",
+        label: "Affiliates",
+        icon: "UserRoundCheck",
+        perm: "affiliates",
+      },
+      {
+        key: "bulk-adjustment",
+        path: "/bulk-adjustment",
+        label: "Bulk Adjustment",
+        icon: "Scale",
+        motherOnly: true,
+      },
+    ],
+  },
+
   { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
 
   { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
@@ -104,6 +133,8 @@ export const navItems = [
 /** CreateAdmin পেজে দেখানো পারমিশন তালিকা */
 export const allPermissions = [
   { key: "dashboard", label: "Dashboard", path: "/" },
+  { key: "users", label: "Users", path: "/users" },
+  { key: "affiliates", label: "Affiliates", path: "/affiliates" },
   { key: "manual-deposit", label: "Manual Deposit", path: "/manual-deposit" },
   { key: "deposit-requests", label: "Deposit Requests", path: "/deposit-requests" },
   {

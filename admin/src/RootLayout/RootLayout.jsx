@@ -16,6 +16,9 @@ import {
   Layers,
   BadgeDollarSign,
   History,
+  Users,
+  UserRoundCheck,
+  Scale,
   ChevronDown,
   User,
   Menu,
@@ -43,6 +46,9 @@ const ICONS = {
   Layers,
   BadgeDollarSign,
   History,
+  Users,
+  UserRoundCheck,
+  Scale,
   User,
 };
 

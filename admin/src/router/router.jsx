@@ -9,6 +9,9 @@ import Admins from "../pages/Admins/Admins";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
 import Maintenance from "../pages/Maintenance/Maintenance";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
+import Users from "../pages/Users/Users";
+import Affiliates from "../pages/Users/Affiliates";
+import BulkAdjustment from "../pages/BulkAdjustment/BulkAdjustment";
 import RegisterBonus from "../pages/RegisterBonus/RegisterBonus";
 import DepositMethods from "../pages/DepositMethods/DepositMethods";
 import DepositField from "../pages/DepositField/DepositField";
@@ -47,6 +50,16 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <Maintenance />
+          </PrivateRoute>
+        ),
+      },
+      { path: "users", element: <Users /> },
+      { path: "affiliates", element: <Affiliates /> },
+      {
+        path: "bulk-adjustment",
+        element: (
+          <PrivateRoute motherOnly>
+            <BulkAdjustment />
           </PrivateRoute>
         ),
       },

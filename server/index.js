@@ -19,6 +19,8 @@ import depositRequestRoutes from "./routes/depositRequestRoutes.js";
 import adminManualDepositRoutes from "./routes/adminManualDepositRoutes.js";
 import autoDepositRoutes from "./routes/autoDepositRoutes.js";
 import turnoverRoutes from "./routes/turnoverRoutes.js";
+import adminUserRoutes from "./routes/adminUserRoutes.js";
+import bulkAdjustmentRoutes from "./routes/bulkAdjustmentRoutes.js";
 
 dotenv.config();
 
@@ -95,6 +97,8 @@ app.use("/api/deposit-requests", depositRequestRoutes);
 app.use("/api/manual-deposit", adminManualDepositRoutes);
 app.use("/api/auto-deposit", autoDepositRoutes);
 app.use("/api/turnover", turnoverRoutes);
+app.use("/api/admin/manage", adminUserRoutes);
+app.use("/api/admin/bulk-adjustment", bulkAdjustmentRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

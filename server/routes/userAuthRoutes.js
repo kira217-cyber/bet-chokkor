@@ -207,7 +207,7 @@ router.post("/otp/verify", otpLimiter, async (req, res) => {
 
 router.post("/register", authLimiter, async (req, res) => {
   try {
-    const userId = text(req.body?.userId);
+    const userId = text(req.body?.userId).toLowerCase();
     const password = text(req.body?.password);
     const countryCode = text(req.body?.countryCode) || "+880";
     const phone = text(req.body?.phone);
@@ -219,6 +219,17 @@ router.post("/register", authLimiter, async (req, res) => {
 
     if (userId.length < 4 || userId.length > 15) {
       return errorResponse(res, "Username must be 4 to 15 characters", 400, "usernameLength");
+    }
+
+    // অ্যাডমিনের এডিট পেজেও ঠিক এই নিয়ম — নইলে এখানে বানানো নাম
+    // ওখানে বদলাতে গিয়ে আটকে যেত
+    if (!/^[a-z0-9]+$/.test(userId)) {
+      return errorResponse(
+        res,
+        "Username allows only letters and numbers",
+        400,
+        "usernameChars",
+      );
     }
 
     if (password.length < MIN_PASSWORD) {
@@ -302,7 +313,7 @@ router.post("/register", authLimiter, async (req, res) => {
 
 router.post("/login", authLimiter, async (req, res) => {
   try {
-    const userId = text(req.body?.userId);
+    const userId = text(req.body?.userId).toLowerCase();
     const password = text(req.body?.password);
 
     if (!userId || !password) {

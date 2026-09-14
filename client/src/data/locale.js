@@ -184,6 +184,10 @@ export const locale = {
     bn: "এই ব্যবহারকারীর নামটি নেওয়া হয়ে গেছে",
     en: "This username is taken",
   },
+  errUsernameChars: {
+    bn: "ব্যবহারকারীর নামে শুধু ইংরেজি অক্ষর ও সংখ্যা চলবে",
+    en: "Username allows only letters and numbers",
+  },
   errUsernameLength: {
     bn: "ব্যবহারকারীর নাম ৪ থেকে ১৫ অক্ষরের হতে হবে",
     en: "Username must be 4 to 15 characters",
