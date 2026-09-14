@@ -9,7 +9,9 @@ import {
   selectGlobalLoaded,
 } from "../../features/global/globalSelectors";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
+import { selectIsAuth } from "../../features/auth/authSelectors";
 import LanguageMenu from "../LanguageMenu/LanguageMenu";
+import UserBar from "./UserBar";
 
 // ডেস্কটপ হেডারে লোগোর পাশে যে দুটো কুইক-লিংক দেখানো হয়
 const QUICK_LINK_KEYS = ["slot", "casino"];
@@ -30,6 +32,7 @@ const Navber = ({ setDesktopOpen }) => {
   const siteIdentify = useSelector(selectSiteIdentify);
   const loaded = useSelector(selectGlobalLoaded);
   const categories = useSelector(selectGameCategories);
+  const isAuth = useSelector(selectIsAuth);
 
   const quickLinks = QUICK_LINK_KEYS.map((key) =>
     categories.find((item) => item.key === key),
@@ -123,8 +126,15 @@ const Navber = ({ setDesktopOpen }) => {
           className="flex items-center"
           style={{ gap: "calc(var(--u) * 2.133)" }}
         >
-          {authButton("/login", t("login"), "secondary")}
-          {authButton("/register", t("signup"), "primary")}
+          {/* লগইন করা থাকলে লগইন/সাইন আপের বদলে ব্যালেন্স ও ডিপোজিট */}
+          {isAuth ? (
+            <UserBar />
+          ) : (
+            <>
+              {authButton("/login", t("login"), "secondary")}
+              {authButton("/register", t("signup"), "primary")}
+            </>
+          )}
 
           <button
             type="button"

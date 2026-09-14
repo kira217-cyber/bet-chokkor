@@ -6,6 +6,9 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import PrivateRoute from "../PrivateRoute/PrivateRoute";
+import Deposit from "../pages/Deposit/Deposit";
+import DepositGroup from "../pages/Deposit/DepositGroup";
 
 export const routes = createBrowserRouter([
   {
@@ -21,6 +24,24 @@ export const routes = createBrowserRouter([
       {
         path: "games/:category",
         element: <Games />,
+      },
+
+      // লগইন ছাড়া member পেজে ঢোকা যায় না — PrivateRoute হোমে ফেরত পাঠায়
+      {
+        path: "member/wallet/deposit",
+        element: (
+          <PrivateRoute>
+            <Deposit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/wallet/deposit/:group",
+        element: (
+          <PrivateRoute>
+            <DepositGroup />
+          </PrivateRoute>
+        ),
       },
     ],
   },

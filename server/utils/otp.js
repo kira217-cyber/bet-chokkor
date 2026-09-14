@@ -47,7 +47,7 @@ export const sendOtp = async ({ site, flow, countryCode, phone }) => {
   const setting = await OtpSetting.current();
 
   if (!setting.isActive || !setting.apiKey) {
-    return { ok: false, message: "OTP service is not configured" };
+    return { ok: false, code: "otpNotConfigured", message: "OTP service is not configured" };
   }
 
   const key = keyOf(flow, countryCode, phone);
@@ -58,7 +58,7 @@ export const sendOtp = async ({ site, flow, countryCode, phone }) => {
       (RESEND_GAP_MS - (Date.now() - existing.lastSentAt)) / 1000,
     );
 
-    return { ok: false, message: `Please wait ${wait}s before asking again` };
+    return { ok: false, code: "otpWait", message: `Please wait ${wait}s before asking again` };
   }
 
   try {
@@ -75,7 +75,7 @@ export const sendOtp = async ({ site, flow, countryCode, phone }) => {
     );
 
     if (!data?.success || !data?.otp) {
-      return { ok: false, message: data?.message || "OTP send failed" };
+      return { ok: false, code: "otpSendFailed", message: data?.message || "OTP send failed" };
     }
 
     store.set(key, {
@@ -101,11 +101,13 @@ export const verifyOtp = ({ flow, countryCode, phone, otp }) => {
   const key = keyOf(flow, countryCode, phone);
   const entry = store.get(key);
 
-  if (!entry) return { ok: false, message: "Please ask for an OTP first" };
+  if (!entry) {
+    return { ok: false, code: "otpNotAsked", message: "Please ask for an OTP first" };
+  }
 
   if (Date.now() > entry.expiresAt) {
     store.delete(key);
-    return { ok: false, message: "OTP has expired" };
+    return { ok: false, code: "otpExpired", message: "OTP has expired" };
   }
 
   entry.tries += 1;
@@ -113,11 +115,11 @@ export const verifyOtp = ({ flow, countryCode, phone, otp }) => {
   // বারবার আন্দাজ করা ঠেকাতে
   if (entry.tries > MAX_TRIES) {
     store.delete(key);
-    return { ok: false, message: "Too many wrong tries, ask for a new OTP" };
+    return { ok: false, code: "otpTooManyTries", message: "Too many wrong tries, ask for a new OTP" };
   }
 
   if (String(otp || "").trim() !== entry.otp) {
-    return { ok: false, message: "OTP did not match" };
+    return { ok: false, code: "otpWrong", message: "OTP did not match" };
   }
 
   entry.verified = true;

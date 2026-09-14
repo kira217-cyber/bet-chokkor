@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Eye, EyeOff, X } from "lucide-react";
 
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
 import FormField from "../../components/FormField/FormField";
+import FormAlert from "../../components/FormAlert/FormAlert";
+import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
+import { setCredentials } from "../../features/auth/authSlice";
+import { authError, loginUser, sendOtp } from "../../features/auth/authApi";
 
 /**
  * লগইন পেজ।
@@ -13,15 +18,82 @@ import { useLanguage } from "../../Context/LanguageProvider";
  * উঁচু (bg neutral800, radius --radius-10), লিংক সারি ৮.৫৩u,
  * বাটন ১৩.৩৩u উঁচু / --fs-larger / ৭০০।
  *
- * সাবমিট এখনো স্ট্যাটিক — server যুক্ত হলে authSlice এর thunk বসবে।
+ * অ্যাডমিন লগইনে OTP চালু রাখলে পাসওয়ার্ডের পর একটা কোডের ধাপ আসে;
+ * বন্ধ থাকলে সরাসরি ঢুকে যায়। ভুল হলে মূল সাইটের মতো ফর্মের উপরেই
+ * ইনলাইন ব্যানারে দেখায়, মডালে নয়।
  */
 const Login = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
-  const canSubmit = form.username.trim() && form.password.trim();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [otpStep, setOtpStep] = useState(null);
+
+  const canSubmit = form.username.trim() && form.password.trim() && !busy;
+
+  /** পাসওয়ার্ড ঠিক থাকলে টোকেন বসিয়ে হোমে */
+  const finish = (data) => {
+    dispatch(setCredentials({ user: data.user, token: data.token }));
+    navigate("/", { replace: true });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!canSubmit) return;
+
+    try {
+      setBusy(true);
+      setError("");
+
+      const data = await loginUser({
+        userId: form.username.trim(),
+        password: form.password,
+      });
+
+      // OTP লাগলে সার্ভার টোকেন দেয় না, কোড চাওয়ার কথা বলে
+      if (data.otpRequired) {
+        const sent = await sendOtp({
+          flow: "login",
+          site: "client",
+          userId: form.username.trim(),
+        });
+
+        setOtpStep({ maskedPhone: sent.maskedPhone });
+        return;
+      }
+
+      finish(data);
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** কোড ঠিক হলে একই পাসওয়ার্ড দিয়ে আবার — এবার টোকেন আসে */
+  const handleVerified = async () => {
+    try {
+      setBusy(true);
+
+      finish(
+        await loginUser({
+          userId: form.username.trim(),
+          password: form.password,
+        }),
+      );
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+      setOtpStep(null);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const update = (key) => (event) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
@@ -56,13 +128,28 @@ const Login = () => {
     </button>
   );
 
+  if (otpStep) {
+    return (
+      <AuthLayout active="login">
+        <OtpStep
+          flow="login"
+          userId={form.username.trim()}
+          maskedPhone={otpStep.maskedPhone}
+          onVerified={handleVerified}
+        />
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout active="login">
       <form
         className="flex flex-col"
         style={{ gap: "calc(var(--u) * 4.267)" }}
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={handleSubmit}
       >
+        <FormAlert>{error}</FormAlert>
+
         <FormField label={t("username")}>
           <div className={inputBox} style={inputBoxStyle}>
             <input
@@ -130,7 +217,7 @@ const Login = () => {
             color: "var(--btn-primary-txt)",
           }}
         >
-          {t("login")}
+          {busy ? t("loading") : t("login")}
         </button>
       </form>
     </AuthLayout>

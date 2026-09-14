@@ -29,7 +29,12 @@ const turnOverSchema = new mongoose.Schema(
 
     sourceType: {
       type: String,
-      enum: ["register-bonus", "deposit", "auto-deposit", "manual-deposit"],
+      enum: [
+        "register-bonus",
+        "deposit",
+        "auto-deposit",
+        "admin-manual-deposit",
+      ],
       required: true,
       index: true,
     },
@@ -50,6 +55,29 @@ const turnOverSchema = new mongoose.Schema(
 
     eligibleProviders: { type: [EligibleProviderSchema], default: [] },
 
+    /**
+     * eligibleProviders এর প্রতিটা প্রোভাইডারের বাঁধা অংশে এ পর্যন্ত কত
+     * জমেছে। এর বাইরের অগ্রগতি এসেছে "যে কোনো প্রোভাইডার" অংশ থেকে।
+     * তাই একটা প্রোভাইডারের ন্যূনতম অংশ আলাদা করে গোনা ও থামানো যায়।
+     */
+    providerProgress: {
+      type: [
+        new mongoose.Schema(
+          {
+            providerCode: {
+              type: String,
+              required: true,
+              trim: true,
+              uppercase: true,
+            },
+            progress: { type: Number, default: 0, min: 0 },
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
+
     status: {
       type: String,
       enum: ["running", "completed", "cancelled"],
@@ -60,6 +88,13 @@ const turnOverSchema = new mongoose.Schema(
     completedAt: { type: Date, default: null },
   },
   { timestamps: true },
+);
+
+// একই উৎস থেকে দুবার টার্নওভার তৈরি হতে পারবে না — অনুমোদন দুবার
+// চললেও (রিট্রাই, দুই ট্যাব) হিসাব একবারই বসে
+turnOverSchema.index(
+  { user: 1, sourceType: 1, sourceId: 1 },
+  { unique: true, partialFilterExpression: { sourceId: { $type: "objectId" } } },
 );
 
 turnOverSchema.index({ user: 1, status: 1 });

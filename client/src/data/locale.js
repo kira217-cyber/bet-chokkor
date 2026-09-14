@@ -74,6 +74,165 @@ export const locale = {
   continue: { bn: "চালিয়ে যান", en: "Continue" },
   register: { bn: "রেজিস্টার করুন", en: "Register" },
 
+  // ── OTP ও পাসওয়ার্ড পুনরুদ্ধার ──
+  otpTitle: { bn: "যাচাইকরণ কোড", en: "Verification code" },
+  otpSentTo: { bn: "কোড পাঠানো হয়েছে", en: "Code sent to" },
+  otpPlaceholder: { bn: "৬ সংখ্যার কোড", en: "6 digit code" },
+  resendOtp: { bn: "কোড আবার পাঠান", en: "Resend code" },
+  resendIn: { bn: "আবার পাঠাতে পারবেন", en: "Resend in" },
+  seconds: { bn: "সেকেন্ড", en: "s" },
+  verify: { bn: "যাচাই করুন", en: "Verify" },
+  newPassword: { bn: "নতুন পাসওয়ার্ড", en: "New password" },
+  newPasswordPlaceholder: {
+    bn: "নতুন পাসওয়ার্ড লিখুন",
+    en: "Enter a new password",
+  },
+  savePassword: { bn: "পাসওয়ার্ড সেভ করুন", en: "Save password" },
+  passwordChanged: {
+    bn: "পাসওয়ার্ড বদলে গেছে। এখন লগইন করুন।",
+    en: "Password changed. Please log in.",
+  },
+  passwordTooShort: {
+    bn: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+    en: "Password must be at least 6 characters",
+  },
+
+  // ── রেজিস্টার বোনাস ও ফল ──
+  referralCode: { bn: "রেফারেল কোড", en: "Referral code" },
+  referralCodePlaceholder: {
+    bn: "থাকলে লিখুন (ঐচ্ছিক)",
+    en: "If you have one (optional)",
+  },
+  registerBonusNote: {
+    bn: "রেজিস্টার করলেই বোনাস",
+    en: "Bonus on sign up",
+  },
+  registerDone: {
+    bn: "অ্যাকাউন্ট তৈরি হয়েছে",
+    en: "Your account is ready",
+  },
+  somethingWrong: {
+    bn: "কিছু একটা ভুল হয়েছে, আবার চেষ্টা করুন",
+    en: "Something went wrong, please try again",
+  },
+
+  // ── ডিপোজিট ──
+  deposit: { bn: "ডিপোজিট", en: "Deposit" },
+  withdraw: { bn: "উইথড্র", en: "Withdraw" },
+  groupEwallet: { bn: "ই-ওয়ালেট", en: "E-Wallet" },
+  groupCrypto: { bn: "ক্রিপ্টো", en: "Crypto" },
+  groupBank: { bn: "ব্যাংক", en: "Bank" },
+  upToPercent: { bn: "{n}% পর্যন্ত", en: "Up to {n}%" },
+  selectPromotion: { bn: "প্রমোশন সিলেক্ট করুন", en: "Select a promotion" },
+  promotionLabel: { bn: "প্রমোশন", en: "Promotion" },
+  noPromotion: { bn: "সাধারণ", en: "Normal" },
+  selectPayment: { bn: "পেমেন্ট নির্বাচন করুন", en: "Select a payment" },
+  selectChannel: { bn: "চ্যানেল সিলেক্ট করুন", en: "Select a channel" },
+  depositChannel: { bn: "ডিপোজিট চ্যানেল", en: "Deposit channel" },
+  depositAmount: { bn: "ডিপোজিটের পরিমাণ", en: "Deposit amount" },
+  amountPlaceholder: { bn: "টাকার পরিমাণ লিখুন", en: "Enter an amount" },
+  minMax: { bn: "সর্বনিম্ন / সর্বোচ্চ", en: "Min / Max" },
+  bonusLine: { bn: "বোনাস", en: "Bonus" },
+  totalGet: { bn: "মোট পাবেন", en: "You get" },
+  turnoverLine: { bn: "টার্নওভার", en: "Turnover" },
+  sendMoneyTo: { bn: "এই নম্বরে টাকা পাঠান", en: "Send the money to" },
+  copied: { bn: "কপি হয়েছে", en: "Copied" },
+  submitDeposit: { bn: "জমা দিন", en: "Submit" },
+  depositDone: {
+    bn: "আপনার ডিপোজিট জমা হয়েছে",
+    en: "Your deposit has been submitted",
+  },
+  depositDoneText: {
+    bn: "অ্যাডমিন মিলিয়ে দেখে অনুমোদন দিলে টাকা আপনার ব্যালেন্সে যোগ হবে।",
+    en: "Once an admin checks it, the money will be added to your balance.",
+  },
+  noMethodYet: {
+    bn: "এখন কোনো ডিপোজিটের উপায় চালু নেই",
+    en: "No deposit method is open right now",
+  },
+  amountRange: {
+    bn: "টাকার অঙ্কটা সীমার ভিতরে দিন",
+    en: "Enter an amount within the limit",
+  },
+
+  // ── সার্ভারের ভুলের বার্তা (code → লেখা) ──
+  errMissingFields: {
+    bn: "সব ঘর পূরণ করুন",
+    en: "Please fill in every field",
+  },
+  errBadLogin: {
+    bn: "ব্যবহারকারীর নাম বা পাসওয়ার্ড ঠিক নয়",
+    en: "Username or password is not correct",
+  },
+  errAccountLocked: {
+    bn: "অনেকবার ভুল হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
+    en: "Too many wrong tries. Please try again in a little while.",
+  },
+  errAccountDisabled: {
+    bn: "এই অ্যাকাউন্টটি বন্ধ করা আছে",
+    en: "This account is disabled",
+  },
+  errNoAccount: {
+    bn: "এই নামে কোনো অ্যাকাউন্ট নেই",
+    en: "No account found",
+  },
+  errAccountExists: {
+    bn: "এই অ্যাকাউন্টটি আগে থেকেই আছে",
+    en: "This account already exists",
+  },
+  errUsernameTaken: {
+    bn: "এই ব্যবহারকারীর নামটি নেওয়া হয়ে গেছে",
+    en: "This username is taken",
+  },
+  errUsernameLength: {
+    bn: "ব্যবহারকারীর নাম ৪ থেকে ১৫ অক্ষরের হতে হবে",
+    en: "Username must be 4 to 15 characters",
+  },
+  errPhoneTaken: {
+    bn: "এই নম্বরে আগেই একটা অ্যাকাউন্ট আছে",
+    en: "This number already has an account",
+  },
+  errPasswordTooShort: {
+    bn: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+    en: "Password must be at least 6 characters",
+  },
+  errBadReferral: {
+    bn: "রেফারেল কোডটি ঠিক নয়",
+    en: "Referral code is not valid",
+  },
+  errOtpNotConfigured: {
+    bn: "এখন কোড পাঠানো যাচ্ছে না, একটু পরে চেষ্টা করুন",
+    en: "Codes cannot be sent right now, please try later",
+  },
+  errOtpWait: {
+    bn: "একটু পরে আবার কোড চান",
+    en: "Please wait a moment before asking again",
+  },
+  errOtpSendFailed: {
+    bn: "কোড পাঠানো যায়নি, আবার চেষ্টা করুন",
+    en: "The code could not be sent, please try again",
+  },
+  errOtpNotAsked: {
+    bn: "আগে কোড চেয়ে নিন",
+    en: "Please ask for a code first",
+  },
+  errOtpExpired: {
+    bn: "কোডের সময় শেষ, নতুন কোড নিন",
+    en: "The code has expired, ask for a new one",
+  },
+  errOtpWrong: {
+    bn: "কোডটি মিলছে না",
+    en: "The code did not match",
+  },
+  errOtpTooManyTries: {
+    bn: "অনেকবার ভুল হয়েছে, নতুন কোড নিন",
+    en: "Too many wrong tries, ask for a new code",
+  },
+  errOtpNotVerified: {
+    bn: "আগে কোডটি যাচাই করুন",
+    en: "Please verify the code first",
+  },
+
   // ── রক্ষণাবেক্ষণ ──
   maintenanceTitle: {
     bn: "সাইট রক্ষণাবেক্ষণে আছে",

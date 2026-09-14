@@ -11,6 +11,14 @@ import gameApiKeyRoutes from "./routes/gameApiKeyRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import otpSettingRoutes from "./routes/otpSettingRoutes.js";
 import userAuthRoutes from "./routes/userAuthRoutes.js";
+import registerBonusRoutes from "./routes/registerBonusRoutes.js";
+import depositMethodRoutes from "./routes/depositMethodRoutes.js";
+import depositFieldRoutes from "./routes/depositFieldRoutes.js";
+import depositBonusTurnoverRoutes from "./routes/depositBonusTurnoverRoutes.js";
+import depositRequestRoutes from "./routes/depositRequestRoutes.js";
+import adminManualDepositRoutes from "./routes/adminManualDepositRoutes.js";
+import autoDepositRoutes from "./routes/autoDepositRoutes.js";
+import turnoverRoutes from "./routes/turnoverRoutes.js";
 
 dotenv.config();
 
@@ -79,6 +87,14 @@ app.use("/api/admin/game-api-key", gameApiKeyRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/otp-setting", otpSettingRoutes);
 app.use("/api/user", userAuthRoutes);
+app.use("/api/register-bonus", registerBonusRoutes);
+app.use("/api/deposit-methods", depositMethodRoutes);
+app.use("/api/deposit-fields", depositFieldRoutes);
+app.use("/api/deposit-bonus-turnover", depositBonusTurnoverRoutes);
+app.use("/api/deposit-requests", depositRequestRoutes);
+app.use("/api/manual-deposit", adminManualDepositRoutes);
+app.use("/api/auto-deposit", autoDepositRoutes);
+app.use("/api/turnover", turnoverRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -8,6 +8,16 @@ import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
 import Maintenance from "../pages/Maintenance/Maintenance";
+import OtpSetting from "../pages/OtpSetting/OtpSetting";
+import RegisterBonus from "../pages/RegisterBonus/RegisterBonus";
+import DepositMethods from "../pages/DepositMethods/DepositMethods";
+import DepositField from "../pages/DepositField/DepositField";
+import DepositBonusTurnover from "../pages/DepositBonusTurnover/DepositBonusTurnover";
+import ManualDeposit from "../pages/ManualDeposit/ManualDeposit";
+import DepositRequests from "../pages/DepositRequests/DepositRequests";
+import AutoDeposit from "../pages/AutoDeposit/AutoDeposit";
+import AutoDepositHistory from "../pages/AutoDepositHistory/AutoDepositHistory";
+import TurnoverHistory from "../pages/TurnoverHistory/TurnoverHistory";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
 export const routes = createBrowserRouter([
@@ -40,6 +50,58 @@ export const routes = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: "otp-setting",
+        element: (
+          <PrivateRoute motherOnly>
+            <OtpSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "register-bonus",
+        element: (
+          <PrivateRoute motherOnly>
+            <RegisterBonus />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "deposit-methods",
+        element: (
+          <PrivateRoute motherOnly>
+            <DepositMethods />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "deposit-field",
+        element: (
+          <PrivateRoute motherOnly>
+            <DepositField />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "deposit-bonus-turnover",
+        element: (
+          <PrivateRoute motherOnly>
+            <DepositBonusTurnover />
+          </PrivateRoute>
+        ),
+      },
+      { path: "manual-deposit", element: <ManualDeposit /> },
+      { path: "deposit-requests", element: <DepositRequests /> },
+      {
+        path: "auto-deposit",
+        element: (
+          <PrivateRoute motherOnly>
+            <AutoDeposit />
+          </PrivateRoute>
+        ),
+      },
+      { path: "auto-deposit-history", element: <AutoDepositHistory /> },
+      { path: "turnover-history", element: <TurnoverHistory /> },
       {
         path: "game-api-key",
         element: (

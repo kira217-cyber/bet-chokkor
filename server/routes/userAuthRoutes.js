@@ -76,6 +76,37 @@ const makeGamePlayName = async () => {
 const issueToken = (user) =>
   generateToken({ id: user._id, kind: "user", role: user.role });
 
+/** ০১৭****৮৯০১ — ব্যবহারকারী নিজের নম্বর চিনবেন, অন্য কেউ পড়তে পারবে না */
+const maskPhone = (phone = "") => {
+  const value = String(phone);
+
+  if (value.length < 6) return "****";
+
+  return `${value.slice(0, 3)}${"*".repeat(value.length - 7)}${value.slice(-4)}`;
+};
+
+/**
+ * ফোন নম্বর বের করা — সরাসরি দেওয়া নম্বর, নয়তো ইউজারনেম থেকে।
+ *
+ * পাসওয়ার্ড ভুলে গেলে মূল সাইট ইউজারনেম চায়, নম্বর নয়। তাই নম্বরটা
+ * সার্ভারই খুঁজে নেয় — ক্লায়েন্টে কখনো পুরো নম্বর যায় না।
+ */
+const resolveTarget = async ({ userId, countryCode, phone }) => {
+  if (userId) {
+    const user = await User.findOne({ userId });
+
+    if (!user) return null;
+
+    return { user, countryCode: user.countryCode, phone: user.phone };
+  }
+
+  if (!phone) return null;
+
+  const user = await User.findOne({ countryCode, phone });
+
+  return { user, countryCode, phone };
+};
+
 /* =========================
    OTP
    ========================= */
@@ -88,35 +119,50 @@ router.post("/otp/send", otpLimiter, async (req, res) => {
   try {
     const flow = text(req.body?.flow);
     const site = req.body?.site === "affiliate" ? "affiliate" : "client";
-    const countryCode = text(req.body?.countryCode) || "+880";
-    const phone = text(req.body?.phone);
+    const userId = text(req.body?.userId);
+    const inputCode = text(req.body?.countryCode) || "+880";
+    const inputPhone = text(req.body?.phone);
 
-    if (!flow || !phone) {
-      return errorResponse(res, "Flow and phone are required", 400);
+    if (!flow || (!inputPhone && !userId)) {
+      return errorResponse(res, "Flow and phone are required", 400, "missingFields");
     }
+
+    const target = await resolveTarget({
+      userId,
+      countryCode: inputCode,
+      phone: inputPhone,
+    });
+
+    // অ্যাকাউন্ট আছে কিনা সেটা OTP চালু-বন্ধের আগেই দেখা হয় — নইলে OTP
+    // বন্ধ থাকলে ভুল ইউজারনেমও পরের ধাপে চলে যেত
+    if (flow === "register") {
+      if (target?.user) {
+        return errorResponse(res, "This number already has an account", 409, "phoneTaken");
+      }
+    } else if (!target?.user) {
+      return errorResponse(res, "No account found", 404, "noAccount");
+    }
+
+    const countryCode = target?.countryCode || inputCode;
+    const phone = target?.phone || inputPhone;
 
     if (!(await isOtpRequired(site, flow))) {
       return successResponse(res, "OTP is not needed for this step", {
         required: false,
+        maskedPhone: maskPhone(phone),
       });
-    }
-
-    // রেজিস্টারে নম্বরটা নতুন হতে হবে, বাকি ফ্লোতে চেনা হতে হবে
-    const exists = await User.exists({ countryCode, phone });
-
-    if (flow === "register" && exists) {
-      return errorResponse(res, "This number already has an account", 409);
-    }
-
-    if (flow !== "register" && !exists) {
-      return errorResponse(res, "No account found with this number", 404);
     }
 
     const result = await sendOtp({ site, flow, countryCode, phone });
 
-    if (!result.ok) return errorResponse(res, result.message, 400);
+    if (!result.ok) {
+      return errorResponse(res, result.message, 400, result.code);
+    }
 
-    return successResponse(res, result.message, { required: true });
+    return successResponse(res, result.message, {
+      required: true,
+      maskedPhone: maskPhone(phone),
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
@@ -125,17 +171,29 @@ router.post("/otp/send", otpLimiter, async (req, res) => {
 router.post("/otp/verify", otpLimiter, async (req, res) => {
   try {
     const flow = text(req.body?.flow);
-    const countryCode = text(req.body?.countryCode) || "+880";
-    const phone = text(req.body?.phone);
+    const userId = text(req.body?.userId);
+    const inputCode = text(req.body?.countryCode) || "+880";
+    const inputPhone = text(req.body?.phone);
     const otp = text(req.body?.otp);
 
-    if (!flow || !phone || !otp) {
-      return errorResponse(res, "Flow, phone and OTP are required", 400);
+    if (!flow || (!inputPhone && !userId) || !otp) {
+      return errorResponse(res, "Flow, phone and OTP are required", 400, "missingFields");
     }
+
+    const target = await resolveTarget({
+      userId,
+      countryCode: inputCode,
+      phone: inputPhone,
+    });
+
+    const countryCode = target?.countryCode || inputCode;
+    const phone = target?.phone || inputPhone;
 
     const result = verifyOtp({ flow, countryCode, phone, otp });
 
-    if (!result.ok) return errorResponse(res, result.message, 400);
+    if (!result.ok) {
+      return errorResponse(res, result.message, 400, result.code);
+    }
 
     return successResponse(res, result.message, { verified: true });
   } catch (error) {
@@ -156,11 +214,11 @@ router.post("/register", authLimiter, async (req, res) => {
     const referralCode = text(req.body?.referralCode).toUpperCase();
 
     if (!userId || !password || !phone) {
-      return errorResponse(res, "Username, password and phone are required", 400);
+      return errorResponse(res, "Username, password and phone are required", 400, "missingFields");
     }
 
     if (userId.length < 4 || userId.length > 15) {
-      return errorResponse(res, "Username must be 4 to 15 characters", 400);
+      return errorResponse(res, "Username must be 4 to 15 characters", 400, "usernameLength");
     }
 
     if (password.length < MIN_PASSWORD) {
@@ -168,21 +226,22 @@ router.post("/register", authLimiter, async (req, res) => {
         res,
         `Password must be at least ${MIN_PASSWORD} characters`,
         400,
+        "passwordTooShort",
       );
     }
 
     if (await User.exists({ userId })) {
-      return errorResponse(res, "This username is taken", 409);
+      return errorResponse(res, "This username is taken", 409, "usernameTaken");
     }
 
     if (await User.exists({ countryCode, phone })) {
-      return errorResponse(res, "This number already has an account", 409);
+      return errorResponse(res, "This number already has an account", 409, "phoneTaken");
     }
 
     // OTP চালু থাকলে আগে যাচাই হয়ে থাকতে হবে
     if (await isOtpRequired("client", "register")) {
       if (!isVerified({ flow: "register", countryCode, phone })) {
-        return errorResponse(res, "Please verify the OTP first", 400);
+        return errorResponse(res, "Please verify the OTP first", 400, "otpNotVerified");
       }
     }
 
@@ -192,7 +251,7 @@ router.post("/register", authLimiter, async (req, res) => {
       referrer = await User.findOne({ referralCode });
 
       if (!referrer) {
-        return errorResponse(res, "Referral code is not valid", 400);
+        return errorResponse(res, "Referral code is not valid", 400, "badReferral");
       }
     }
 
@@ -230,7 +289,7 @@ router.post("/register", authLimiter, async (req, res) => {
     );
   } catch (error) {
     if (error?.code === 11000) {
-      return errorResponse(res, "This account already exists", 409);
+      return errorResponse(res, "This account already exists", 409, "accountExists");
     }
 
     return errorResponse(res, error.message, 500);
@@ -247,7 +306,7 @@ router.post("/login", authLimiter, async (req, res) => {
     const password = text(req.body?.password);
 
     if (!userId || !password) {
-      return errorResponse(res, "Username and password are required", 400);
+      return errorResponse(res, "Username and password are required", 400, "missingFields");
     }
 
     const user = await User.findOne({ userId }).select(
@@ -257,7 +316,7 @@ router.post("/login", authLimiter, async (req, res) => {
     // অ্যাকাউন্ট নেই আর পাসওয়ার্ড ভুল — একই বার্তা, যাতে কোন ইউজারনেম
     // আছে সেটা বাইরে থেকে যাচাই করা না যায়
     if (!user) {
-      return errorResponse(res, "Username or password is not correct", 401);
+      return errorResponse(res, "Username or password is not correct", 401, "badLogin");
     }
 
     if (user.lockedUntil && user.lockedUntil > new Date()) {
@@ -266,6 +325,7 @@ router.post("/login", authLimiter, async (req, res) => {
         res,
         `Account locked. Try again in ${minutes} minute(s).`,
         423,
+        "accountLocked",
       );
     }
 
@@ -281,20 +341,21 @@ router.post("/login", authLimiter, async (req, res) => {
 
       await user.save();
 
-      return errorResponse(res, "Username or password is not correct", 401);
+      return errorResponse(res, "Username or password is not correct", 401, "badLogin");
     }
 
     if (!user.isActive) {
-      return errorResponse(res, "This account is disabled", 403);
+      return errorResponse(res, "This account is disabled", 403, "accountDisabled");
     }
 
     // লগইনে OTP চালু থাকলে যাচাই হয়ে থাকতে হবে
     if (await isOtpRequired("client", "login")) {
       if (!isVerified({ flow: "login", countryCode: user.countryCode, phone: user.phone })) {
+        // পুরো নম্বর ফেরত যায় না — কোড চাওয়ার সময় ক্লায়েন্ট শুধু
+        // ইউজারনেম পাঠায়, নম্বরটা সার্ভারই খুঁজে নেয়
         return successResponse(res, "OTP verification needed", {
           otpRequired: true,
-          countryCode: user.countryCode,
-          phone: user.phone,
+          maskedPhone: maskPhone(user.phone),
         });
       }
 
@@ -321,12 +382,13 @@ router.post("/login", authLimiter, async (req, res) => {
 
 router.post("/forgot-password", authLimiter, async (req, res) => {
   try {
-    const countryCode = text(req.body?.countryCode) || "+880";
-    const phone = text(req.body?.phone);
+    const userId = text(req.body?.userId);
+    const inputCode = text(req.body?.countryCode) || "+880";
+    const inputPhone = text(req.body?.phone);
     const newPassword = text(req.body?.newPassword);
 
-    if (!phone || !newPassword) {
-      return errorResponse(res, "Phone and new password are required", 400);
+    if ((!inputPhone && !userId) || !newPassword) {
+      return errorResponse(res, "Account and new password are required", 400, "missingFields");
     }
 
     if (newPassword.length < MIN_PASSWORD) {
@@ -334,18 +396,26 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
         res,
         `Password must be at least ${MIN_PASSWORD} characters`,
         400,
+        "passwordTooShort",
       );
     }
 
-    const user = await User.findOne({ countryCode, phone });
+    const target = await resolveTarget({
+      userId,
+      countryCode: inputCode,
+      phone: inputPhone,
+    });
 
-    if (!user) {
-      return errorResponse(res, "No account found with this number", 404);
-    }
+    const user = target?.user;
+
+    if (!user) return errorResponse(res, "No account found", 404, "noAccount");
+
+    const countryCode = target.countryCode;
+    const phone = target.phone;
 
     if (await isOtpRequired("client", "forgotPassword")) {
       if (!isVerified({ flow: "forgotPassword", countryCode, phone })) {
-        return errorResponse(res, "Please verify the OTP first", 400);
+        return errorResponse(res, "Please verify the OTP first", 400, "otpNotVerified");
       }
     }
 

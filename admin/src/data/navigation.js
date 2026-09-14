@@ -17,6 +17,74 @@ export const navItems = [
 
   { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
 
+  { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
+
+  { key: "register-bonus", path: "/register-bonus", label: "Register Bonus", icon: "Gift", motherOnly: true },
+
+  {
+    key: "deposit",
+    label: "Deposit",
+    icon: "Wallet",
+    children: [
+      {
+        key: "deposit-methods",
+        path: "/deposit-methods",
+        label: "Add Deposit Method",
+        icon: "Wallet",
+        motherOnly: true,
+      },
+      {
+        key: "deposit-field",
+        path: "/deposit-field",
+        label: "Deposit Field",
+        icon: "ClipboardList",
+        motherOnly: true,
+      },
+      {
+        key: "deposit-bonus-turnover",
+        path: "/deposit-bonus-turnover",
+        label: "Bonus & Turnover",
+        icon: "Layers",
+        motherOnly: true,
+      },
+      {
+        key: "manual-deposit",
+        path: "/manual-deposit",
+        label: "Manual Deposit",
+        icon: "BadgeDollarSign",
+        perm: "manual-deposit",
+      },
+      {
+        key: "deposit-requests",
+        path: "/deposit-requests",
+        label: "Deposit Requests",
+        icon: "Receipt",
+        perm: "deposit-requests",
+      },
+      {
+        key: "auto-deposit",
+        path: "/auto-deposit",
+        label: "Auto Deposit",
+        icon: "Zap",
+        motherOnly: true,
+      },
+      {
+        key: "auto-deposit-history",
+        path: "/auto-deposit-history",
+        label: "Auto Deposit History",
+        icon: "Receipt",
+        perm: "auto-deposit-history",
+      },
+      {
+        key: "turnover-history",
+        path: "/turnover-history",
+        label: "All Turnover History",
+        icon: "History",
+        perm: "turnover-history",
+      },
+    ],
+  },
+
   {
     key: "game",
     label: "Game",
@@ -36,6 +104,18 @@ export const navItems = [
 /** CreateAdmin পেজে দেখানো পারমিশন তালিকা */
 export const allPermissions = [
   { key: "dashboard", label: "Dashboard", path: "/" },
+  { key: "manual-deposit", label: "Manual Deposit", path: "/manual-deposit" },
+  { key: "deposit-requests", label: "Deposit Requests", path: "/deposit-requests" },
+  {
+    key: "auto-deposit-history",
+    label: "Auto Deposit History",
+    path: "/auto-deposit-history",
+  },
+  {
+    key: "turnover-history",
+    label: "All Turnover History",
+    path: "/turnover-history",
+  },
 ];
 
 export const roleLabels = {

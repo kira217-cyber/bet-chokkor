@@ -1,9 +1,21 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { useDispatch } from "react-redux";
+import { ChevronDown, Gift } from "lucide-react";
 
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
 import FormField from "../../components/FormField/FormField";
+import FormAlert from "../../components/FormAlert/FormAlert";
+import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
+import { useAlert } from "../../Context/alertContext";
+import { setCredentials } from "../../features/auth/authSlice";
+import {
+  authError,
+  fetchRegisterBonus,
+  registerUser,
+  sendOtp,
+} from "../../features/auth/authApi";
 
 /**
  * তিন ধাপের রেজিস্টার পেজ।
@@ -12,12 +24,19 @@ import { useLanguage } from "../../Context/LanguageProvider";
  * বাকিগুলো neutral700), সংযোগ রেখা ০.৫৩u, ধাপের নাম --fs-larger।
  * সারি ও বাটনের মাপ লগইন পেজের মতোই।
  *
- * ফর্ম এখনো স্ট্যাটিক — server যুক্ত হলে রেজিস্টার API বসবে।
+ * OTP চালু থাকলে নম্বরের ধাপের পরেই কোড চাওয়া হয় — তাতে ভুল নম্বরে
+ * পুরো ফর্ম পূরণ করে ফেলার পর আটকে যাওয়া লাগে না।
+ *
+ * রেফারেল লিংক (`?ref=CODE`) দিয়ে এলে কোডটা আগে থেকেই বসে থাকে।
  */
 const STEPS = ["stepContact", "stepPersonal", "stepPassword"];
 
 const Register = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showAlert } = useAlert();
+  const [params] = useSearchParams();
 
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -28,7 +47,23 @@ const Register = () => {
     username: "",
     password: "",
     confirmPassword: "",
+    referralCode: (params.get("ref") || "").toUpperCase(),
   });
+
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [otpStep, setOtpStep] = useState(null);
+  const [bonus, setBonus] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    fetchRegisterBonus().then((campaign) => alive && setBonus(campaign));
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const update = (key) => (event) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
@@ -63,9 +98,103 @@ const Register = () => {
   // ধাপ অনুযায়ী কোন কোন ঘর পূরণ হলে পরের ধাপে যাওয়া যাবে
   const stepValid = [
     form.phone.trim().length === 11,
-    form.fullName.trim() && form.username.trim(),
-    form.password.trim() && form.password === form.confirmPassword,
+    form.fullName.trim() && form.username.trim().length >= 4,
+    form.password.trim().length >= 6 && form.password === form.confirmPassword,
   ];
+
+  /** নম্বরের ধাপ শেষে — OTP লাগলে কোড চাওয়া, নইলে সোজা পরের ধাপে */
+  const passContactStep = async () => {
+    try {
+      setBusy(true);
+      setError("");
+
+      const sent = await sendOtp({
+        flow: "register",
+        site: "client",
+        countryCode: "+880",
+        phone: form.phone.trim(),
+      });
+
+      if (sent.required) {
+        setOtpStep({ maskedPhone: sent.maskedPhone });
+        return;
+      }
+
+      setStep(1);
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = async () => {
+    try {
+      setBusy(true);
+      setError("");
+
+      const data = await registerUser({
+        userId: form.username.trim(),
+        password: form.password,
+        countryCode: "+880",
+        phone: form.phone.trim(),
+        currency: form.currency,
+        firstName: form.fullName.trim(),
+        email: form.email.trim(),
+        referralCode: form.referralCode.trim(),
+      });
+
+      dispatch(setCredentials({ user: data.user, token: data.token }));
+
+      // বোনাস পেলে সেটাই মূল খবর — মূল সাইটের মতো মডালে জানানো হয়
+      await showAlert({
+        type: "success",
+        title: t("registerDone"),
+        message: data.bonus
+          ? `${t("registerBonusNote")}: ${data.bonus.creditedAmount}`
+          : "",
+      });
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (!stepValid[step] || busy) return;
+
+    if (step === 0) {
+      passContactStep();
+      return;
+    }
+
+    if (step === STEPS.length - 1) {
+      submit();
+      return;
+    }
+
+    setStep((prev) => prev + 1);
+  };
+
+  if (otpStep) {
+    return (
+      <AuthLayout active="register">
+        <OtpStep
+          flow="register"
+          countryCode="+880"
+          phone={form.phone.trim()}
+          maskedPhone={otpStep.maskedPhone}
+          onVerified={() => {
+            setOtpStep(null);
+            setStep(1);
+          }}
+        />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout active="register">
@@ -88,7 +217,7 @@ const Register = () => {
         }}
       >
         {STEPS.map((item, index) => (
-          <React.Fragment key={item.key}>
+          <React.Fragment key={item}>
             {index > 0 && (
               <span
                 className="shrink-0 bg-[var(--neutral700)]"
@@ -140,8 +269,33 @@ const Register = () => {
       <form
         className="flex flex-col"
         style={{ gap: "calc(var(--u) * 4.267)" }}
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleNext();
+        }}
       >
+        <FormAlert>{error}</FormAlert>
+
+        {step === 0 && bonus && (
+          <div
+            className="flex items-center"
+            style={{
+              gap: "calc(var(--u) * 2.133)",
+              padding: "calc(var(--u) * 3.2) calc(var(--u) * 4.267)",
+              borderRadius: "var(--radius-10)",
+              background:
+                "color-mix(in srgb, var(--primary500), transparent 88%)",
+              color: "var(--primary500)",
+              fontSize: "var(--fs-larger)",
+            }}
+          >
+            <Gift size={18} className="shrink-0" />
+            <span>
+              {t("registerBonusNote")}: {bonus.bonusAmount}
+            </span>
+          </div>
+        )}
+
         {step === 0 && (
           <>
             <FormField label={t("selectCurrency")}>
@@ -261,6 +415,28 @@ const Register = () => {
             <FormField label={t("username")}>
               {textInput("username", t("usernamePlaceholder"))}
             </FormField>
+
+            {/* রেফারেল লিংক দিয়ে এলে কোডটা আগে থেকেই বসা থাকে */}
+            <FormField label={t("referralCode")}>
+              <div
+                className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
+                style={inputBoxStyle}
+              >
+                <input
+                  type="text"
+                  value={form.referralCode}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      referralCode: event.target.value.toUpperCase(),
+                    }))
+                  }
+                  placeholder={t("referralCodePlaceholder")}
+                  className={inputClass}
+                  style={inputStyle}
+                />
+              </div>
+            </FormField>
           </>
         )}
 
@@ -284,21 +460,25 @@ const Register = () => {
         )}
 
         <button
-          type="button"
-          disabled={!stepValid[step]}
-          onClick={() => setStep((prev) => Math.min(prev + 1, STEPS.length - 1))}
+          type="submit"
+          disabled={!stepValid[step] || busy}
           className="flex w-full cursor-pointer items-center justify-center font-medium transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
           style={{
             height: "calc(var(--u) * 13.333)",
             borderRadius: "var(--radius-10)",
             fontSize: "var(--fs-larger)",
-            backgroundColor: stepValid[step]
-              ? "var(--primary500)"
-              : "color-mix(in srgb, var(--primary500), black 40%)",
+            backgroundColor:
+              stepValid[step] && !busy
+                ? "var(--primary500)"
+                : "color-mix(in srgb, var(--primary500), black 40%)",
             color: "var(--btn-primary-txt)",
           }}
         >
-          {step === STEPS.length - 1 ? t("register") : t("continue")}
+          {busy
+            ? t("loading")
+            : step === STEPS.length - 1
+              ? t("register")
+              : t("continue")}
         </button>
       </form>
     </AuthLayout>

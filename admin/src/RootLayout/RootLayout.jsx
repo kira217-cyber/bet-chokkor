@@ -7,6 +7,15 @@ import {
   Gamepad2,
   KeyRound,
   Wrench,
+  MessageSquareLock,
+  Gift,
+  Wallet,
+  Receipt,
+  Zap,
+  ClipboardList,
+  Layers,
+  BadgeDollarSign,
+  History,
   ChevronDown,
   User,
   Menu,
@@ -19,7 +28,23 @@ import { navItems, roleLabels } from "../data/navigation";
 import { logout } from "../features/auth/authSlice";
 import { selectAdmin } from "../features/auth/authSelectors";
 
-const ICONS = { LayoutDashboard, UserCog, Gamepad2, KeyRound, Wrench, User };
+const ICONS = {
+  LayoutDashboard,
+  UserCog,
+  Gamepad2,
+  KeyRound,
+  Wrench,
+  MessageSquareLock,
+  Gift,
+  Wallet,
+  Receipt,
+  Zap,
+  ClipboardList,
+  Layers,
+  BadgeDollarSign,
+  History,
+  User,
+};
 
 /** একটা মেনু লিংকের চেহারা — সাধারণ আইটেম আর ড্রপডাউনের ভিতরের লিংক দুটোতেই */
 const linkClass = ({ isActive }) =>
@@ -64,11 +89,22 @@ const RootLayout = () => {
   const role = admin?.role || "sub";
   const permissions = Array.isArray(admin?.permissions) ? admin.permissions : [];
 
-  const visibleItems = navItems.filter((item) => {
+  const canSee = (item) => {
     if (item.motherOnly) return role === "mother";
     if (role === "mother" || role === "viewer") return true;
     return !item.perm || permissions.includes(item.perm);
-  });
+  };
+
+  // ড্রপডাউনের ভিতরের লিংকগুলোও আলাদা করে বাছা হয় — নইলে sub অ্যাডমিন
+  // এমন লিংক দেখতেন যেটা খুললে 403 ছাড়া কিছু নেই
+  const visibleItems = navItems
+    .filter(canSee)
+    .map((item) =>
+      item.children?.length
+        ? { ...item, children: item.children.filter(canSee) }
+        : item,
+    )
+    .filter((item) => !item.children || item.children.length > 0);
 
   const handleLogout = () => {
     dispatch(logout());
