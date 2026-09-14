@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/User.js";
 import DepositRequest from "../models/DepositRequest.js";
+import AutoDeposit from "../models/AutoDeposit.js";
 import TurnOver from "../models/TurnOver.js";
 
 import {
@@ -13,7 +14,7 @@ import {
 } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 import { num, money } from "../utils/depositCalc.js";
-import { normalizePhone } from "../utils/phone.js";
+import { normalizeCountryCode, normalizePhone } from "../utils/phone.js";
 
 const router = express.Router();
 
@@ -180,6 +181,66 @@ router.get("/affiliates/:id/referrals", protectAdmin, async (req, res) => {
 });
 
 /* =========================
+   একজনের ইতিহাস — প্রতিটা অংশ আলাদা করে আনা হয়
+   ========================= */
+
+/**
+ * ইতিহাসের এক পাতা।
+ *
+ * বিস্তারিত পেজে চার-পাঁচটা ইতিহাস থাকে; একসাথে সব আনলে ভারী হয়ে যেত,
+ * তাই প্রতিটা নিজের মতো করে পাতা ঘোরায়।
+ */
+const historyPage = async (req, res, Model, extra = {}) => {
+  if (!isId(req.params.id)) return errorResponse(res, "Invalid id", 400);
+
+  const page = Math.max(1, num(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, num(req.query.limit) || 10));
+
+  const filter = { user: req.params.id, ...extra };
+  const status = text(req.query.status);
+
+  if (status && status !== "all") filter.status = status;
+
+  const [rows, total] = await Promise.all([
+    Model.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    Model.countDocuments(filter),
+  ]);
+
+  return successResponse(res, "History loaded", {
+    rows,
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
+  });
+};
+
+router.get("/:id/history/deposits", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, DepositRequest);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/auto-deposits", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, AutoDeposit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/turnovers", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, TurnOver);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+/* =========================
    বদলানো — দুই ধরনের জন্যই একই রুট
    ========================= */
 
@@ -217,9 +278,10 @@ router.patch(
 /**
  * তথ্য বদলানো।
  *
- * ব্যালেন্স এখান থেকে সরাসরি বদলানো যায় না — টাকার নড়াচড়া Manual
- * Deposit দিয়ে হয়, তাতে রেকর্ড থাকে। এখানে শুধু পরিচয়, পাসওয়ার্ড আর
- * অ্যাফিলিয়েটের কমিশনের হার।
+ * ব্যালেন্স ও কমিশনের জমা টাকাও এখান থেকে ঠিক করা যায় — হিসাব ভুল
+ * হয়ে গেলে বা হাতে শুধরে দেওয়ার দরকার পড়লে। সাধারণ জমা-খরচ Manual
+ * Deposit দিয়েই করা উচিত, কারণ তাতে রেকর্ড থেকে যায়; এটা শোধরানোর
+ * জন্য, তাই শুধু mother অ্যাডমিন পারেন।
  */
 router.patch(
   "/:id",
@@ -287,7 +349,19 @@ router.patch(
         user.lockedUntil = null;
       }
 
-      // কমিশনের হার শুধু অ্যাফিলিয়েটের জন্যই অর্থবহ
+      if (body.countryCode !== undefined) {
+        user.countryCode = normalizeCountryCode(body.countryCode);
+      }
+
+      if (body.currency !== undefined) {
+        user.currency = text(body.currency).toUpperCase() || "BDT";
+      }
+
+      if (body.balance !== undefined) {
+        user.balance = money(Math.max(0, num(body.balance)));
+      }
+
+      // কমিশনের হার ও জমা টাকা শুধু অ্যাফিলিয়েটের জন্যই অর্থবহ
       if (user.role === "aff-user") {
         [
           "referCommission",
@@ -297,6 +371,17 @@ router.patch(
         ].forEach((key) => {
           if (body[key] !== undefined) {
             user[key] = Math.min(100, Math.max(0, num(body[key])));
+          }
+        });
+
+        [
+          "referCommissionBalance",
+          "depositCommissionBalance",
+          "gameWinCommissionBalance",
+          "gameLossCommissionBalance",
+        ].forEach((key) => {
+          if (body[key] !== undefined) {
+            user[key] = money(Math.max(0, num(body[key])));
           }
         });
       }

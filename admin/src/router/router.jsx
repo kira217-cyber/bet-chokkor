@@ -11,6 +11,7 @@ import Maintenance from "../pages/Maintenance/Maintenance";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
 import Users from "../pages/Users/Users";
 import Affiliates from "../pages/Users/Affiliates";
+import UserDetails from "../pages/Users/UserDetails";
 import BulkAdjustment from "../pages/BulkAdjustment/BulkAdjustment";
 import RegisterBonus from "../pages/RegisterBonus/RegisterBonus";
 import DepositMethods from "../pages/DepositMethods/DepositMethods";
@@ -54,7 +55,9 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "users", element: <Users /> },
+      { path: "users/:id", element: <UserDetails kind="users" /> },
       { path: "affiliates", element: <Affiliates /> },
+      { path: "affiliates/:id", element: <UserDetails kind="affiliates" /> },
       {
         path: "bulk-adjustment",
         element: (

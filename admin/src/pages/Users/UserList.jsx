@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 import { RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
 import UserTable from "./UserTable";
-import UserDrawer from "./UserDrawer";
 
 const fetchUsers = async (kind, status, q, page) => {
   const params = new URLSearchParams({ page: String(page), limit: "20" });
@@ -30,6 +30,7 @@ const TABS = [
  */
 const UserList = ({ kind, title, subtitle }) => {
   const isAffiliate = kind === "affiliates";
+  const navigate = useNavigate();
 
   const [tab, setTab] = useState("all");
   const [search, setSearch] = useState("");
@@ -39,7 +40,6 @@ const UserList = ({ kind, title, subtitle }) => {
   const [meta, setMeta] = useState({});
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(null);
 
   // টাইপ করার সময় প্রতি অক্ষরে রিকোয়েস্ট না গিয়ে একটু থেমে যায়
   useEffect(() => {
@@ -159,7 +159,7 @@ const UserList = ({ kind, title, subtitle }) => {
         rows={rows}
         loading={loading}
         showCommission={isAffiliate}
-        onOpen={setOpen}
+        onOpen={(row) => navigate(`/${kind}/${row._id}`)}
       />
 
       {meta.totalPages > 1 && (
@@ -192,15 +192,6 @@ const UserList = ({ kind, title, subtitle }) => {
             Next
           </button>
         </div>
-      )}
-
-      {open && (
-        <UserDrawer
-          kind={kind}
-          user={open}
-          onClose={() => setOpen(null)}
-          onChanged={load}
-        />
       )}
     </div>
   );
