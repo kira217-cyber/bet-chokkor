@@ -9,6 +9,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import gameApiKeyRoutes from "./routes/gameApiKeyRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
+import otpSettingRoutes from "./routes/otpSettingRoutes.js";
+import userAuthRoutes from "./routes/userAuthRoutes.js";
 
 dotenv.config();
 
@@ -75,6 +77,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/admin/game-api-key", gameApiKeyRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
+app.use("/api/otp-setting", otpSettingRoutes);
+app.use("/api/user", userAuthRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
