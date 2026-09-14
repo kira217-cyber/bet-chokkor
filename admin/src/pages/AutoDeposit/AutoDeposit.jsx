@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import ProviderPicker from "../../components/ProviderPicker/ProviderPicker";
 
 const fetchSetting = async () => {
   const { data } = await api.get("/api/auto-deposit/admin");
@@ -30,7 +31,7 @@ const bonusesFrom = (setting) =>
     isActive: bonus.isActive !== false,
     providers: (bonus.eligibleProviders || []).map((item) => ({
       providerCode: item.providerCode || "",
-      percent: String(item.percent ?? 100),
+      percent: Number(item.percent ?? 100),
     })),
   }));
 
@@ -110,6 +111,21 @@ const AutoDeposit = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    const bad = bonuses.find(
+      (bonus) =>
+        bonus.providers.reduce(
+          (sum, item) => sum + (Number(item.percent) || 0),
+          0,
+        ) > 100,
+    );
+
+    if (bad) {
+      toast.error(
+        `Bonus "${bad.titleEn || bad.titleBn || "untitled"}" providers add up to more than 100%`,
+      );
+      return;
+    }
+
     save(
       "save",
       {
@@ -126,12 +142,7 @@ const AutoDeposit = () => {
           bonusScope: bonus.bonusScope,
           isActive: bonus.isActive,
           order: index,
-          eligibleProviders: bonus.providers
-            .filter((item) => item.providerCode.trim())
-            .map((item) => ({
-              providerCode: item.providerCode.trim().toUpperCase(),
-              percent: Number(item.percent) || 0,
-            })),
+          eligibleProviders: bonus.providers,
         })),
       },
       () => setToken(""),
@@ -407,90 +418,12 @@ const AutoDeposit = () => {
                   </div>
 
                   <div className="mt-3 border-t border-white/[0.06] pt-3">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-[13px] text-[var(--text-muted)]">
-                        Eligible providers
-                      </span>
+                    <p className="ad-label">Eligible providers</p>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setBonus(index, "providers", [
-                            ...bonus.providers,
-                            { providerCode: "", percent: "100" },
-                          ])
-                        }
-                        className="ad-btn ad-btn--ghost ad-btn--sm"
-                      >
-                        <Plus size={13} />
-                        Provider
-                      </button>
-                    </div>
-
-                    {bonus.providers.length === 0 ? (
-                      <p className="text-[12px] text-[var(--text-disabled)]">
-                        Empty means any provider counts in full.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        {bonus.providers.map((provider, pIndex) => (
-                          <div
-                            key={pIndex}
-                            className="grid gap-2 sm:grid-cols-[1fr_120px_auto]"
-                          >
-                            <input
-                              value={provider.providerCode}
-                              onChange={(e) =>
-                                setBonus(
-                                  index,
-                                  "providers",
-                                  bonus.providers.map((row, i) =>
-                                    i === pIndex
-                                      ? { ...row, providerCode: e.target.value }
-                                      : row,
-                                  ),
-                                )
-                              }
-                              placeholder="JILI"
-                              className="ad-input"
-                            />
-
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={provider.percent}
-                              onChange={(e) =>
-                                setBonus(
-                                  index,
-                                  "providers",
-                                  bonus.providers.map((row, i) =>
-                                    i === pIndex
-                                      ? { ...row, percent: e.target.value }
-                                      : row,
-                                  ),
-                                )
-                              }
-                              className="ad-input"
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setBonus(
-                                  index,
-                                  "providers",
-                                  bonus.providers.filter((_, i) => i !== pIndex),
-                                )
-                              }
-                              className="ad-btn ad-btn--danger ad-btn--sm"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <ProviderPicker
+                      value={bonus.providers}
+                      onChange={(next) => setBonus(index, "providers", next)}
+                    />
                   </div>
                 </div>
               ))}

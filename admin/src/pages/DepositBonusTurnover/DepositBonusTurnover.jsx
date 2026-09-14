@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { Layers, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import ProviderPicker from "../../components/ProviderPicker/ProviderPicker";
 
 const fetchAll = async () => {
   const [methodsRes, configsRes] = await Promise.all([
@@ -27,7 +28,7 @@ const draftFrom = (config) => ({
   turnoverMultiplier: String(config?.turnoverMultiplier ?? 1),
   eligibleProviders: (config?.eligibleProviders || []).map((item) => ({
     providerCode: item.providerCode || "",
-    percent: String(item.percent ?? 100),
+    percent: Number(item.percent ?? 100),
   })),
   channels: (config?.channels || []).map((channel) => ({
     id: channel.id || "",
@@ -48,90 +49,10 @@ const draftFrom = (config) => ({
     isActive: promo.isActive !== false,
     eligibleProviders: (promo.eligibleProviders || []).map((item) => ({
       providerCode: item.providerCode || "",
-      percent: String(item.percent ?? 100),
+      percent: Number(item.percent ?? 100),
     })),
   })),
 });
-
-const sumPercent = (list) =>
-  list.reduce((total, item) => total + (Number(item.percent) || 0), 0);
-
-/** প্রোভাইডারের তালিকা — মূল কনফিগ ও প্রতিটা প্রোমো দুই জায়গাতেই লাগে */
-const ProviderList = ({ list, onChange }) => {
-  const total = sumPercent(list);
-
-  return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-[13px] text-[var(--text-muted)]">
-          Eligible providers{" "}
-          {list.length > 0 && (
-            <b style={{ color: total > 100 ? "var(--status-danger)" : "var(--text-secondary)" }}>
-              ({total}%)
-            </b>
-          )}
-        </span>
-
-        <button
-          type="button"
-          onClick={() => onChange([...list, { providerCode: "", percent: "100" }])}
-          className="ad-btn ad-btn--ghost ad-btn--sm"
-        >
-          <Plus size={13} />
-          Provider
-        </button>
-      </div>
-
-      {list.length === 0 ? (
-        <p className="text-[12px] text-[var(--text-disabled)]">
-          Empty means no restriction — any provider counts in full.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {list.map((item, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_120px_auto]">
-              <input
-                value={item.providerCode}
-                onChange={(e) =>
-                  onChange(
-                    list.map((row, i) =>
-                      i === index ? { ...row, providerCode: e.target.value } : row,
-                    ),
-                  )
-                }
-                placeholder="JILI"
-                className="ad-input"
-              />
-
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={item.percent}
-                onChange={(e) =>
-                  onChange(
-                    list.map((row, i) =>
-                      i === index ? { ...row, percent: e.target.value } : row,
-                    ),
-                  )
-                }
-                className="ad-input"
-              />
-
-              <button
-                type="button"
-                onClick={() => onChange(list.filter((_, i) => i !== index))}
-                className="ad-btn ad-btn--danger ad-btn--sm"
-              >
-                <Trash2 size={13} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 /**
  * বোনাস ও টার্নওভার।
@@ -234,13 +155,25 @@ const DepositBonusTurnover = () => {
       return;
     }
 
-    const providers = (list) =>
-      list
-        .filter((item) => item.providerCode.trim())
-        .map((item) => ({
-          providerCode: item.providerCode.trim().toUpperCase(),
-          percent: Number(item.percent) || 0,
-        }));
+    const over = (list) =>
+      (list || []).reduce((sum, item) => sum + (Number(item.percent) || 0), 0) >
+      100;
+
+    if (over(draft.eligibleProviders)) {
+      toast.error("Default eligible providers add up to more than 100%");
+      return;
+    }
+
+    const badPromo = draft.promotions.find((promo) =>
+      over(promo.eligibleProviders),
+    );
+
+    if (badPromo) {
+      toast.error(
+        `Promotion "${badPromo.id || "untitled"}" providers add up to more than 100%`,
+      );
+      return;
+    }
 
     try {
       setBusy("save");
@@ -248,7 +181,7 @@ const DepositBonusTurnover = () => {
       const { data } = await api.post("/api/deposit-bonus-turnover", {
         depositMethod: selected,
         turnoverMultiplier: Number(draft.turnoverMultiplier) || 0,
-        eligibleProviders: providers(draft.eligibleProviders),
+        eligibleProviders: draft.eligibleProviders,
         channels: draft.channels.map((channel, index) => ({
           id: channel.id.trim() || `channel-${index}`,
           name: { bn: channel.nameBn, en: channel.nameEn },
@@ -265,7 +198,7 @@ const DepositBonusTurnover = () => {
           bonusScope: promo.bonusScope,
           isActive: promo.isActive,
           sort: index,
-          eligibleProviders: providers(promo.eligibleProviders),
+          eligibleProviders: promo.eligibleProviders,
         })),
       });
 
@@ -355,8 +288,8 @@ const DepositBonusTurnover = () => {
                   promotion picked.
                 </p>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div>
+                <div className="mt-4 flex flex-col gap-4">
+                  <div className="sm:max-w-[240px]">
                     <label className="ad-label" htmlFor="bt-multiplier">
                       Turnover multiplier
                     </label>
@@ -373,11 +306,13 @@ const DepositBonusTurnover = () => {
                     />
                   </div>
 
-                  <div className="rounded-[12px] border border-white/[0.06] p-3">
-                    <ProviderList
-                      list={draft.eligibleProviders}
+                  <div>
+                    <p className="ad-label">Eligible providers</p>
+
+                    <ProviderPicker
+                      value={draft.eligibleProviders}
                       onChange={(next) =>
-                        setDraft((p) => ({ ...p, eligibleProviders: next }))
+                        setDraft((prev) => ({ ...prev, eligibleProviders: next }))
                       }
                     />
                   </div>
@@ -659,12 +594,17 @@ const DepositBonusTurnover = () => {
                         </div>
 
                         <div className="mt-3 border-t border-white/[0.06] pt-3">
-                          <ProviderList
-                            list={promo.eligibleProviders}
+                          <p className="ad-label">
+                            Eligible providers for this promotion
+                          </p>
+
+                          <ProviderPicker
+                            value={promo.eligibleProviders}
                             onChange={(next) =>
                               setRow("promotions", index, "eligibleProviders", next)
                             }
                           />
+
                           <p className="mt-2 text-[12px] text-[var(--text-disabled)]">
                             Leaving this empty means the default list above is
                             used — not that the promotion is unrestricted.

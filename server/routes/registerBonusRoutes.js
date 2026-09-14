@@ -7,6 +7,7 @@ import {
   requireWrite,
 } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
+import { sumPercent } from "../utils/depositCalc.js";
 
 const router = express.Router();
 
@@ -30,6 +31,17 @@ const cleanProviders = (list) => {
     }))
     .filter((item) => item.providerCode);
 };
+
+/**
+ * প্রোভাইডারের শতাংশ ১০০ ছাড়ালে আটকানো।
+ *
+ * প্রতিটা শতাংশ সেই প্রোভাইডারের বাঁধা অংশ; যোগফল ১০০ ছাড়ালে শর্তটা
+ * কী বোঝায় সেটাই অস্পষ্ট হয়ে যায়। Bonus & Turnover এও একই পরীক্ষা।
+ */
+const providersError = (list) =>
+  sumPercent(list) > 100
+    ? "Eligible providers add up to more than 100%"
+    : "";
 
 /* =========================
    ক্লায়েন্ট
@@ -95,12 +107,17 @@ router.post(
         return errorResponse(res, "Bonus amount must be more than 0", 400);
       }
 
+      const providers = cleanProviders(body.eligibleProviders);
+      const providerProblem = providersError(providers);
+
+      if (providerProblem) return errorResponse(res, providerProblem, 400);
+
       const campaign = await RegisterBonusCampaign.create({
         title,
         description: langText(body.description),
         bonusAmount,
         turnoverMultiplier: Math.max(0, num(body.turnoverMultiplier, 1)),
-        eligibleProviders: cleanProviders(body.eligibleProviders),
+        eligibleProviders: providers,
         startDate: body.startDate ? new Date(body.startDate) : new Date(),
         endDate: body.endDate ? new Date(body.endDate) : null,
         order: Math.max(0, num(body.order)),
@@ -147,7 +164,12 @@ router.put(
       }
 
       if (body.eligibleProviders !== undefined) {
-        campaign.eligibleProviders = cleanProviders(body.eligibleProviders);
+        const providers = cleanProviders(body.eligibleProviders);
+        const providerProblem = providersError(providers);
+
+        if (providerProblem) return errorResponse(res, providerProblem, 400);
+
+        campaign.eligibleProviders = providers;
       }
 
       if (body.startDate !== undefined) {

@@ -266,6 +266,72 @@ router.delete(
    ========================= */
 
 /** হোম পেজের সব — ক্যাটাগরি, ভেন্ডর, হোম প্রোভাইডার, ফিচার্ড গেম */
+/**
+ * মাস্টারের সব প্রোভাইডার — অ্যাডমিনের জন্য।
+ *
+ * টার্নওভারের শর্তে কোন প্রোভাইডার বাছা যাবে সেটা এখান থেকেই আসে, তাই
+ * কোড হাতে টাইপ করতে হয় না। মাস্টারে যা আছে তাই দেখা যায়, ফলে নতুন
+ * প্রোভাইডার যোগ হলে এখানে আপনাআপনি চলে আসে।
+ */
+router.get("/admin/providers", protectAdmin, async (req, res) => {
+  try {
+    const { apiKey, reason } = await loadUsableKey();
+
+    if (!apiKey) {
+      return errorResponse(
+        res,
+        `Game API key is not ready (${reason}) — providers cannot be listed`,
+        400,
+      );
+    }
+
+    const cached = getCached("admin:providers");
+
+    if (cached) {
+      return successResponse(res, "Providers loaded (cached)", {
+        providers: cached,
+      });
+    }
+
+    const raw = await masterGet(
+      "/api/master/bc-global/client/game-data",
+      apiKey,
+    );
+
+    const list = raw?.data?.providers || raw?.providers || [];
+
+    // একই প্রোভাইডার একাধিক ক্যাটাগরিতে থাকতে পারে — কোড ধরে একবারই
+    const seen = new Map();
+
+    (Array.isArray(list) ? list : []).forEach((item) => {
+      const code = text(item?.providerCode).toUpperCase();
+
+      if (!code || seen.has(code)) return;
+
+      seen.set(code, {
+        providerCode: code,
+        providerName: text(item?.providerName) || code,
+        providerIconUrl: text(item?.providerIconUrl),
+        isActive: item?.isActive !== false,
+      });
+    });
+
+    const providers = [...seen.values()].sort((a, b) =>
+      a.providerName.localeCompare(b.providerName),
+    );
+
+    setCached("admin:providers", providers);
+
+    return successResponse(res, "Providers loaded", { providers });
+  } catch (error) {
+    return errorResponse(
+      res,
+      error?.response?.data?.message || error.message || "Master request failed",
+      error?.response?.status || 502,
+    );
+  }
+});
+
 router.get("/client/game-data", async (req, res) => {
   try {
     const { apiKey, reason } = await loadUsableKey();

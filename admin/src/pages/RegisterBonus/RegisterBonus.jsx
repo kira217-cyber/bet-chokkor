@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import ProviderPicker from "../../components/ProviderPicker/ProviderPicker";
 
 const fetchCampaigns = async () => {
   const { data } = await api.get("/api/register-bonus");
@@ -27,6 +28,7 @@ const emptyDraft = {
   turnoverMultiplier: "3",
   order: "0",
   status: "active",
+  eligibleProviders: [],
 };
 
 const draftFrom = (campaign) => ({
@@ -38,6 +40,7 @@ const draftFrom = (campaign) => ({
   turnoverMultiplier: String(campaign.turnoverMultiplier ?? ""),
   order: String(campaign.order ?? 0),
   status: campaign.status || "active",
+  eligibleProviders: campaign.eligibleProviders || [],
 });
 
 /**
@@ -109,6 +112,7 @@ const RegisterBonus = () => {
       turnoverMultiplier: Number(draft.turnoverMultiplier),
       order: Number(draft.order),
       status: draft.status,
+      eligibleProviders: draft.eligibleProviders,
     };
 
     if (!payload.title.bn && !payload.title.en) {
@@ -118,6 +122,17 @@ const RegisterBonus = () => {
 
     if (!(payload.bonusAmount > 0)) {
       toast.error("Bonus amount must be more than 0");
+      return;
+    }
+
+    // সার্ভারও আটকায়, কিন্তু এখানে বললে ফর্ম ছেড়ে যেতে হয় না
+    const providerTotal = draft.eligibleProviders.reduce(
+      (sum, item) => sum + (Number(item.percent) || 0),
+      0,
+    );
+
+    if (providerTotal > 100) {
+      toast.error("Eligible providers add up to more than 100%");
       return;
     }
 
@@ -324,6 +339,18 @@ const RegisterBonus = () => {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
+            </div>
+
+            {/* ── কোন প্রোভাইডারে খেললে গোনা হবে ── */}
+            <div>
+              <p className="ad-label">Eligible providers</p>
+
+              <ProviderPicker
+                value={draft.eligibleProviders}
+                onChange={(next) =>
+                  setDraft((prev) => ({ ...prev, eligibleProviders: next }))
+                }
+              />
             </div>
 
             <p className="text-[13px] text-[var(--text-muted)]">
