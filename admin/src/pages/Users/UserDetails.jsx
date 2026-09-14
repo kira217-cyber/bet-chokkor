@@ -22,6 +22,9 @@ import HistoryTable from "./HistoryTable";
 const money = (value) => Number(value || 0).toFixed(2);
 
 const STATUS_COLOR = {
+  win: "var(--status-success)",
+  loss: "var(--status-danger)",
+  push: "var(--text-muted)",
   pending: "var(--status-pending)",
   approved: "var(--status-success)",
   rejected: "var(--status-danger)",
@@ -605,6 +608,33 @@ const UserDetails = ({ kind }) => {
       </form>
 
       {/* ── ইতিহাস ── */}
+      <HistoryTable
+        title="Game history"
+        userId={id}
+        path="games"
+        statuses={[
+          { key: "all", label: "All" },
+          { key: "win", label: "Win" },
+          { key: "loss", label: "Loss" },
+          { key: "push", label: "Push" },
+        ]}
+        columns={[
+          { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
+          { key: "game", label: "Game", render: (r) => r.gameUId },
+          { key: "provider", label: "Provider", render: (r) => r.providerCode || "—" },
+          { key: "bet", label: "Bet", render: (r) => money(r.betAmount) },
+          { key: "win", label: "Win", render: (r) => money(r.winAmount) },
+          { key: "net", label: "Net", render: (r) => money(r.netAmount) },
+          { key: "after", label: "Balance after", render: (r) => money(r.balanceAfter) },
+          {
+            key: "turnover",
+            label: "Turnover",
+            render: (r) => (r.turnoverApplied ? "counted" : "—"),
+          },
+          { key: "result", label: "Result", render: (r) => <Pill value={r.resultType} /> },
+        ]}
+      />
+
       <HistoryTable
         title="Deposit history"
         userId={id}

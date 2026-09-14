@@ -21,6 +21,8 @@ import autoDepositRoutes from "./routes/autoDepositRoutes.js";
 import turnoverRoutes from "./routes/turnoverRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoutes.js";
 import bulkAdjustmentRoutes from "./routes/bulkAdjustmentRoutes.js";
+import callbackRoutes from "./routes/callbackRoutes.js";
+import gameHistoryRoutes from "./routes/gameHistoryRoutes.js";
 
 dotenv.config();
 
@@ -111,6 +113,10 @@ app.use("/api/auto-deposit", autoDepositRoutes);
 app.use("/api/turnover", turnoverRoutes);
 app.use("/api/admin/manage", adminUserRoutes);
 app.use("/api/admin/bulk-adjustment", bulkAdjustmentRoutes);
+
+// white-label মাস্টার প্রতিটা বাজি ও ফলের খবর এখানে পাঠায়
+app.use("/api/callback", callbackRoutes);
+app.use("/api/game-history", gameHistoryRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

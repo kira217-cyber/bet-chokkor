@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import DepositRequest from "../models/DepositRequest.js";
 import AutoDeposit from "../models/AutoDeposit.js";
+import GameHistory from "../models/GameHistory.js";
 import TurnOver from "../models/TurnOver.js";
 
 import {
@@ -190,7 +191,7 @@ router.get("/affiliates/:id/referrals", protectAdmin, async (req, res) => {
  * বিস্তারিত পেজে চার-পাঁচটা ইতিহাস থাকে; একসাথে সব আনলে ভারী হয়ে যেত,
  * তাই প্রতিটা নিজের মতো করে পাতা ঘোরায়।
  */
-const historyPage = async (req, res, Model, extra = {}) => {
+const historyPage = async (req, res, Model, extra = {}, statusField = "status") => {
   if (!isId(req.params.id)) return errorResponse(res, "Invalid id", 400);
 
   const page = Math.max(1, num(req.query.page) || 1);
@@ -199,7 +200,7 @@ const historyPage = async (req, res, Model, extra = {}) => {
   const filter = { user: req.params.id, ...extra };
   const status = text(req.query.status);
 
-  if (status && status !== "all") filter.status = status;
+  if (status && status !== "all") filter[statusField] = status;
 
   const [rows, total] = await Promise.all([
     Model.find(filter)
@@ -227,6 +228,14 @@ router.get("/:id/history/deposits", protectAdmin, async (req, res) => {
 router.get("/:id/history/auto-deposits", protectAdmin, async (req, res) => {
   try {
     return await historyPage(req, res, AutoDeposit);
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/games", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, GameHistory, {}, "resultType");
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }

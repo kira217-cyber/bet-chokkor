@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
+import GameHistory from "../pages/GameHistory/GameHistory";
 import Maintenance from "../pages/Maintenance/Maintenance";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
 import Users from "../pages/Users/Users";
@@ -118,6 +119,7 @@ export const routes = createBrowserRouter([
       },
       { path: "auto-deposit-history", element: <AutoDepositHistory /> },
       { path: "turnover-history", element: <TurnoverHistory /> },
+      { path: "game-history", element: <GameHistory /> },
       {
         path: "game-api-key",
         element: (

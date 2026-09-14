@@ -118,13 +118,20 @@ export const navItems = [
     key: "game",
     label: "Game",
     icon: "Gamepad2",
-    motherOnly: true,
     children: [
+      {
+        key: "game-history",
+        path: "/game-history",
+        label: "Game History",
+        icon: "Dices",
+        perm: "game-history",
+      },
       {
         key: "game-api-key",
         path: "/game-api-key",
         label: "Add Game API Key",
         icon: "KeyRound",
+        motherOnly: true,
       },
     ],
   },
@@ -134,6 +141,7 @@ export const navItems = [
 export const allPermissions = [
   { key: "dashboard", label: "Dashboard", path: "/" },
   { key: "users", label: "Users", path: "/users" },
+  { key: "game-history", label: "Game History", path: "/game-history" },
   { key: "affiliates", label: "Affiliates", path: "/affiliates" },
   { key: "manual-deposit", label: "Manual Deposit", path: "/manual-deposit" },
   { key: "deposit-requests", label: "Deposit Requests", path: "/deposit-requests" },

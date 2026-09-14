@@ -9,6 +9,7 @@ import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
 import { authError } from "../../features/auth/authApi";
 import { previewCalc, submitDeposit } from "../../features/deposit/depositApi";
+import { imageUrl } from "../../features/deposit/imageUrl";
 
 const boxStyle = {
   height: "calc(var(--u) * 13.333)",
@@ -136,13 +137,27 @@ const DepositForm = ({ method, channel, promo, contact, onBack }) => {
         {/* ── যে নম্বরে টাকা পাঠাতে হবে ── */}
         {contact?.number && (
           <div
-            className="flex items-center justify-between bg-[var(--neutral800)]"
+            className="flex items-center bg-[var(--neutral800)]"
             style={{
               borderRadius: "var(--radius-10)",
               padding: "calc(var(--u) * 3.2) calc(var(--u) * 4.267)",
+              gap: "calc(var(--u) * 3.2)",
             }}
           >
-            <div className="min-w-0">
+            {method.logoUrl && (
+              <img
+                src={imageUrl(method.logoUrl)}
+                alt=""
+                className="shrink-0 object-contain"
+                style={{
+                  height: "calc(var(--u) * 12.8)",
+                  width: "calc(var(--u) * 12.8)",
+                }}
+                draggable="false"
+              />
+            )}
+
+            <div className="min-w-0 flex-1">
               <p
                 className="text-[var(--text-secondary)]"
                 style={{ fontSize: "var(--fs-small)" }}

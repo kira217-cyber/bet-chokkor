@@ -33,9 +33,10 @@ const boxStyle = {
  * Bajiman এর মতো সব উপায় একসাথে (ই-ওয়ালেট, ক্রিপ্টো আলাদা পর্দা নয়),
  * শুধু ভাগ অনুযায়ী দলবদ্ধ করে দেখানো হয়।
  *
- * মূল সাইট থেকে মাপা: কার্ড তিন কলামে ১৮.৬৭u উঁচু, মাঝে ২.১৩৩u ফাঁক,
- * বাছাই করা কার্ডে সোনালি বর্ডার; চ্যানেলের সারি ১৪.৬৭u; নিচে পুরো
- * চওড়া বাটন ১৩.৩৩u।
+ * কার্ড তিন কলামে ২৪u উঁচু, ভিতরে লোগো ১২.৮u — ছোট লোগোয় কোন উপায়টা
+ * কোনটা তা দূর থেকে বোঝা যাচ্ছিল না, তাই বড় করা হয়েছে। বাছাই করা
+ * কার্ডে সোনালি বর্ডার; চ্যানেলের সারি ১৪.৬৭u; নিচে পুরো চওড়া বাটন
+ * ১৩.৩৩u।
  */
 const ManualDeposit = () => {
   const { t, tv } = useLanguage();
@@ -134,9 +135,9 @@ const ManualDeposit = () => {
                   onClick={() => pickMethod(item)}
                   className="flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
                   style={{
-                    height: "calc(var(--u) * 18.667)",
+                    height: "calc(var(--u) * 24)",
                     borderRadius: "var(--radius-10)",
-                    gap: "calc(var(--u) * 1.6)",
+                    gap: "calc(var(--u) * 2.133)",
                     border: `1px solid ${
                       active ? "var(--primary500)" : "transparent"
                     }`,
@@ -148,8 +149,8 @@ const ManualDeposit = () => {
                       alt=""
                       className="object-contain"
                       style={{
-                        height: "calc(var(--u) * 7.467)",
-                        width: "calc(var(--u) * 7.467)",
+                        height: "calc(var(--u) * 12.8)",
+                        width: "calc(var(--u) * 12.8)",
                       }}
                       draggable="false"
                     />
@@ -157,9 +158,9 @@ const ManualDeposit = () => {
                     <span
                       className="flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]"
                       style={{
-                        height: "calc(var(--u) * 7.467)",
-                        width: "calc(var(--u) * 7.467)",
-                        fontSize: "var(--fs-small)",
+                        height: "calc(var(--u) * 12.8)",
+                        width: "calc(var(--u) * 12.8)",
+                        fontSize: "var(--fs-larger)",
                       }}
                     >
                       {(tv(item.methodName) || item.methodId)
