@@ -223,7 +223,7 @@ const BulkAdjustment = () => {
           </p>
         </div>
       ) : (
-        <div className="ad-card overflow-x-auto p-0">
+        <div className="ad-card ad-table-wrap ad-scroll p-0">
           <table className="w-full min-w-[900px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">

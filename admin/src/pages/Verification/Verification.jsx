@@ -292,7 +292,7 @@ const Verification = () => {
           </p>
         </div>
       ) : (
-        <div className="ad-card ad-scroll overflow-x-auto p-0">
+        <div className="ad-card ad-table-wrap ad-scroll p-0">
           <table className="w-full min-w-[980px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">

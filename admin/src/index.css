@@ -69,6 +69,19 @@ body {
   overflow: hidden;
 }
 
+/*
+ * চওড়া টেবিলের মোড়ক।
+ *
+ * `.ad-card` এর `overflow: hidden` টেইলউইন্ডের `overflow-x-auto` কে
+ * হারিয়ে দিত — কলামগুলো কেটে যেত, কিন্তু পাশে স্ক্রল করা যেত না। তাই
+ * আলাদা ক্লাস, আর সেটা `.ad-card` এর পরে লেখা যাতে এটাই জেতে।
+ */
+.ad-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* গ্রেডিয়েন্ট শিরোনাম — লগইন পেজের "Admin" লেখার মতো */
 .ad-title {
   background-image: linear-gradient(
@@ -238,6 +251,13 @@ body {
 }
 
 /* ── স্ক্রলবার ── */
+/* ফায়ারফক্সে ::-webkit-scrollbar কাজ করে না, তাই ওর নিজের দুটো
+   প্রপার্টিও দেওয়া — নইলে ওখানে মোটা ডিফল্ট স্ক্রলবার বসত */
+.ad-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neutral700) transparent;
+}
+
 .ad-scroll::-webkit-scrollbar {
   width: 6px;
   height: 6px;
