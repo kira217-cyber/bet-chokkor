@@ -186,6 +186,233 @@ export const locale = {
     en: "Not for under 18s. Please play responsibly.",
   },
 
+
+  // ── সাধারণ ──
+  loading: { bn: "লোড হচ্ছে…", en: "Loading…" },
+  logout: { bn: "লগআউট", en: "Logout" },
+  menu: { bn: "মেনু", en: "Menu" },
+  continue: { bn: "চালিয়ে যান", en: "Continue" },
+  copied: { bn: "কপি হয়েছে", en: "Copied" },
+  copyLink: { bn: "লিংক কপি করুন", en: "Copy link" },
+  somethingWrong: {
+    bn: "কিছু একটা ভুল হয়েছে, আবার চেষ্টা করুন",
+    en: "Something went wrong, please try again",
+  },
+  filterAll: { bn: "সব", en: "All" },
+  labelPrev: { bn: "আগের", en: "Prev" },
+  labelNext: { bn: "পরের", en: "Next" },
+  currency: { bn: "মুদ্রা", en: "Currency" },
+  joined: { bn: "যোগ দিয়েছেন", en: "Joined" },
+  accountStatus: { bn: "অ্যাকাউন্টের অবস্থা", en: "Account status" },
+  statusActive: { bn: "সক্রিয়", en: "Active" },
+  statusInactive: { bn: "নিষ্ক্রিয়", en: "Inactive" },
+  statusPending: { bn: "পেন্ডিং", en: "Pending" },
+  statusApproved: { bn: "অনুমোদিত", en: "Approved" },
+  statusRejected: { bn: "বাতিল", en: "Rejected" },
+
+  // ── OTP ও পাসওয়ার্ড ──
+  otpTitle: { bn: "যাচাইকরণ কোড", en: "Verification code" },
+  otpPlaceholder: { bn: "৬ সংখ্যার কোড", en: "6 digit code" },
+  otpSentTo: { bn: "কোড পাঠানো হয়েছে", en: "Code sent to" },
+  resendOtp: { bn: "কোড আবার পাঠান", en: "Resend code" },
+  resendIn: { bn: "আবার পাঠাতে পারবেন", en: "Resend in" },
+  seconds: { bn: "সেকেন্ড", en: "s" },
+  verify: { bn: "যাচাই করুন", en: "Verify" },
+  newPassword: { bn: "নতুন পাসওয়ার্ড", en: "New password" },
+  newPasswordPlaceholder: { bn: "নতুন পাসওয়ার্ড লিখুন", en: "Enter a new password" },
+  savePassword: { bn: "পাসওয়ার্ড সেভ করুন", en: "Save password" },
+  passwordChanged: {
+    bn: "পাসওয়ার্ড বদলে গেছে। এখন লগইন করুন।",
+    en: "Password changed. Please log in.",
+  },
+  passwordTooShort: {
+    bn: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+    en: "Password must be at least 6 characters",
+  },
+
+  // ── ড্যাশবোর্ডের মেনু ──
+  affiliatePanel: { bn: "অ্যাফিলিয়েট প্যানেল", en: "Affiliate panel" },
+  affiliateRole: { bn: "অ্যাফিলিয়েট", en: "Affiliate" },
+  navDashboard: { bn: "ড্যাশবোর্ড", en: "Dashboard" },
+  navMyUsers: { bn: "আমার খেলোয়াড়", en: "My players" },
+  navCommissionStatus: { bn: "কমিশনের হিসাব", en: "Commission" },
+  navWithdraw: { bn: "টাকা তুলুন", en: "Withdraw" },
+  navWithdrawHistory: { bn: "উইথড্র ইতিহাস", en: "Withdraw history" },
+  navProfile: { bn: "প্রোফাইল", en: "Profile" },
+
+  // ── ড্যাশবোর্ড ──
+  statTotalPlayers: { bn: "মোট খেলোয়াড়", en: "Total players" },
+  statActive: { bn: "সক্রিয়", en: "Active" },
+  statThisMonth: { bn: "এই মাসে এসেছেন", en: "Joined this month" },
+  statNewPlayers: { bn: "নতুন খেলোয়াড়", en: "New players" },
+  statPlayerDeposit: { bn: "তাঁদের মোট জমা", en: "Their deposits" },
+  statDeposits: { bn: "টি জমা", en: "deposits" },
+  statNetCommission: { bn: "শেষ কমিশন", en: "Net commission" },
+  statPayable: { bn: "আপনার পাওনা", en: "Payable to you" },
+  statOwed: { bn: "আপনার দেনা", en: "You owe" },
+  statRounds: { bn: "মোট রাউন্ড", en: "Rounds" },
+  statTurnover: { bn: "টার্নওভার", en: "Turnover" },
+  statGameCommission: { bn: "খেলা থেকে কমিশন", en: "Commission from play" },
+  statMonthCommission: { bn: "এই মাসের কমিশন", en: "This month" },
+  statReferred: { bn: "আপনার আনা", en: "Referred by you" },
+
+  commissionBalances: { bn: "জমে থাকা কমিশন", en: "Commission balances" },
+  commissionBalancesText: {
+    bn: "অ্যাডমিন হিসাব মেলালে এই টাকা ব্যালেন্সে চলে যায়।",
+    en: "These move into your balance when the admin settles up.",
+  },
+  commissionRates: { bn: "কমিশনের হার", en: "Commission rates" },
+  commissionRatesText: {
+    bn: "কোন খাত থেকে কত শতাংশ পাবেন।",
+    en: "What share you earn from each source.",
+  },
+  cmRefer: { bn: "রেফার কমিশন", en: "Refer commission" },
+  cmDeposit: { bn: "ডিপোজিট কমিশন", en: "Deposit commission" },
+  cmGameLoss: { bn: "খেলোয়াড় হারলে", en: "When a player loses" },
+  cmGameWin: { bn: "খেলোয়াড় জিতলে", en: "When a player wins" },
+  cmNet: { bn: "শেষ হিসাব", en: "Net" },
+  cmGross: { bn: "মোট পাওনা", en: "Gross" },
+  cmGrossText: { bn: "জেতার ভাগ বাদ দেওয়ার আগে", en: "Before the win share is taken out" },
+
+  gameSummary: { bn: "খেলার হিসাব", en: "Play summary" },
+  gameSummaryText: {
+    bn: "আপনার খেলোয়াড়েরা কত খেলেছেন।",
+    en: "How much your players have played.",
+  },
+  myReferralLink: { bn: "আপনার রেফারেল লিংক", en: "Your referral link" },
+  myReferralLinkText: {
+    bn: "এই লিংক দিয়ে কেউ অ্যাকাউন্ট খুললে তিনি আপনার খেলোয়াড়।",
+    en: "Anyone signing up with this link becomes your player.",
+  },
+  myReferralHint: {
+    bn: "যত বেশি সক্রিয় খেলোয়াড়, তত বেশি কমিশন।",
+    en: "The more active players, the more commission.",
+  },
+  dashboardNote: {
+    bn: "খেলোয়াড় হারলে আপনার পাওনা বাড়ে, জিতলে জেতার ভাগটা বাদ যায় — তাই শেষ হিসাব ঋণাত্মকও হতে পারে।",
+    en: "A player's loss adds to what you are owed; their win is deducted — so the net can be negative.",
+  },
+
+  // ── আমার খেলোয়াড় ──
+  myUsersText: {
+    bn: "আপনার লিংক দিয়ে যাঁরা এসেছেন।",
+    en: "Everyone who signed up with your link.",
+  },
+  searchPlayer: { bn: "নাম বা নম্বর দিয়ে খুঁজুন", en: "Search name or number" },
+  noPlayersYet: { bn: "এখনো কেউ আসেননি", en: "Nobody yet" },
+  thPlayer: { bn: "খেলোয়াড়", en: "Player" },
+  thJoined: { bn: "কবে এসেছেন", en: "Joined" },
+  thDeposit: { bn: "জমা", en: "Deposit" },
+  thTurnover: { bn: "টার্নওভার", en: "Turnover" },
+  thLastLogin: { bn: "শেষ লগইন", en: "Last login" },
+  thStatus: { bn: "অবস্থা", en: "Status" },
+  thWhen: { bn: "কখন", en: "When" },
+  thGame: { bn: "গেম", en: "Game" },
+  thBet: { bn: "বাজি", en: "Bet" },
+  thResult: { bn: "ফল", en: "Result" },
+  thCommission: { bn: "কমিশন", en: "Commission" },
+  thMethod: { bn: "মাধ্যম", en: "Method" },
+  thNumber: { bn: "নম্বর", en: "Number" },
+  thAmount: { bn: "পরিমাণ", en: "Amount" },
+  thAfter: { bn: "পরের ব্যালেন্স", en: "Balance after" },
+
+  // ── কমিশনের হিসাব ──
+  mainBalance: { bn: "ব্যালেন্স", en: "Balance" },
+  mainBalanceText: { bn: "এখান থেকেই টাকা তোলা যায়", en: "This is what you can withdraw" },
+  commissionHistory: { bn: "কমিশন কোথা থেকে এল", en: "Where the commission came from" },
+  commissionHistoryText: {
+    bn: "কোন খেলোয়াড়ের কোন রাউন্ড থেকে কত।",
+    en: "Which player, which round, how much.",
+  },
+  noCommissionYet: { bn: "এখনো কোনো কমিশন নেই", en: "No commission yet" },
+  commissionSettleNote: {
+    bn: "জমে থাকা কমিশন অ্যাডমিন হিসাব মিলিয়ে ব্যালেন্সে বসিয়ে দেন; তারপর সেখান থেকে তোলা যায়।",
+    en: "The admin settles your commission into your balance, and you withdraw from there.",
+  },
+
+  // ── প্রোফাইল ──
+  myInfo: { bn: "আমার তথ্য", en: "My details" },
+  myInfoText: { bn: "অ্যাকাউন্টে যা আছে", en: "What the account holds" },
+  profileChangeNote: {
+    bn: "নাম, নম্বর বা কমিশনের হার বদলাতে সাপোর্টে যোগাযোগ করুন।",
+    en: "To change your name, number or commission rates, contact support.",
+  },
+
+  // ── উইথড্র ──
+  withdrawText: {
+    bn: "ব্যালেন্স থেকে নিজের নম্বরে টাকা নিন।",
+    en: "Move money from your balance to your own number.",
+  },
+  withdrawHistoryText: { bn: "আগের আবেদনগুলো", en: "Your earlier requests" },
+  availableBalance: { bn: "তোলার মতো আছে", en: "Available" },
+  myNumbers: { bn: "সেভ করা নম্বর", en: "Saved numbers" },
+  myNumbersText: { bn: "যেখানে টাকা যাবে", en: "Where the money goes" },
+  selectWithdrawMethod: { bn: "উপায় নির্বাচন করুন", en: "Select a method" },
+  selectWallet: { bn: "নম্বর নির্বাচন করুন", en: "Select a number" },
+  addNumber: { bn: "যোগ করুন", en: "Add" },
+  noNumberYet: { bn: "কোনো নম্বর সেভ করা নেই", en: "No number saved yet" },
+  noWithdrawMethod: { bn: "এখন কোনো উপায় চালু নেই", en: "No method is open right now" },
+  registrationNumber: { bn: "রেজিস্ট্রেশনের নম্বর", en: "Registration number" },
+  withdrawAmount: { bn: "কত টাকা তুলবেন", en: "How much to withdraw" },
+  amountPlaceholder: { bn: "টাকার পরিমাণ লিখুন", en: "Enter an amount" },
+  minMax: { bn: "সর্বনিম্ন / সর্বোচ্চ", en: "Min / Max" },
+  withdrawNow: { bn: "উইথড্র করুন", en: "Withdraw" },
+  withdrawDone: { bn: "আপনার উইথড্র জমা হয়েছে", en: "Your withdraw has been submitted" },
+  withdrawDoneText: {
+    bn: "অ্যাডমিন দেখে অনুমোদন দিলে টাকা আপনার নম্বরে চলে যাবে।",
+    en: "Once an admin approves it, the money goes to your number.",
+  },
+  noWithdrawYet: { bn: "এখনো কোনো উইথড্র নেই", en: "No withdraw yet" },
+  pendingWithdrawText: {
+    bn: "আপনার একটা আবেদন এখনো দেখা হচ্ছে। সেটা শেষ হলে আবার চেষ্টা করুন।",
+    en: "You already have a request being checked. Try again once it is done.",
+  },
+  turnoverLeftText: { bn: "টার্নওভার বাকি আছে:", en: "Turnover still to play:" },
+  needVerificationText: {
+    bn: "আগে পরিচয় যাচাই সম্পন্ন করতে হবে।",
+    en: "Please complete identity verification first.",
+  },
+
+  // ── সার্ভারের ভুলের বার্তা ──
+  errMissingFields: { bn: "সব ঘর পূরণ করুন", en: "Please fill in every field" },
+  errBadLogin: {
+    bn: "ইউজারনেম বা পাসওয়ার্ড ঠিক নেই",
+    en: "Username or password is not correct",
+  },
+  errAccountLocked: {
+    bn: "অ্যাকাউন্ট সাময়িক বন্ধ, একটু পরে চেষ্টা করুন",
+    en: "Account is locked, please try again later",
+  },
+  errAccountDisabled: { bn: "এই অ্যাকাউন্টটি বন্ধ আছে", en: "This account is disabled" },
+  errNoAccount: { bn: "এই নম্বরে কোনো অ্যাকাউন্ট নেই", en: "No account found" },
+  errUsernameTaken: { bn: "এই ইউজারনেম নেওয়া হয়ে গেছে", en: "This username is taken" },
+  errUsernameChars: {
+    bn: "ইউজারনেমে শুধু অক্ষর ও সংখ্যা চলবে",
+    en: "Username allows only letters and numbers",
+  },
+  errUsernameLength: {
+    bn: "ইউজারনেম ৪ থেকে ১৫ অক্ষরের হতে হবে",
+    en: "Username must be 4 to 15 characters",
+  },
+  errPhoneTaken: { bn: "এই নম্বরে আগেই অ্যাকাউন্ট আছে", en: "This number already has an account" },
+  errPasswordTooShort: {
+    bn: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে",
+    en: "Password must be at least 6 characters",
+  },
+  errOtpWrong: { bn: "কোডটা ঠিক নেই", en: "That code is not right" },
+  errOtpExpired: { bn: "কোডের মেয়াদ শেষ, আবার পাঠান", en: "The code expired, send it again" },
+  errOtpWait: { bn: "একটু পরে আবার চেষ্টা করুন", en: "Please wait a moment" },
+  errOtpNotVerified: { bn: "আগে কোডটা যাচাই করুন", en: "Verify the code first" },
+  errLowBalance: { bn: "ব্যালেন্সে যথেষ্ট টাকা নেই", en: "Not enough balance" },
+  errPendingWithdraw: {
+    bn: "আপনার একটা আবেদন এখনো ঝুলে আছে",
+    en: "You already have a request waiting",
+  },
+  errNotAffiliate: {
+    bn: "এই অংশটা অ্যাফিলিয়েটদের জন্য",
+    en: "This area is for affiliates",
+  },
+
   // ── 404 ──
   notFoundText: {
     bn: "দুঃখিত, আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।",

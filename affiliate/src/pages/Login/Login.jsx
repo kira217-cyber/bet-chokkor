@@ -1,30 +1,111 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Eye, EyeOff } from "lucide-react";
 
 import AuthCard from "../../components/AuthCard/AuthCard";
 import FormField from "../../components/FormField/FormField";
+import FormAlert from "../../components/FormAlert/FormAlert";
+import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
+import { setCredentials } from "../../features/auth/authSlice";
+import { authError, loginAffiliate } from "../../features/auth/authApi";
 
 /**
  * অ্যাফিলিয়েট লগইন।
- * সাবমিট এখনো স্ট্যাটিক — server যুক্ত হলে authSlice এর thunk বসবে।
+ *
+ * সার্ভারে খেলোয়াড় আর অ্যাফিলিয়েটের রুট একটাই; অনুরোধে
+ * `site: "affiliate"` যায় বলে খেলোয়াড়ের অ্যাকাউন্ট দিয়ে এখানে ঢোকা
+ * যায় না — সার্ভার ভূমিকা মিলিয়ে দেখে।
+ *
+ * OTP চালু থাকলে পাসওয়ার্ডের পর কোডের ধাপ আসে; বন্ধ থাকলে সরাসরি।
  */
 const Login = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
-  const canSubmit = form.username.trim() && form.password.trim();
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [otpStep, setOtpStep] = useState(null);
+
+  const canSubmit = form.username.trim() && form.password.trim() && !busy;
 
   const update = (key) => (event) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
+
+  const finish = (data) => {
+    dispatch(setCredentials({ user: data.user, token: data.token }));
+    navigate("/dashboard", { replace: true });
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+
+    if (!canSubmit) return;
+
+    try {
+      setBusy(true);
+      setError("");
+
+      const data = await loginAffiliate({
+        userId: form.username.trim(),
+        password: form.password,
+      });
+
+      // OTP লাগলে সার্ভার টোকেন দেয় না, কোড চাওয়ার কথা বলে
+      if (data.otpRequired) {
+        setOtpStep({ maskedPhone: data.maskedPhone });
+        return;
+      }
+
+      finish(data);
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** কোড মিলে গেলে একই পাসওয়ার্ড দিয়ে আবার — এবার সার্ভার টোকেন দেবে */
+  const afterOtp = async () => {
+    try {
+      setBusy(true);
+
+      const data = await loginAffiliate({
+        userId: form.username.trim(),
+        password: form.password,
+      });
+
+      finish(data);
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+      setOtpStep(null);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const boxClass =
     "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--form-box-bg)]";
   const inputClass =
     "h-[48px] w-full bg-transparent px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]";
+
+  if (otpStep) {
+    return (
+      <AuthCard title={t("otpTitle")} subtitle={t("loginSubtitle")}>
+        <OtpStep
+          flow="login"
+          userId={form.username.trim()}
+          maskedPhone={otpStep.maskedPhone}
+          onVerified={afterOtp}
+        />
+      </AuthCard>
+    );
+  }
 
   return (
     <AuthCard
@@ -42,10 +123,9 @@ const Login = () => {
         </>
       }
     >
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={(event) => event.preventDefault()}
-      >
+      <form className="flex flex-col gap-5" onSubmit={submit}>
+        <FormAlert>{error}</FormAlert>
+
         <FormField label={t("username")}>
           <div className={boxClass}>
             <input
@@ -83,7 +163,7 @@ const Login = () => {
 
         <div className="flex justify-end">
           <Link
-            to="/login"
+            to="/forgot-password"
             className="text-[14px] text-[var(--primary500)] underline underline-offset-4"
           >
             {t("forgotPassword")}
@@ -100,7 +180,7 @@ const Login = () => {
               : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
           }
         >
-          {t("login")}
+          {busy ? t("loading") : t("login")}
         </button>
       </form>
     </AuthCard>

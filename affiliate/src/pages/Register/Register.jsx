@@ -1,19 +1,35 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Check, ChevronDown } from "lucide-react";
 
 import AuthCard from "../../components/AuthCard/AuthCard";
 import FormField from "../../components/FormField/FormField";
+import FormAlert from "../../components/FormAlert/FormAlert";
+import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
+import { setCredentials } from "../../features/auth/authSlice";
+import {
+  authError,
+  registerAffiliate,
+  sendOtp,
+} from "../../features/auth/authApi";
 
 /**
  * অ্যাফিলিয়েট রেজিস্ট্রেশন — এক পেজেই সব ঘর (ক্লায়েন্টের ৩-ধাপ ফর্মের
  * বদলে), কারণ অ্যাফিলিয়েটের তথ্য কম আর একবারে দেখতে পারলে সুবিধা।
  *
- * সাবমিট এখনো স্ট্যাটিক — server যুক্ত হলে রেজিস্টার API বসবে।
+ * OTP চালু থাকলে সাবমিটের পর কোডের ধাপ আসে — কোডটা আগেভাগে পাঠানো হয়
+ * না, সার্ভার চাওয়ার পরেই; নইলে যাদের জন্য OTP বন্ধ তাদেরও SMS যেত।
  */
 const Register = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [otpStep, setOtpStep] = useState(null);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -37,7 +53,74 @@ const Register = () => {
     form.username.trim() &&
     phoneValid &&
     passwordMatch &&
-    agreed;
+    agreed &&
+    !busy;
+
+  /** নামটা দুই ভাগে — সার্ভারে firstName ও lastName আলাদা ঘর */
+  const splitName = () => {
+    const parts = form.fullName.trim().split(/\s+/);
+    return { firstName: parts[0] || "", lastName: parts.slice(1).join(" ") };
+  };
+
+  const payload = () => ({
+    userId: form.username.trim().toLowerCase(),
+    password: form.password,
+    countryCode: "+880",
+    phone: form.phone,
+    email: form.email.trim(),
+    ...splitName(),
+  });
+
+  const finish = (data) => {
+    dispatch(setCredentials({ user: data.user, token: data.token }));
+    navigate("/dashboard", { replace: true });
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+
+    if (!canSubmit) return;
+
+    try {
+      setBusy(true);
+      setError("");
+
+      finish(await registerAffiliate(payload()));
+    } catch (err) {
+      // সার্ভার কোড চাইলে তখনই পাঠানো হয়
+      if (err?.response?.data?.code === "otpNotVerified") {
+        try {
+          const sent = await sendOtp({
+            flow: "register",
+            countryCode: "+880",
+            phone: form.phone,
+          });
+
+          setOtpStep({ maskedPhone: sent.maskedPhone });
+          return;
+        } catch (otpErr) {
+          setError(authError(otpErr, t("somethingWrong"), t));
+          return;
+        }
+      }
+
+      setError(authError(err, t("somethingWrong"), t));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const afterOtp = async () => {
+    try {
+      setBusy(true);
+      finish(await registerAffiliate(payload()));
+    } catch (err) {
+      setError(authError(err, t("somethingWrong"), t));
+      setOtpStep(null);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const boxClass =
     "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--form-box-bg)]";
@@ -56,6 +139,20 @@ const Register = () => {
     </div>
   );
 
+  if (otpStep) {
+    return (
+      <AuthCard title={t("otpTitle")} subtitle={t("registerSubtitle")}>
+        <OtpStep
+          flow="register"
+          countryCode="+880"
+          phone={form.phone}
+          maskedPhone={otpStep.maskedPhone}
+          onVerified={afterOtp}
+        />
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard
       title={t("registerTitle")}
@@ -73,10 +170,9 @@ const Register = () => {
         </>
       }
     >
-      <form
-        className="flex flex-col gap-5"
-        onSubmit={(event) => event.preventDefault()}
-      >
+      <form className="flex flex-col gap-5" onSubmit={submit}>
+        <FormAlert>{error}</FormAlert>
+
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField label={t("fullName")}>
             {textInput("fullName", t("fullNamePlaceholder"))}
@@ -187,7 +283,7 @@ const Register = () => {
               : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
           }
         >
-          {t("signup")}
+          {busy ? t("loading") : t("signup")}
         </button>
       </form>
     </AuthCard>

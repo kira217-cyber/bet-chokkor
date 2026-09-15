@@ -29,6 +29,19 @@ const LOCK_MINUTES = 15;
 
 const text = (value) => String(value ?? "").trim();
 
+/**
+ * অনুরোধটা কোন সাইট থেকে — খেলোয়াড়ের, নাকি অ্যাফিলিয়েটের।
+ *
+ * দুই সাইটে নিয়ম প্রায় একই, শুধু কয়েকটা জায়গায় আলাদা: কী ভূমিকা
+ * পাবে, রেজিস্টার বোনাস পাবে কিনা, আর OTP এর সেটিংটা কোনটা। তাই
+ * আলাদা রুট না বানিয়ে একই রুটই দুই সাইটের কাজ করে — নইলে একটায় বাগ
+ * ঠিক করলে অন্যটা পিছিয়ে থাকত।
+ */
+const siteOf = (body) => (body?.site === "affiliate" ? "affiliate" : "client");
+
+/** ওই সাইটের ব্যবহারকারীর ভূমিকা */
+const roleOf = (site) => (site === "affiliate" ? "aff-user" : "user");
+
 /** এক IP থেকে বারবার চেষ্টা ঠেকাতে */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -217,6 +230,7 @@ router.post("/otp/verify", otpLimiter, async (req, res) => {
 
 router.post("/register", authLimiter, async (req, res) => {
   try {
+    const site = siteOf(req.body);
     const userId = text(req.body?.userId).toLowerCase();
     const password = text(req.body?.password);
     const countryCode = normalizeCountryCode(req.body?.countryCode);
@@ -260,7 +274,7 @@ router.post("/register", authLimiter, async (req, res) => {
     }
 
     // OTP চালু থাকলে আগে যাচাই হয়ে থাকতে হবে
-    if (await isOtpRequired("client", "register")) {
+    if (await isOtpRequired(site, "register")) {
       if (!isVerified({ flow: "register", countryCode, phone })) {
         return errorResponse(res, "Please verify the OTP first", 400, "otpNotVerified");
       }
@@ -278,6 +292,7 @@ router.post("/register", authLimiter, async (req, res) => {
 
     const user = await User.create({
       userId,
+      role: roleOf(site),
       password: await bcrypt.hash(password, BCRYPT_ROUNDS),
       countryCode,
       phone,
@@ -294,8 +309,15 @@ router.post("/register", authLimiter, async (req, res) => {
       await referrer.save();
     }
 
-    // চালু ক্যাম্পেইন থাকলে বোনাস ও টার্নওভার বসে
-    const bonus = await grantRegisterBonus(user);
+    /*
+     * চালু ক্যাম্পেইন থাকলে বোনাস ও টার্নওভার বসে।
+     *
+     * শুধু খেলোয়াড়ের জন্য — অ্যাফিলিয়েট খেলতে আসেন না, তাঁর আয় কমিশন
+     * থেকে। বোনাস দিলে সেটার টার্নওভারও বসত, আর তখন কমিশন তুলতে গিয়ে
+     * আটকে যেতেন।
+     */
+    const bonus =
+      site === "affiliate" ? null : await grantRegisterBonus(user);
 
     clearOtp({ flow: "register", countryCode, phone });
 
@@ -323,6 +345,7 @@ router.post("/register", authLimiter, async (req, res) => {
 
 router.post("/login", authLimiter, async (req, res) => {
   try {
+    const site = siteOf(req.body);
     const userId = text(req.body?.userId).toLowerCase();
     const password = text(req.body?.password);
 
@@ -369,8 +392,17 @@ router.post("/login", authLimiter, async (req, res) => {
       return errorResponse(res, "This account is disabled", 403, "accountDisabled");
     }
 
+    /*
+     * খেলোয়াড়ের অ্যাকাউন্ট দিয়ে অ্যাফিলিয়েট সাইটে (বা উল্টোটা) ঢোকা
+     * যাবে না। একই বার্তা দেওয়া হয় — নইলে বাইরে থেকে যাচাই করা যেত
+     * কোন ইউজারনেমটা কোন ধরনের অ্যাকাউন্ট।
+     */
+    if (user.role !== roleOf(site)) {
+      return errorResponse(res, "Username or password is not correct", 401, "badLogin");
+    }
+
     // লগইনে OTP চালু থাকলে যাচাই হয়ে থাকতে হবে
-    if (await isOtpRequired("client", "login")) {
+    if (await isOtpRequired(site, "login")) {
       if (!isVerified({ flow: "login", countryCode: user.countryCode, phone: user.phone })) {
         // পুরো নম্বর ফেরত যায় না — কোড চাওয়ার সময় ক্লায়েন্ট শুধু
         // ইউজারনেম পাঠায়, নম্বরটা সার্ভারই খুঁজে নেয়
@@ -403,6 +435,7 @@ router.post("/login", authLimiter, async (req, res) => {
 
 router.post("/forgot-password", authLimiter, async (req, res) => {
   try {
+    const site = siteOf(req.body);
     const userId = text(req.body?.userId);
     const inputCode = normalizeCountryCode(req.body?.countryCode);
     const inputPhone = normalizePhone(req.body?.phone, inputCode);
@@ -434,7 +467,7 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     const countryCode = target.countryCode;
     const phone = target.phone;
 
-    if (await isOtpRequired("client", "forgotPassword")) {
+    if (await isOtpRequired(site, "forgotPassword")) {
       if (!isVerified({ flow: "forgotPassword", countryCode, phone })) {
         return errorResponse(res, "Please verify the OTP first", 400, "otpNotVerified");
       }
