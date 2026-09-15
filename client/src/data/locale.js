@@ -559,6 +559,15 @@ export const locale = {
     bn: "এখনো কেউ আপনার কোড দিয়ে আসেননি",
     en: "Nobody has signed up with your code yet",
   },
+  refProgramStatus: {
+    bn: "রেফারেল প্রোগ্রামের স্ট্যাটাস",
+    en: "Referral program status",
+  },
+  refEarnedStatus: { bn: "অর্জিত রেফারেল স্ট্যাটাস", en: "Earned referral status" },
+  refBonusRules: { bn: "অর্জিত বোনাসের নিয়মাবলী", en: "Bonus rules" },
+  refTotalReward: { bn: "মোট পুরস্কার", en: "Total reward" },
+  refRewardTaka: { bn: "রিওয়ার্ড (৳)", en: "Reward (৳)" },
+  shareIt: { bn: "শেয়ার করুন", en: "Share" },
   refCommission: { bn: "কমিশন", en: "Commission" },
   refMilestone: { bn: "মাইলফলক", en: "Milestone" },
 
