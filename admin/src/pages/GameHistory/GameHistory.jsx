@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { Dices, Loader2, RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
+import { Pager, SummaryCards, UserCell } from "../../components/HistoryBits/HistoryBits";
 
 const fetchRows = async (result, q, page) => {
   const params = new URLSearchParams({ page: String(page), limit: "20" });
@@ -15,6 +16,7 @@ const fetchRows = async (result, q, page) => {
 };
 
 const money = (value) => Number(value || 0).toFixed(2);
+const when = (value) => (value ? new Date(value).toLocaleString() : "—");
 
 const TABS = [
   { key: "all", label: "All" },
@@ -29,12 +31,33 @@ const RESULT_COLOR = {
   push: "var(--text-muted)",
 };
 
+const HEADS = [
+  "When",
+  "Player",
+  "Gameplay",
+  "Game",
+  "Round",
+  "Serial",
+  "Result",
+  "Bet",
+  "Win",
+  "Net",
+  "Before",
+  "After",
+  "Turnover",
+  "Commission",
+];
+
 /**
  * খেলার ইতিহাস।
  *
  * প্রতিটা রাউন্ড white-label মাস্টারের কলব্যাক থেকে আসে — বাজি,
  * ফলাফল, আগে-পরে ব্যালেন্স, টার্নওভারে গোনা হলো কিনা আর অ্যাফিলিয়েট
  * কত কমিশন পেলেন।
+ *
+ * উপরে সারাংশ দেখে এক নজরেই বোঝা যায় সাইটের লাভ-লোকসান কোন দিকে,
+ * তারপর দরকার হলে সারিতে নামা যায়। খেলোয়াড়ের নামে ক্লিক করলে সরাসরি
+ * তার বিস্তারিত পাতায় চলে যাওয়া যায়।
  */
 const GameHistory = () => {
   const [tab, setTab] = useState("all");
@@ -85,8 +108,11 @@ const GameHistory = () => {
     }
   };
 
+  const counts = totals.counts || {};
+  const profit = Number(totals.siteProfit || 0);
+
   return (
-    <div className="mx-auto max-w-[1200px]">
+    <div className="mx-auto max-w-[1400px]">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="ad-title text-[26px] lg:text-[30px]">Game History</h1>
@@ -106,11 +132,17 @@ const GameHistory = () => {
         </button>
       </div>
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-4">
-        {[
-          ["Rounds", meta.total ?? 0, "var(--text-primary)"],
+      <SummaryCards
+        items={[
+          ["Rounds", meta.total ?? 0, "var(--text-primary)", `On this page: ${rows.length}`],
           ["Total bet", money(totals.bet), "var(--primary500)"],
           ["Total win", money(totals.win), "var(--status-success)"],
+          [
+            "Site profit",
+            money(totals.siteProfit),
+            profit >= 0 ? "var(--status-success)" : "var(--status-danger)",
+            profit >= 0 ? "House ahead" : "House behind",
+          ],
           [
             "Player net",
             money(totals.net),
@@ -120,15 +152,11 @@ const GameHistory = () => {
                 ? "var(--status-danger)"
                 : "var(--text-muted)",
           ],
-        ].map(([label, value, color]) => (
-          <div key={label} className="ad-card py-4">
-            <p className="text-[13px] text-[var(--text-muted)]">{label}</p>
-            <p className="mt-1 text-[22px] font-black" style={{ color }}>
-              {value}
-            </p>
-          </div>
-        ))}
-      </div>
+          ["Won rounds", counts.win ?? 0, "var(--status-success)"],
+          ["Lost rounds", counts.loss ?? 0, "var(--status-danger)"],
+          ["Push rounds", counts.push ?? 0, "var(--text-muted)"],
+        ]}
+      />
 
       <div className="ad-card mb-4 flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2">
@@ -162,7 +190,7 @@ const GameHistory = () => {
               setSearch(event.target.value);
               setPage(1);
             }}
-            placeholder="Username, game id or round"
+            placeholder="Username, phone, game id or round"
             style={{ paddingInlineStart: "38px" }}
             className="ad-input"
           />
@@ -186,21 +214,10 @@ const GameHistory = () => {
         </div>
       ) : (
         <div className="ad-card overflow-x-auto p-0">
-          <table className="w-full min-w-[980px] border-collapse text-left">
+          <table className="w-full min-w-[1400px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">
-                {[
-                  "When",
-                  "Player",
-                  "Game",
-                  "Provider",
-                  "Bet",
-                  "Win",
-                  "Net",
-                  "Balance after",
-                  "Turnover",
-                  "Commission",
-                ].map((head) => (
+                {HEADS.map((head) => (
                   <th
                     key={head}
                     className="px-3 py-3 text-[12px] font-bold uppercase tracking-wide text-[var(--text-muted)]"
@@ -218,19 +235,46 @@ const GameHistory = () => {
                   className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]"
                 >
                   <td className="px-3 py-3 text-[12px] text-[var(--text-muted)]">
-                    {new Date(row.createdAt).toLocaleString()}
+                    {when(row.createdAt)}
                   </td>
 
-                  <td className="px-3 py-3 text-[14px] font-semibold text-[var(--neutral100)]">
-                    {row.userId}
+                  <td className="px-3 py-3">
+                    <UserCell user={row.user} userId={row.userId} />
                   </td>
 
-                  <td className="px-3 py-3 text-[12px] text-[var(--text-secondary)]">
-                    {row.gameUId}
+                  <td className="px-3 py-3 text-[12px]">
+                    <p className="font-semibold text-[var(--text-secondary)]">
+                      {row.userGamePlayName || "—"}
+                    </p>
+                    <p className="mt-0.5 break-all text-[var(--text-disabled)]">
+                      {row.memberAccount || "—"}
+                    </p>
                   </td>
 
-                  <td className="px-3 py-3 text-[12px] text-[var(--text-muted)]">
-                    {row.providerCode || "—"}
+                  <td className="max-w-[190px] px-3 py-3">
+                    <p className="text-[13px] font-semibold text-[var(--neutral100)]">
+                      {row.gameName || "—"}
+                    </p>
+                    <p className="mt-0.5 break-all text-[11px] text-[var(--text-disabled)]">
+                      {row.providerCode || "—"} · {row.gameUId}
+                    </p>
+                  </td>
+
+                  <td className="max-w-[150px] break-all px-3 py-3 text-[11px] text-[var(--text-muted)]">
+                    {row.gameRound || "—"}
+                  </td>
+
+                  <td className="max-w-[150px] break-all px-3 py-3 text-[11px] text-[var(--text-muted)]">
+                    {row.serialNumber || "—"}
+                  </td>
+
+                  <td className="px-3 py-3">
+                    <span
+                      className="text-[12px] font-bold uppercase"
+                      style={{ color: RESULT_COLOR[row.resultType] }}
+                    >
+                      {row.resultType}
+                    </span>
                   </td>
 
                   <td className="px-3 py-3 text-[13px] text-[var(--text-primary)]">
@@ -246,6 +290,10 @@ const GameHistory = () => {
                     style={{ color: RESULT_COLOR[row.resultType] }}
                   >
                     {money(row.netAmount)}
+                  </td>
+
+                  <td className="px-3 py-3 text-[13px] text-[var(--text-muted)]">
+                    {money(row.balanceBefore)}
                   </td>
 
                   <td className="px-3 py-3 text-[13px] text-[var(--primary500)]">
@@ -280,37 +328,15 @@ const GameHistory = () => {
         </div>
       )}
 
-      {meta.totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-3">
-          <button
-            type="button"
-            disabled={page <= 1 || loading}
-            onClick={() => {
-              setLoading(true);
-              setPage((prev) => prev - 1);
-            }}
-            className="ad-btn ad-btn--ghost ad-btn--sm"
-          >
-            Previous
-          </button>
-
-          <span className="text-[13px] text-[var(--text-muted)]">
-            {meta.page} / {meta.totalPages}
-          </span>
-
-          <button
-            type="button"
-            disabled={page >= meta.totalPages || loading}
-            onClick={() => {
-              setLoading(true);
-              setPage((prev) => prev + 1);
-            }}
-            className="ad-btn ad-btn--ghost ad-btn--sm"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pager
+        page={meta.page || 1}
+        totalPages={meta.totalPages || 1}
+        busy={loading}
+        onChange={(next) => {
+          setLoading(true);
+          setPage(next);
+        }}
+      />
 
       <p className="mt-4 text-[12px] text-[var(--text-disabled)]">
         Turnover moves from here — each bet counts towards whatever conditions

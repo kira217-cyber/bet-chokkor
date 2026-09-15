@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { Loader2, Receipt, RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
+import { UserCell } from "../../components/HistoryBits/HistoryBits";
 
 const fetchDeposits = async (status, q) => {
   const params = new URLSearchParams();
@@ -199,8 +200,8 @@ const AutoDepositHistory = () => {
                   key={deposit._id}
                   className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]"
                 >
-                  <td className="px-4 py-3 text-[14px] font-semibold text-[var(--neutral100)]">
-                    {deposit.user?.userId || deposit.userIdText || "—"}
+                  <td className="px-4 py-3">
+                    <UserCell user={deposit.user} userId={deposit.userIdText} />
                   </td>
 
                   <td className="px-4 py-3 text-[12px] text-[var(--text-muted)]">

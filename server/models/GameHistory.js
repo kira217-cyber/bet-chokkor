@@ -42,6 +42,16 @@ const gameHistorySchema = new Schema(
       unique: true,
     },
 
+    /**
+     * গেমের নাম — মাস্টারের তালিকা থেকে।
+     *
+     * ইতিহাসে uid ("0f78172e…") দেখিয়ে লাভ নেই, কেউ চিনবে না। নামটা
+     * কলব্যাকের সময়েই বসিয়ে রাখা হয়, কারণ পরে দেখাতে গেলে প্রতিবার
+     * মাস্টারে খুঁজতে হতো — আর নাম বদলে গেলেও যা খেলা হয়েছিল সেই
+     * নামটাই থাকা উচিত।
+     */
+    gameName: { type: String, default: "", trim: true },
+
     providerCode: { type: String, default: "", trim: true, uppercase: true },
 
     betAmount: { type: Number, required: true, min: 0 },

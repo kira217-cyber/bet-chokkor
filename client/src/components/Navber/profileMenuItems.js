@@ -25,23 +25,25 @@ export const buildProfileMenu = (t) => [
   { key: "personal", label: t("menuPersonalInfo"), Icon: User, to: "/member/profile" },
   { key: "security", label: t("menuSecurity"), Icon: Lock, soon: true },
   { key: "verify", label: t("verification"), Icon: BadgeCheck, soon: true },
+  // তিনটে নামেই একই ইতিহাসের পাতা, শুধু আলাদা ট্যাব খোলা থাকে —
+  // মূল সাইটের মেনুতে এই তিনটেই আছে, আর ভিতরে বাকি ট্যাবগুলোও পাওয়া যায়
   {
     key: "transaction",
     label: t("transactionRecords"),
     Icon: Receipt,
-    to: "/member/transaction-records",
+    to: "/member/history/deposit",
   },
   {
     key: "betting",
     label: t("bettingRecords"),
     Icon: ScrollText,
-    to: "/member/betting-records",
+    to: "/member/history/bet",
   },
   {
     key: "turnover",
     label: t("turnoverRecords"),
     Icon: RotateCcw,
-    to: "/member/turnover",
+    to: "/member/history/turnover",
   },
   { key: "vip", label: t("myVip"), Icon: Crown, soon: true },
   { key: "referral", label: t("menuReferral"), Icon: Users, soon: true },

@@ -12,9 +12,7 @@ import ManualDeposit from "../pages/Deposit/ManualDeposit";
 import AutoDeposit from "../pages/Deposit/AutoDeposit";
 import Withdraw from "../pages/Withdraw/Withdraw";
 import Profile from "../pages/Member/Profile";
-import TransactionRecords from "../pages/Member/TransactionRecords";
-import BettingRecords from "../pages/Member/BettingRecords";
-import TurnoverRecords from "../pages/Member/TurnoverRecords";
+import History from "../pages/Member/History";
 import PlayGame from "../pages/PlayGame/PlayGame";
 
 export const routes = createBrowserRouter([
@@ -58,27 +56,12 @@ export const routes = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      // পাঁচটা ট্যাবই এক পাতায়; URL এ কোনটা খোলা থাকবে সেটা বলা থাকে
       {
-        path: "member/transaction-records",
+        path: "member/history/:tab",
         element: (
           <PrivateRoute>
-            <TransactionRecords />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "member/betting-records",
-        element: (
-          <PrivateRoute>
-            <BettingRecords />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "member/turnover",
-        element: (
-          <PrivateRoute>
-            <TurnoverRecords />
+            <History />
           </PrivateRoute>
         ),
       },

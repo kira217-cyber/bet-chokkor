@@ -226,7 +226,12 @@ router.get("/my", protectUser, async (req, res) => {
 
     return successResponse(res, "Withdraws loaded", {
       requests,
-      meta: { page, limit, total },
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+      },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -264,7 +269,7 @@ router.get("/admin", protectAdmin, async (req, res) => {
 
     const [requests, total, counts] = await Promise.all([
       WithdrawRequest.find(filter)
-        .populate("user", "userId phone balance isActive")
+        .populate("user", "userId phone balance isActive role")
         .populate("reviewedBy", "email role")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
@@ -310,7 +315,7 @@ router.patch("/admin/:id/approve", protectAdmin, requireWrite, async (req, res) 
         },
       },
       { returnDocument: "after" },
-    ).populate("user", "userId phone balance");
+    ).populate("user", "userId phone balance role");
 
     if (!request) {
       const exists = await WithdrawRequest.exists({ _id: req.params.id });

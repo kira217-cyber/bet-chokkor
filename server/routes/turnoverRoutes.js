@@ -25,18 +25,26 @@ const withPercent = (row) => ({
 /** নিজের চলতি ও শেষ হওয়া টার্নওভার */
 router.get("/my", protectUser, async (req, res) => {
   try {
+    const page = Math.max(1, num(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, num(req.query.limit) || 10));
+
     const filter = { user: req.user._id };
     const status = text(req.query.status);
 
     if (["running", "completed"].includes(status)) filter.status = status;
 
-    const turnovers = await TurnOver.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(Math.min(100, Math.max(1, num(req.query.limit) || 20)))
-      .lean();
+    const [turnovers, total] = await Promise.all([
+      TurnOver.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      TurnOver.countDocuments(filter),
+    ]);
 
     return successResponse(res, "Turnovers loaded", {
       turnovers: turnovers.map(withPercent),
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -74,7 +82,7 @@ router.get("/admin", protectAdmin, async (req, res) => {
 
     const [turnovers, total, counts] = await Promise.all([
       TurnOver.find(filter)
-        .populate("user", "userId phone balance")
+        .populate("user", "userId phone balance role")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)

@@ -27,19 +27,46 @@ const masterBaseUrl = () =>
   text(process.env.MASTER_API_URL).replace(/\/+$/, "");
 
 /**
- * গেমের প্রোভাইডার দুইভাবে আসতে পারে।
+ * গেমের তথ্য দুইভাবে আসতে পারে।
  *
  * সরাসরি তালিকায় `provider.providerCode`, আর hot/popular এর মোড়কে
  * এক ধাপ নিচে `game.provider.providerCode` — দুটোই দেখা হয়।
+ *
+ * কোডের পাশাপাশি নামটাও রাখা হয়: ইতিহাসে "0f78172e…" এর বদলে
+ * "Lightning Baccarat" দেখালে তবেই কেউ বুঝতে পারেন কোন গেমে কী হয়েছে।
  */
 const addToMap = (map, games) => {
   (Array.isArray(games) ? games : []).forEach((item) => {
-    const uid = text(item?.gameUId || item?.game?.gameUId);
+    // hot/popular এর মোড়কে আসল গেমটা `game` এ, আর গেমের নামটা মাস্টার
+    // রাখে `oracleGame.name` এ — উপরের স্তরে নাম নেই
+    const inner = item?.game || {};
+    const oracle = item?.oracleGame || inner?.oracleGame || {};
+
+    const uid = text(item?.gameUId || inner?.gameUId || oracle?.gameUId);
+
+    if (!uid) return;
+
     const code = text(
-      item?.provider?.providerCode || item?.game?.provider?.providerCode,
+      item?.provider?.providerCode || inner?.provider?.providerCode,
     ).toUpperCase();
 
-    if (uid && code) map.set(uid, code);
+    const name = text(
+      oracle?.name ||
+        item?.gameName ||
+        inner?.gameName ||
+        item?.name ||
+        inner?.name,
+    );
+
+    if (!code && !name) return;
+
+    // একই uid আগে এলে যেটুকু জানা ছিল সেটুকু রেখেই বাকিটা যোগ হয়
+    const prev = map.get(uid) || { code: "", name: "" };
+
+    map.set(uid, {
+      code: code || prev.code,
+      name: name || prev.name,
+    });
   });
 };
 
@@ -100,49 +127,45 @@ const refresh = async () => {
   return inflight;
 };
 
+const EMPTY = { code: "", name: "" };
+
 /**
- * এক গেমের প্রোভাইডার কোড।
+ * এক গেমের তথ্য — প্রোভাইডার কোড ও নাম।
  *
- * না পেলে `null` — তখন কলার ধরে নেয় প্রোভাইডার অজানা, আর শর্তওয়ালা
+ * না পেলে খালি — তখন কলার ধরে নেয় প্রোভাইডার অজানা, আর শর্তওয়ালা
  * টার্নওভারে সেই বাজিটা গোনা হয় না। মাস্টার ধরা না গেলে পুরো কলব্যাক
  * ভেঙে ফেলার চেয়ে এটাই নিরাপদ।
  */
-export const resolveProviderCode = async (gameUId) => {
+export const resolveGameInfo = async (gameUId) => {
   const uid = text(gameUId);
 
-  if (!uid) return null;
+  if (!uid) return EMPTY;
 
   const fresh = Date.now() - cache.fetchedAt < CACHE_TTL_MS;
 
   if (fresh && cache.map.has(uid)) return cache.map.get(uid);
 
-  if (!fresh) {
-    try {
-      const map = await refresh();
-      return map.get(uid) || null;
-    } catch {
-      // পুরোনো ক্যাশ থাকলে সেটাই ভালো, কিছু না থাকার চেয়ে
-      return cache.map.get(uid) || null;
-    }
-  }
-
-  // ক্যাশ তাজা কিন্তু গেমটা নেই — নতুন গেম যোগ হয়ে থাকতে পারে
   try {
     const map = await refresh();
-    return map.get(uid) || null;
+    return map.get(uid) || EMPTY;
   } catch {
-    return null;
+    // পুরোনো ক্যাশ থাকলে সেটাই ভালো, কিছু না থাকার চেয়ে
+    return cache.map.get(uid) || EMPTY;
   }
 };
+
+/** শুধু প্রোভাইডার কোডটা — টার্নওভারের হিসাব এটাই ব্যবহার করে */
+export const resolveProviderCode = async (gameUId) =>
+  (await resolveGameInfo(gameUId)).code || null;
 
 /**
  * ক্যাশে থাকলে দাও, না থাকলে খালি — মাস্টারে কল করে না।
  *
- * ইতিহাসে প্রোভাইডারের নামটা থাকলে ভালো, কিন্তু সেটার জন্য প্রতিটা
- * রাউন্ডে পুরো তালিকা টেনে আনা বাড়াবাড়ি। তাই ওখানে এটাই ব্যবহার হয়।
+ * ইতিহাসে গেমের নাম ও প্রোভাইডার থাকলে ভালো, কিন্তু সেটার জন্য
+ * প্রতিটা রাউন্ডে পুরো তালিকা টেনে আনা বাড়াবাড়ি। তাই কলব্যাকে এটাই
+ * ব্যবহার হয়, আর না পেলে উত্তর পাঠানোর পরে বসিয়ে দেওয়া হয়।
  */
-export const peekProviderCode = (gameUId) =>
-  cache.map.get(text(gameUId)) || "";
+export const peekGameInfo = (gameUId) => cache.map.get(text(gameUId)) || EMPTY;
 
 /** পরীক্ষা ও অ্যাডমিন টুলের জন্য */
 export const catalogStatus = () => ({

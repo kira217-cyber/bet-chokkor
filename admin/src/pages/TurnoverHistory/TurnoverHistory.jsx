@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import { History, Loader2, RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
+import { UserCell } from "../../components/HistoryBits/HistoryBits";
 
 const fetchTurnovers = async (status, source, q) => {
   const params = new URLSearchParams();
@@ -219,8 +220,8 @@ const TurnoverHistory = () => {
                   key={row._id}
                   className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]"
                 >
-                  <td className="px-4 py-3 text-[14px] font-semibold text-[var(--neutral100)]">
-                    {row.user?.userId || "—"}
+                  <td className="px-4 py-3">
+                    <UserCell user={row.user} />
                   </td>
 
                   <td className="px-4 py-3 text-[13px] text-[var(--text-secondary)]">

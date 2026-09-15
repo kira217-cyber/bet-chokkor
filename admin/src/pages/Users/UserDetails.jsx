@@ -620,7 +620,20 @@ const UserDetails = ({ kind }) => {
         ]}
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
-          { key: "game", label: "Game", render: (r) => r.gameUId },
+          {
+            key: "game",
+            label: "Game",
+            render: (r) => (
+              <>
+                <span className="font-semibold text-[var(--neutral100)]">
+                  {r.gameName || "—"}
+                </span>
+                <span className="mt-0.5 block break-all text-[11px] text-[var(--text-disabled)]">
+                  {r.gameUId}
+                </span>
+              </>
+            ),
+          },
           { key: "provider", label: "Provider", render: (r) => r.providerCode || "—" },
           { key: "bet", label: "Bet", render: (r) => money(r.betAmount) },
           { key: "win", label: "Win", render: (r) => money(r.winAmount) },

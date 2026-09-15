@@ -253,20 +253,28 @@ router.post("/create", protectUser, async (req, res) => {
 /** নিজের অটো ডিপোজিটের ইতিহাস */
 router.get("/history/my", protectUser, async (req, res) => {
   try {
-    const limit = Math.min(100, Math.max(1, num(req.query.limit) || 20));
+    const page = Math.max(1, num(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, num(req.query.limit) || 10));
 
     const filter = { user: req.user._id };
     const status = String(req.query.status || "").trim().toUpperCase();
 
     if (["PENDING", "PAID", "FAILED"].includes(status)) filter.status = status;
 
-    const deposits = await AutoDeposit.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .select("-calc.affiliateDepositCommission")
-      .lean();
+    const [deposits, total] = await Promise.all([
+      AutoDeposit.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .select("-calc.affiliateDepositCommission")
+        .lean(),
+      AutoDeposit.countDocuments(filter),
+    ]);
 
-    return successResponse(res, "Auto deposits loaded", { deposits });
+    return successResponse(res, "Auto deposits loaded", {
+      deposits,
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
@@ -365,7 +373,7 @@ router.get("/deposits/admin", protectAdmin, async (req, res) => {
 
     const [deposits, total, counts] = await Promise.all([
       AutoDeposit.find(filter)
-        .populate("user", "userId phone balance")
+        .populate("user", "userId phone balance role")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)

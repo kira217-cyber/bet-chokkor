@@ -138,7 +138,12 @@ router.get("/my", protectUser, async (req, res) => {
 
     return successResponse(res, "Deposits loaded", {
       requests,
-      meta: { page, limit, total },
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit) || 1,
+      },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -179,7 +184,7 @@ router.get("/admin", protectAdmin, async (req, res) => {
 
     const [requests, total, counts] = await Promise.all([
       DepositRequest.find(filter)
-        .populate("user", "userId phone balance isActive")
+        .populate("user", "userId phone balance isActive role")
         .populate("approvedBy", "email role")
         .populate("rejectedBy", "email role")
         .sort({ createdAt: -1 })
@@ -210,7 +215,7 @@ router.get("/admin/:id", protectAdmin, async (req, res) => {
     if (!isId(req.params.id)) return errorResponse(res, "Invalid id", 400);
 
     const request = await DepositRequest.findById(req.params.id)
-      .populate("user", "userId phone balance isActive")
+      .populate("user", "userId phone balance isActive role")
       .populate("approvedBy", "email role")
       .populate("rejectedBy", "email role")
       .lean();
@@ -323,7 +328,7 @@ router.patch("/admin/:id/approve", protectAdmin, requireWrite, async (req, res) 
     }
 
     const request = await DepositRequest.findById(claimed._id)
-      .populate("user", "userId phone balance isActive")
+      .populate("user", "userId phone balance isActive role")
       .lean();
 
     return successResponse(res, "Deposit approved", {

@@ -1,4 +1,4 @@
-/** ইতিহাসের পাতায় টাকা ও তারিখ দেখানোর ফরম্যাট */
+/** ইতিহাসের পাতায় টাকা, তারিখ আর স্ট্যাটাসের রঙ */
 
 export const money = (value) => {
   const amount = Number(value || 0);
@@ -24,3 +24,19 @@ export const formatDate = (value) => {
     hour12: false,
   });
 };
+
+const STATUS_TONE = {
+  pending: "var(--status-pending)",
+  approved: "var(--status-success)",
+  paid: "var(--status-success)",
+  completed: "var(--status-success)",
+  running: "var(--status-pending)",
+  rejected: "var(--status-danger)",
+  failed: "var(--status-danger)",
+  win: "var(--status-success)",
+  loss: "var(--status-danger)",
+  push: "var(--status-info)",
+};
+
+export const statusTone = (status) =>
+  STATUS_TONE[String(status || "").toLowerCase()] || "var(--text-muted)";

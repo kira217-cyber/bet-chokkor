@@ -370,6 +370,24 @@ export const locale = {
   tabDeposit: { bn: "ডিপোজিট", en: "Deposit" },
   tabAutoDeposit: { bn: "অটো ডিপোজিট", en: "Auto Deposit" },
   tabWithdraw: { bn: "উইথড্র", en: "Withdraw" },
+  tabBet: { bn: "বেট", en: "Bet" },
+  tabTurnover: { bn: "টার্নওভার", en: "Turnover" },
+
+  // ইতিহাসের ট্যাব — কী `tab_<route segment>` আকারে, তাই URL থেকেই মেলে
+  tab_deposit: { bn: "ডিপোজিট হিস্টোরি", en: "Deposit History" },
+  tab_auto_deposit: { bn: "অটো ডিপোজিট হিস্টোরি", en: "Auto Deposit History" },
+  tab_withdraw: { bn: "উইথড্র হিস্টোরি", en: "Withdraw History" },
+  tab_bet: { bn: "বেট হিস্টোরি", en: "Bet History" },
+  tab_turnover: { bn: "টার্নওভার হিস্টোরি", en: "Turnover History" },
+
+  labelTotal: { bn: "মোট", en: "Total" },
+  labelPage: { bn: "পেজ", en: "Page" },
+  labelOf: { bn: "/", en: "of" },
+  labelPrev: { bn: "আগের", en: "Prev" },
+  labelTransaction: { bn: "ট্রানজেকশন", en: "Transaction" },
+  labelProvider: { bn: "প্রোভাইডার", en: "Provider" },
+  labelSerial: { bn: "সিরিয়াল", en: "Serial" },
+  labelLeft: { bn: "বাকি", en: "Left" },
 
   filterAll: { bn: "সব", en: "All" },
   statusPending: { bn: "পেন্ডিং", en: "Pending" },

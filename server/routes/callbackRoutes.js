@@ -4,10 +4,7 @@ import User from "../models/User.js";
 import GameHistory from "../models/GameHistory.js";
 
 import { applyTurnoverProgress } from "../utils/turnoverProgress.js";
-import {
-  peekProviderCode,
-  resolveProviderCode,
-} from "../utils/gameProviderCatalog.js";
+import { peekGameInfo, resolveGameInfo } from "../utils/gameProviderCatalog.js";
 
 const router = express.Router();
 
@@ -198,6 +195,9 @@ router.post("/", async (req, res) => {
 
     const commission = await applyAffiliateCommission({ player, netAmount });
 
+    // টার্নওভারের জন্য আগেই তোলা হয়ে থাকলে ক্যাশে পাওয়া যাবে
+    const gameInfo = peekGameInfo(gameUId);
+
     const history = await GameHistory.create({
       user: player._id,
       userId: player.userId,
@@ -208,8 +208,8 @@ router.post("/", async (req, res) => {
       gameUId,
       gameRound,
       serialNumber,
-      // টার্নওভারের জন্য আগেই তোলা হয়ে থাকলে ক্যাশে পাওয়া যাবে
-      providerCode: peekProviderCode(gameUId),
+      gameName: gameInfo.name,
+      providerCode: gameInfo.code,
 
       betAmount,
       winAmount,
@@ -234,23 +234,25 @@ router.post("/", async (req, res) => {
     });
 
     /*
-     * প্রোভাইডারের কোড ক্যাশে না থাকলে পরে বসানো।
+     * গেমের নাম বা প্রোভাইডার ক্যাশে না থাকলে পরে বসানো।
      *
      * কলব্যাকের উত্তর দিতে দেরি করা যায় না — মাস্টার অপেক্ষা করে থাকে।
      * তাই উত্তর পাঠিয়ে দিয়ে তারপর মাস্টার থেকে তালিকাটা আনা হয়, আর
-     * ইতিহাসের সারিতে কোডটা বসিয়ে দেওয়া হয়। এতে বেটিং রেকর্ডসে
-     * প্রোভাইডারের নাম ফাঁকা থাকে না, অথচ কলব্যাক ধীরও হয় না।
+     * ইতিহাসের সারিতে বসিয়ে দেওয়া হয়। এতে বেটিং রেকর্ডসে গেমের নামের
+     * ঘর ফাঁকা থাকে না, অথচ কলব্যাক ধীরও হয় না।
      */
-    if (!history.providerCode) {
-      resolveProviderCode(gameUId)
-        .then((code) =>
-          code
-            ? GameHistory.updateOne(
-                { _id: history._id },
-                { $set: { providerCode: code } },
-              )
-            : null,
-        )
+    if (!history.gameName || !history.providerCode) {
+      resolveGameInfo(gameUId)
+        .then((info) => {
+          const patch = {};
+
+          if (!history.gameName && info.name) patch.gameName = info.name;
+          if (!history.providerCode && info.code) patch.providerCode = info.code;
+
+          if (!Object.keys(patch).length) return null;
+
+          return GameHistory.updateOne({ _id: history._id }, { $set: patch });
+        })
         .catch(() => {});
     }
 
