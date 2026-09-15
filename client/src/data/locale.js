@@ -360,6 +360,73 @@ export const locale = {
   applyFilters: { bn: "ফিল্টার প্রয়োগ করুন", en: "Apply filters" },
   noGamesFound: { bn: "কোনো গেম পাওয়া যায়নি", en: "No games found" },
 
+  // ── ইতিহাস (ট্রানজেকশন / বেটিং / টার্নওভার) ──
+  transactionRecords: { bn: "ট্রানজেকশন রেকর্ডস", en: "Transaction Records" },
+  bettingRecords: { bn: "বেটিং রেকর্ডস", en: "Betting Records" },
+  turnoverRecords: { bn: "টার্নওভার", en: "Turnover" },
+  nothingYet: { bn: "এখনো কিছু নেই", en: "Nothing here yet" },
+  refresh: { bn: "রিফ্রেশ", en: "Refresh" },
+
+  tabDeposit: { bn: "ডিপোজিট", en: "Deposit" },
+  tabAutoDeposit: { bn: "অটো ডিপোজিট", en: "Auto Deposit" },
+  tabWithdraw: { bn: "উইথড্র", en: "Withdraw" },
+
+  filterAll: { bn: "সব", en: "All" },
+  statusPending: { bn: "পেন্ডিং", en: "Pending" },
+  statusApproved: { bn: "অনুমোদিত", en: "Approved" },
+  statusRejected: { bn: "বাতিল", en: "Rejected" },
+  statusPaid: { bn: "পেইড", en: "Paid" },
+  statusFailed: { bn: "ব্যর্থ", en: "Failed" },
+  statusRunning: { bn: "চলমান", en: "Running" },
+  statusCompleted: { bn: "সম্পন্ন", en: "Completed" },
+  resultWin: { bn: "জিতেছেন", en: "Won" },
+  resultLoss: { bn: "হেরেছেন", en: "Lost" },
+  resultPush: { bn: "পুশ", en: "Push" },
+
+  labelAmount: { bn: "পরিমাণ", en: "Amount" },
+  labelBonus: { bn: "বোনাস", en: "Bonus" },
+  labelCredited: { bn: "জমা হয়েছে", en: "Credited" },
+  labelTurnover: { bn: "টার্নওভার", en: "Turnover" },
+  labelMethod: { bn: "মাধ্যম", en: "Method" },
+  labelChannel: { bn: "চ্যানেল", en: "Channel" },
+  labelWallet: { bn: "নম্বর", en: "Wallet" },
+  labelDate: { bn: "তারিখ", en: "Date" },
+  labelInvoice: { bn: "ইনভয়েস", en: "Invoice" },
+  labelGame: { bn: "গেম", en: "Game" },
+  labelRound: { bn: "রাউন্ড", en: "Round" },
+  labelBet: { bn: "বেট", en: "Bet" },
+  labelWin: { bn: "উইন", en: "Win" },
+  labelNet: { bn: "নেট", en: "Net" },
+  labelBalanceBefore: { bn: "আগের ব্যালেন্স", en: "Balance before" },
+  labelBalanceAfter: { bn: "পরের ব্যালেন্স", en: "Balance after" },
+  labelAdminNote: { bn: "নোট", en: "Note" },
+  labelRequired: { bn: "প্রয়োজন", en: "Required" },
+  labelProgress: { bn: "হয়েছে", en: "Progress" },
+  labelCompletedAt: { bn: "সম্পন্ন হয়েছে", en: "Completed at" },
+
+  sourceDeposit: { bn: "ডিপোজিট", en: "Deposit" },
+  sourceAutoDeposit: { bn: "অটো ডিপোজিট", en: "Auto Deposit" },
+  sourceRegisterBonus: { bn: "রেজিস্টার বোনাস", en: "Register Bonus" },
+  sourceAdminDeposit: { bn: "অ্যাডমিন ডিপোজিট", en: "Admin Deposit" },
+
+  providerBreakdown: { bn: "প্রোভাইডার অনুযায়ী", en: "By provider" },
+  anyProvider: { bn: "যেকোনো প্রোভাইডার", en: "Any provider" },
+
+  // ── প্রোফাইল ড্রপডাউন ──
+  signupDate: { bn: "সাইন আপ এর তারিখ", en: "Sign up date" },
+  menuPersonalInfo: { bn: "ব্যক্তিগত তথ্য", en: "Personal Info" },
+  menuSecurity: { bn: "লগইন ও সিকিউরিটি", en: "Login & Security" },
+  menuReferral: { bn: "মাই রেফারেল", en: "My Referral" },
+  notification: { bn: "নোটিফিকেশন", en: "Notification" },
+  verification: { bn: "প্রতিপাদন", en: "Verification" },
+  myVip: { bn: "মাই ভিআইপি", en: "My VIP" },
+  profileMenu: { bn: "প্রোফাইল", en: "Profile" },
+  soonTitle: { bn: "শীঘ্রই আসছে", en: "Coming soon" },
+  soonText: {
+    bn: "এই অংশটা এখনো তৈরি হচ্ছে। খুব শিগগিরই চালু হবে।",
+    en: "This section is still being built. It will be available soon.",
+  },
+
   // ── 404 ──
   notFoundText: {
     bn: "দুঃখিত, আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।",

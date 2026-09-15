@@ -1,0 +1,48 @@
+import {
+  Bell,
+  BadgeCheck,
+  Crown,
+  Lock,
+  Receipt,
+  RotateCcw,
+  ScrollText,
+  User,
+  Users,
+} from "lucide-react";
+
+/**
+ * প্রোফাইল মেনুর সারিগুলো — মূল সাইটের ড্রপডাউন থেকে হুবহু ক্রমে।
+ *
+ * ডেস্কটপের ড্রপডাউন আর মোবাইলের প্রোফাইল পাতা — দুই জায়গাতেই এই এক
+ * তালিকা, তাই একটা বদলালে অন্যটা পিছিয়ে থাকে না।
+ *
+ * যেগুলো এখনো বানানো হয়নি সেগুলোয় `soon: true` — সারি দেখা যাবে
+ * (মূল সাইটে আছে), কিন্তু ক্লিক করলে "শীঘ্রই আসছে" বলবে, কোথাও ভাঙা
+ * লিংকে নিয়ে যাবে না।
+ */
+export const buildProfileMenu = (t) => [
+  { key: "notification", label: t("notification"), Icon: Bell, soon: true },
+  { key: "personal", label: t("menuPersonalInfo"), Icon: User, to: "/member/profile" },
+  { key: "security", label: t("menuSecurity"), Icon: Lock, soon: true },
+  { key: "verify", label: t("verification"), Icon: BadgeCheck, soon: true },
+  {
+    key: "transaction",
+    label: t("transactionRecords"),
+    Icon: Receipt,
+    to: "/member/transaction-records",
+  },
+  {
+    key: "betting",
+    label: t("bettingRecords"),
+    Icon: ScrollText,
+    to: "/member/betting-records",
+  },
+  {
+    key: "turnover",
+    label: t("turnoverRecords"),
+    Icon: RotateCcw,
+    to: "/member/turnover",
+  },
+  { key: "vip", label: t("myVip"), Icon: Crown, soon: true },
+  { key: "referral", label: t("menuReferral"), Icon: Users, soon: true },
+];

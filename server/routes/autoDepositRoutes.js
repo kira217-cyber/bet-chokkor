@@ -255,7 +255,12 @@ router.get("/history/my", protectUser, async (req, res) => {
   try {
     const limit = Math.min(100, Math.max(1, num(req.query.limit) || 20));
 
-    const deposits = await AutoDeposit.find({ user: req.user._id })
+    const filter = { user: req.user._id };
+    const status = String(req.query.status || "").trim().toUpperCase();
+
+    if (["PENDING", "PAID", "FAILED"].includes(status)) filter.status = status;
+
+    const deposits = await AutoDeposit.find(filter)
       .sort({ createdAt: -1 })
       .limit(limit)
       .select("-calc.affiliateDepositCommission")

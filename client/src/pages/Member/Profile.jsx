@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Copy, LogOut, Wallet } from "lucide-react";
+import { ChevronRight, Copy, LogOut, Wallet } from "lucide-react";
 
 import MemberPage from "../Deposit/MemberPage";
 import { api } from "../../api/axios";
@@ -10,6 +10,7 @@ import { useAlert } from "../../Context/alertContext";
 import { selectUser } from "../../features/auth/authSelectors";
 import { logout, updateUser } from "../../features/auth/authSlice";
 import { fetchMyDeposits } from "../../features/deposit/depositApi";
+import { buildProfileMenu } from "../../components/Navber/profileMenuItems";
 
 const STATUS_COLOR = {
   pending: "var(--status-pending)",
@@ -54,7 +55,7 @@ const Profile = () => {
   const { t, tv } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { showConfirm } = useAlert();
+  const { showAlert, showConfirm } = useAlert();
 
   const user = useSelector(selectUser);
 
@@ -144,6 +145,61 @@ const Profile = () => {
             <Wallet size={16} />
             {t("deposit")}
           </button>
+        </div>
+
+        {/* ── মেনু ──
+            ডেস্কটপে এই তালিকাটা হেডারের প্রোফাইল ড্রপডাউনে; মোবাইলে
+            ড্রপডাউন নেই, তাই ইতিহাসের পাতাগুলোয় যাওয়ার একমাত্র রাস্তা
+            এটাই। দুই জায়গায় একই তালিকা (components/Navber/profileMenu.js) */}
+        <div className="overflow-hidden bg-[var(--neutral900)]" style={{ borderRadius: "var(--radius-10)" }}>
+          {buildProfileMenu(t)
+            .filter((item) => item.key !== "personal")
+            .map((item) => {
+              const RowIcon = item.Icon;
+
+              const inner = (
+                <>
+                  <RowIcon size={16} className="shrink-0 text-[var(--primary500)]" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  <ChevronRight size={14} className="shrink-0 text-[var(--text-disabled)]" />
+                </>
+              );
+
+              const rowStyle = {
+                height: "calc(var(--u) * 14.667)",
+                paddingInline: "calc(var(--u) * 4.267)",
+                gap: "calc(var(--u) * 3.2)",
+                fontSize: "var(--fs-larger)",
+              };
+
+              if (item.soon) {
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() =>
+                      showAlert({ title: t("soonTitle"), message: t("soonText") })
+                    }
+                    className="flex w-full cursor-pointer items-center text-[var(--text-secondary)]"
+                    style={rowStyle}
+                  >
+                    {inner}
+                  </button>
+                );
+              }
+
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => navigate(item.to)}
+                  className="flex w-full cursor-pointer items-center text-[var(--text-secondary)]"
+                  style={rowStyle}
+                >
+                  {inner}
+                </button>
+              );
+            })}
         </div>
 
         {/* ── নিজের তথ্য ── */}

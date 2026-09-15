@@ -12,6 +12,7 @@ import { selectGameCategories } from "../../features/globalGame/globalGameSelect
 import { selectIsAuth } from "../../features/auth/authSelectors";
 import LanguageMenu from "../LanguageMenu/LanguageMenu";
 import UserBar from "./UserBar";
+import ProfileMenu from "./ProfileMenu";
 
 // ডেস্কটপ হেডারে লোগোর পাশে যে দুটো কুইক-লিংক দেখানো হয়
 const QUICK_LINK_KEYS = ["slot", "casino"];
@@ -119,6 +120,10 @@ const Navber = ({ setDesktopOpen }) => {
                 {tv(item.name)}
               </Link>
             ))}
+
+            {/* মূল সাইটে প্রোফাইল ড্রপডাউনটা এই কুইক-লিংকের সারিতেই,
+                ক্যাসিনোর ঠিক পরে — আর শুধু লগইন করা থাকলে */}
+            {isAuth ? <ProfileMenu /> : null}
           </nav>
         </div>
 

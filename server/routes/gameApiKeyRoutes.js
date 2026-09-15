@@ -273,62 +273,97 @@ router.delete(
  * কোড হাতে টাইপ করতে হয় না। মাস্টারে যা আছে তাই দেখা যায়, ফলে নতুন
  * প্রোভাইডার যোগ হলে এখানে আপনাআপনি চলে আসে।
  */
+/**
+ * মাস্টারের প্রোভাইডার তালিকা — কোড ধরে একবার করে।
+ *
+ * অ্যাডমিন (টার্নওভারের শর্ত বাছা) আর ক্লায়েন্ট (টার্নওভারের অগ্রগতিতে
+ * প্রোভাইডারের নাম-আইকন) — দুই জায়গাতেই একই তালিকা লাগে, তাই একটাই
+ * ফাংশন ও একটাই ক্যাশ।
+ */
+const loadProviderCatalog = async () => {
+  const { apiKey, reason } = await loadUsableKey();
+
+  if (!apiKey) {
+    const error = new Error(
+      `Game API key is not ready (${reason}) — providers cannot be listed`,
+    );
+    error.notConfigured = true;
+    throw error;
+  }
+
+  const cached = getCached("providers:all");
+  if (cached) return { providers: cached, cached: true };
+
+  const raw = await masterGet("/api/master/bc-global/client/game-data", apiKey);
+  const list = raw?.data?.providers || raw?.providers || [];
+
+  // একই প্রোভাইডার একাধিক ক্যাটাগরিতে থাকতে পারে — কোড ধরে একবারই
+  const seen = new Map();
+
+  (Array.isArray(list) ? list : []).forEach((item) => {
+    const code = text(item?.providerCode).toUpperCase();
+
+    if (!code || seen.has(code)) return;
+
+    seen.set(code, {
+      providerCode: code,
+      providerName: text(item?.providerName) || code,
+      providerIconUrl: text(item?.providerIconUrl),
+      isActive: item?.isActive !== false,
+    });
+  });
+
+  const providers = [...seen.values()].sort((a, b) =>
+    a.providerName.localeCompare(b.providerName),
+  );
+
+  setCached("providers:all", providers);
+
+  return { providers, cached: false };
+};
+
+/**
+ * মাস্টারের সব প্রোভাইডার — অ্যাডমিনের জন্য।
+ *
+ * টার্নওভারের শর্তে কোন প্রোভাইডার বাছা যাবে সেটা এখান থেকেই আসে, তাই
+ * কোড হাতে টাইপ করতে হয় না। মাস্টারে যা আছে তাই দেখা যায়, ফলে নতুন
+ * প্রোভাইডার যোগ হলে এখানে আপনাআপনি চলে আসে।
+ */
 router.get("/admin/providers", protectAdmin, async (req, res) => {
   try {
-    const { apiKey, reason } = await loadUsableKey();
+    const { providers, cached } = await loadProviderCatalog();
 
-    if (!apiKey) {
-      return errorResponse(
-        res,
-        `Game API key is not ready (${reason}) — providers cannot be listed`,
-        400,
-      );
-    }
-
-    const cached = getCached("admin:providers");
-
-    if (cached) {
-      return successResponse(res, "Providers loaded (cached)", {
-        providers: cached,
-      });
-    }
-
-    const raw = await masterGet(
-      "/api/master/bc-global/client/game-data",
-      apiKey,
+    return successResponse(
+      res,
+      cached ? "Providers loaded (cached)" : "Providers loaded",
+      { providers },
     );
-
-    const list = raw?.data?.providers || raw?.providers || [];
-
-    // একই প্রোভাইডার একাধিক ক্যাটাগরিতে থাকতে পারে — কোড ধরে একবারই
-    const seen = new Map();
-
-    (Array.isArray(list) ? list : []).forEach((item) => {
-      const code = text(item?.providerCode).toUpperCase();
-
-      if (!code || seen.has(code)) return;
-
-      seen.set(code, {
-        providerCode: code,
-        providerName: text(item?.providerName) || code,
-        providerIconUrl: text(item?.providerIconUrl),
-        isActive: item?.isActive !== false,
-      });
-    });
-
-    const providers = [...seen.values()].sort((a, b) =>
-      a.providerName.localeCompare(b.providerName),
-    );
-
-    setCached("admin:providers", providers);
-
-    return successResponse(res, "Providers loaded", { providers });
   } catch (error) {
+    if (error?.notConfigured) return errorResponse(res, error.message, 400);
+
     return errorResponse(
       res,
       error?.response?.data?.message || error.message || "Master request failed",
       error?.response?.status || 502,
     );
+  }
+});
+
+/**
+ * একই তালিকা ক্লায়েন্টের জন্য।
+ *
+ * টার্নওভারের পাতায় প্রতিটা প্রোভাইডারের নাম আর আইকন দেখাতে হয়, অথচ
+ * টার্নওভারে শুধু কোডটাই সেভ করা থাকে। key এখানেও সার্ভারেই থাকে —
+ * ব্রাউজারে যায় না।
+ */
+router.get("/client/providers", async (req, res) => {
+  try {
+    const { providers } = await loadProviderCatalog();
+
+    return successResponse(res, "Providers loaded", { providers });
+  } catch (error) {
+    // key বসানো না থাকলেও পাতা ভাঙবে না — কোডটুকুই দেখাবে
+    return successResponse(res, "Providers unavailable", { providers: [] });
   }
 });
 

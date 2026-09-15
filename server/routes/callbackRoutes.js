@@ -4,7 +4,10 @@ import User from "../models/User.js";
 import GameHistory from "../models/GameHistory.js";
 
 import { applyTurnoverProgress } from "../utils/turnoverProgress.js";
-import { peekProviderCode } from "../utils/gameProviderCatalog.js";
+import {
+  peekProviderCode,
+  resolveProviderCode,
+} from "../utils/gameProviderCatalog.js";
 
 const router = express.Router();
 
@@ -195,7 +198,7 @@ router.post("/", async (req, res) => {
 
     const commission = await applyAffiliateCommission({ player, netAmount });
 
-    await GameHistory.create({
+    const history = await GameHistory.create({
       user: player._id,
       userId: player.userId,
       userGamePlayName,
@@ -224,13 +227,40 @@ router.post("/", async (req, res) => {
       masterTimestamp: text(timestamp),
     });
 
-    return reply({
+    reply({
       success: true,
       balance: money(updated?.balance),
       message: "OK",
     });
+
+    /*
+     * প্রোভাইডারের কোড ক্যাশে না থাকলে পরে বসানো।
+     *
+     * কলব্যাকের উত্তর দিতে দেরি করা যায় না — মাস্টার অপেক্ষা করে থাকে।
+     * তাই উত্তর পাঠিয়ে দিয়ে তারপর মাস্টার থেকে তালিকাটা আনা হয়, আর
+     * ইতিহাসের সারিতে কোডটা বসিয়ে দেওয়া হয়। এতে বেটিং রেকর্ডসে
+     * প্রোভাইডারের নাম ফাঁকা থাকে না, অথচ কলব্যাক ধীরও হয় না।
+     */
+    if (!history.providerCode) {
+      resolveProviderCode(gameUId)
+        .then((code) =>
+          code
+            ? GameHistory.updateOne(
+                { _id: history._id },
+                { $set: { providerCode: code } },
+              )
+            : null,
+        )
+        .catch(() => {});
+    }
+
+    return undefined;
   } catch (error) {
-    // এখানেও 200 — নইলে মাস্টার একই রাউন্ড বারবার পাঠাতে থাকত
+    // এখানেও 200 — নইলে মাস্টার একই রাউন্ড বারবার পাঠাতে থাকত।
+    // উত্তর আগেই চলে গিয়ে থাকলে (প্রোভাইডার কোড বসানোর ধাপে গোলমাল)
+    // দ্বিতীয়বার পাঠানো যাবে না
+    if (res.headersSent) return undefined;
+
     return reply({ success: false, balance: 0, message: error.message });
   }
 });
