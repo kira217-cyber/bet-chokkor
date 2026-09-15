@@ -21,6 +21,7 @@ import {
   Scale,
   Dices,
   Play,
+  ShieldCheck,
   Banknote,
   ChevronDown,
   User,
@@ -54,6 +55,7 @@ const ICONS = {
   Scale,
   Dices,
   Play,
+  ShieldCheck,
   Banknote,
   User,
 };

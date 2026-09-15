@@ -458,6 +458,63 @@ export const locale = {
     en: "This section is still being built. It will be available soon.",
   },
 
+  // ── পরিচয় যাচাই (KYC) ──
+  verifyIntro: {
+    bn: "নিজের পরিচয় যাচাই করে নিলে অ্যাকাউন্টটা নিরাপদ থাকে।",
+    en: "Verifying your identity keeps your account safe.",
+  },
+  verifyGateBoth: {
+    bn: "যাচাই সম্পন্ন হলে তবেই ডিপোজিট ও উইথড্র করা যাবে।",
+    en: "Deposit and withdraw open up once verification is done.",
+  },
+  verifyGateDeposit: {
+    bn: "যাচাই সম্পন্ন হলে তবেই ডিপোজিট করা যাবে।",
+    en: "Deposit opens up once verification is done.",
+  },
+  verifyGateWithdraw: {
+    bn: "যাচাই সম্পন্ন হলে তবেই উইথড্র করা যাবে।",
+    en: "Withdraw opens up once verification is done.",
+  },
+  verifyFullName: { bn: "কাগজে যে নাম আছে", en: "Name as on the document" },
+  verifyFullNameHint: { bn: "পুরো নাম লিখুন", en: "Enter the full name" },
+  verifyBirthDate: { bn: "জন্ম তারিখ", en: "Date of birth" },
+  verifyDocType: { bn: "কোন কাগজ দিচ্ছেন", en: "Document type" },
+  docNid: { bn: "এনআইডি", en: "NID" },
+  docPassport: { bn: "পাসপোর্ট", en: "Passport" },
+  docDriving: { bn: "ড্রাইভিং লাইসেন্স", en: "Driving licence" },
+  verifyDocNumber: { bn: "কাগজের নম্বর", en: "Document number" },
+  verifyDocNumberHint: { bn: "নম্বরটা লিখুন", en: "Enter the number" },
+  verifyFront: { bn: "কাগজের সামনের দিক", en: "Front of the document" },
+  verifyFrontHint: { bn: "ছবি তুলে দিন", en: "Upload a photo" },
+  verifyBack: { bn: "কাগজের পিছনের দিক", en: "Back of the document" },
+  verifyBackHint: { bn: "থাকলে দিন (ঐচ্ছিক)", en: "If there is one (optional)" },
+  verifySelfie: { bn: "কাগজ হাতে নিজের ছবি", en: "Selfie holding the document" },
+  verifySelfieHint: { bn: "মুখ ও কাগজ দুটোই দেখা যেন যায়", en: "Both your face and the document must be readable" },
+  verifyNeedImages: {
+    bn: "কাগজের সামনের দিক আর নিজের ছবি দুটোই দিতে হবে",
+    en: "The front of the document and a selfie are both required",
+  },
+  verifySubmit: { bn: "যাচাইয়ের জন্য পাঠান", en: "Submit for review" },
+  verifyPendingTitle: { bn: "যাচাই চলছে", en: "Being checked" },
+  verifyPendingText: {
+    bn: "আপনার কাগজপত্র দেখা হচ্ছে। হয়ে গেলে জানিয়ে দেওয়া হবে।",
+    en: "Your documents are being reviewed. You will be told once it is done.",
+  },
+  verifyApprovedTitle: { bn: "যাচাই সম্পন্ন", en: "Verified" },
+  verifyApprovedText: {
+    bn: "আপনার পরিচয় যাচাই হয়ে গেছে।",
+    en: "Your identity has been verified.",
+  },
+  verifyRejected: { bn: "আবেদনটি বাতিল হয়েছে", en: "Your submission was rejected" },
+  errNeedVerification: {
+    bn: "আগে পরিচয় যাচাই সম্পন্ন করুন",
+    en: "Please complete identity verification first",
+  },
+  errAlreadyVerified: {
+    bn: "আপনার পরিচয় আগেই যাচাই হয়ে গেছে",
+    en: "Your identity is already verified",
+  },
+
   // ── 404 ──
   notFoundText: {
     bn: "দুঃখিত, আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।",

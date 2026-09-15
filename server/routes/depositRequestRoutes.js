@@ -10,6 +10,7 @@ import User from "../models/User.js";
 import { protectUser } from "../middleware/protectUser.js";
 import { protectAdmin, requireWrite } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
+import { verificationGate } from "./verificationRoutes.js";
 import { buildDepositCalc, num, money } from "../utils/depositCalc.js";
 
 const router = express.Router();
@@ -39,6 +40,13 @@ router.post("/", protectUser, async (req, res) => {
 
     if (!user) return errorResponse(res, "User not found", 404);
     if (!user.isActive) return errorResponse(res, "This account is disabled", 403);
+
+    // অ্যাডমিন চাইলে ডিপোজিটও পরিচয় যাচাইয়ের পেছনে রাখতে পারেন
+    const gate = await verificationGate(user._id, "deposit");
+
+    if (!gate.ok) {
+      return errorResponse(res, gate.message, 400, "needVerification");
+    }
 
     const method = await DepositMethod.findOne({ methodId, isActive: true });
 
@@ -203,7 +211,7 @@ router.get("/admin", protectAdmin, async (req, res) => {
     return successResponse(res, "Requests loaded", {
       requests,
       summary,
-      meta: { page, limit, total },
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);

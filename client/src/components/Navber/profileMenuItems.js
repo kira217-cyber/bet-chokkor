@@ -24,7 +24,12 @@ export const buildProfileMenu = (t) => [
   { key: "notification", label: t("notification"), Icon: Bell, soon: true },
   { key: "personal", label: t("menuPersonalInfo"), Icon: User, to: "/member/profile" },
   { key: "security", label: t("menuSecurity"), Icon: Lock, soon: true },
-  { key: "verify", label: t("verification"), Icon: BadgeCheck, soon: true },
+  {
+    key: "verify",
+    label: t("verification"),
+    Icon: BadgeCheck,
+    to: "/member/verification",
+  },
   // তিনটে নামেই একই ইতিহাসের পাতা, শুধু আলাদা ট্যাব খোলা থাকে —
   // মূল সাইটের মেনুতে এই তিনটেই আছে, আর ভিতরে বাকি ট্যাবগুলোও পাওয়া যায়
   {

@@ -99,7 +99,7 @@ router.get("/admin", protectAdmin, async (req, res) => {
     return successResponse(res, "Turnovers loaded", {
       turnovers: turnovers.map(withPercent),
       summary,
-      meta: { page, limit, total },
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);

@@ -84,7 +84,7 @@ const HistoryTable = ({ title, userId, path, columns, statuses }) => {
       ) : rows.length === 0 ? (
         <p className="text-[13px] text-[var(--text-disabled)]">Nothing yet.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="ad-scroll overflow-x-auto">
           <table className="w-full min-w-[700px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">

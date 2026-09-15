@@ -12,6 +12,7 @@ import { protectAdmin, requireWrite } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 import { num, money } from "../utils/depositCalc.js";
 import { isOtpRequired, isVerified, clearOtp } from "../utils/otp.js";
+import { verificationGate } from "./verificationRoutes.js";
 
 const router = express.Router();
 
@@ -26,6 +27,19 @@ const isId = (value) => mongoose.Types.ObjectId.isValid(String(value));
  * করতে হবে।
  */
 const checkEligibility = async (userId) => {
+  // পরিচয় যাচাই সবার আগে — টার্নওভার বা ঝুলে থাকা আবেদনের কথা বলার
+  // আগে এটাই বলা উচিত, কারণ এটা না হলে বাকিগুলো মিটিয়েও লাভ নেই
+  const gate = await verificationGate(userId, "withdraw");
+
+  if (!gate.ok) {
+    return {
+      eligible: false,
+      reason: "verification",
+      verificationStatus: gate.status,
+      remaining: 0,
+    };
+  }
+
   const pending = await WithdrawRequest.findOne({
     user: userId,
     status: "pending",
@@ -102,13 +116,22 @@ router.post("/", protectUser, async (req, res) => {
     const eligibility = await checkEligibility(req.user._id);
 
     if (!eligibility.eligible) {
+      const messages = {
+        verification: "Please complete identity verification first",
+        pendingWithdraw: "You already have a withdraw waiting for review",
+      };
+
+      const codes = {
+        verification: "needVerification",
+        pendingWithdraw: "pendingWithdraw",
+      };
+
       return errorResponse(
         res,
-        eligibility.reason === "pendingWithdraw"
-          ? "You already have a withdraw waiting for review"
-          : `Turnover is not finished — ${eligibility.remaining} left`,
+        messages[eligibility.reason] ||
+          `Turnover is not finished — ${eligibility.remaining} left`,
         400,
-        eligibility.reason === "pendingWithdraw" ? "pendingWithdraw" : "turnoverLeft",
+        codes[eligibility.reason] || "turnoverLeft",
       );
     }
 

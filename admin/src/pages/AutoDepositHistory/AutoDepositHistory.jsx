@@ -3,10 +3,13 @@ import { toast } from "react-toastify";
 import { Loader2, Receipt, RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
-import { UserCell } from "../../components/HistoryBits/HistoryBits";
+import { Pager, UserCell } from "../../components/HistoryBits/HistoryBits";
 
-const fetchDeposits = async (status, q) => {
-  const params = new URLSearchParams();
+const fetchDeposits = async (status, q, page) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: "20",
+  });
 
   if (status !== "all") params.set("status", status);
   if (q) params.set("q", q);
@@ -40,18 +43,22 @@ const AutoDepositHistory = () => {
   const [search, setSearch] = useState("");
   const [deposits, setDeposits] = useState([]);
   const [summary, setSummary] = useState({});
+  const [meta, setMeta] = useState({});
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
 
     const timer = setTimeout(() => {
-      fetchDeposits(tab, search)
+      fetchDeposits(tab, search, page)
         .then((data) => {
           if (!alive) return;
 
           setDeposits(data.deposits || []);
           setSummary(data.summary || {});
+      setMeta(data.meta || {});
+          setMeta(data.meta || {});
         })
         .catch((error) =>
           toast.error(error?.response?.data?.message || "Failed to load"),
@@ -63,12 +70,12 @@ const AutoDepositHistory = () => {
       alive = false;
       clearTimeout(timer);
     };
-  }, [tab, search]);
+  }, [tab, search, page]);
 
   const load = async () => {
     try {
       setLoading(true);
-      const data = await fetchDeposits(tab, search);
+      const data = await fetchDeposits(tab, search, page);
 
       setDeposits(data.deposits || []);
       setSummary(data.summary || {});
@@ -127,6 +134,7 @@ const AutoDepositHistory = () => {
               onClick={() => {
                 setLoading(true);
                 setTab(item.key);
+                setPage(1);
               }}
               className={`ad-btn ad-btn--sm ${
                 tab === item.key ? "ad-btn--primary" : "ad-btn--ghost"
@@ -147,6 +155,7 @@ const AutoDepositHistory = () => {
             onChange={(e) => {
               setLoading(true);
               setSearch(e.target.value);
+              setPage(1);
             }}
             placeholder="Search by username"
             style={{ paddingInlineStart: "38px" }}
@@ -171,7 +180,7 @@ const AutoDepositHistory = () => {
           </p>
         </div>
       ) : (
-        <div className="ad-card overflow-x-auto p-0">
+        <div className="ad-card ad-scroll overflow-x-auto p-0">
           <table className="w-full min-w-[820px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">
@@ -243,6 +252,16 @@ const AutoDepositHistory = () => {
           </table>
         </div>
       )}
+
+      <Pager
+        page={meta.page || 1}
+        totalPages={meta.totalPages || 1}
+        busy={loading}
+        onChange={(next) => {
+          setLoading(true);
+          setPage(next);
+        }}
+      />
     </div>
   );
 };

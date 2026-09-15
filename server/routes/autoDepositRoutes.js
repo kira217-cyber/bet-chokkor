@@ -13,6 +13,7 @@ import {
   requireWrite,
 } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
+import { verificationGate } from "./verificationRoutes.js";
 import {
   num,
   money,
@@ -137,6 +138,12 @@ router.post("/create", protectUser, async (req, res) => {
 
     if (!user) return errorResponse(res, "User not found", 404);
     if (!user.isActive) return errorResponse(res, "This account is disabled", 403);
+
+    const gate = await verificationGate(user._id, "deposit");
+
+    if (!gate.ok) {
+      return errorResponse(res, gate.message, 400, "needVerification");
+    }
 
     let bonus = null;
     const bonusId = text(req.body?.bonusId);
@@ -390,7 +397,7 @@ router.get("/deposits/admin", protectAdmin, async (req, res) => {
     return successResponse(res, "Auto deposits loaded", {
       deposits,
       summary,
-      meta: { page, limit, total },
+      meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);

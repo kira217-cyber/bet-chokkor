@@ -137,6 +137,14 @@ export const navItems = [
   },
 
   {
+    key: "verification",
+    path: "/verification",
+    label: "Verification",
+    icon: "ShieldCheck",
+    perm: "verification",
+  },
+
+  {
     key: "game",
     label: "Game",
     icon: "Gamepad2",
@@ -171,6 +179,7 @@ export const allPermissions = [
   { key: "dashboard", label: "Dashboard", path: "/" },
   { key: "users", label: "Users", path: "/users" },
   { key: "game-history", label: "Game History", path: "/game-history" },
+  { key: "verification", label: "Verification", path: "/verification" },
   {
     key: "withdraw-requests",
     label: "Withdraw Requests",

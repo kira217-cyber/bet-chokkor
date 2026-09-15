@@ -6,6 +6,7 @@ import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
+import Verification from "../pages/Verification/Verification";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
 import GameLaunchKey from "../pages/GameLaunchKey/GameLaunchKey";
 import GameHistory from "../pages/GameHistory/GameHistory";
@@ -130,6 +131,7 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "withdraw-requests", element: <WithdrawRequests /> },
+      { path: "verification", element: <Verification /> },
       { path: "turnover-history", element: <TurnoverHistory /> },
       { path: "game-history", element: <GameHistory /> },
       {

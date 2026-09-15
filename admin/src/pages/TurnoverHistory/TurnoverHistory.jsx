@@ -3,10 +3,13 @@ import { toast } from "react-toastify";
 import { History, Loader2, RefreshCw, Search } from "lucide-react";
 
 import { api } from "../../api/axios";
-import { UserCell } from "../../components/HistoryBits/HistoryBits";
+import { Pager, UserCell } from "../../components/HistoryBits/HistoryBits";
 
-const fetchTurnovers = async (status, source, q) => {
-  const params = new URLSearchParams();
+const fetchTurnovers = async (status, source, q, page) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: "20",
+  });
 
   if (status !== "all") params.set("status", status);
   if (source !== "all") params.set("sourceType", source);
@@ -42,18 +45,22 @@ const TurnoverHistory = () => {
   const [search, setSearch] = useState("");
   const [turnovers, setTurnovers] = useState([]);
   const [summary, setSummary] = useState({});
+  const [meta, setMeta] = useState({});
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
 
     const timer = setTimeout(() => {
-      fetchTurnovers(tab, source, search)
+      fetchTurnovers(tab, source, search, page)
         .then((data) => {
           if (!alive) return;
 
           setTurnovers(data.turnovers || []);
           setSummary(data.summary || {});
+      setMeta(data.meta || {});
+          setMeta(data.meta || {});
         })
         .catch((error) =>
           toast.error(error?.response?.data?.message || "Failed to load"),
@@ -65,12 +72,12 @@ const TurnoverHistory = () => {
       alive = false;
       clearTimeout(timer);
     };
-  }, [tab, source, search]);
+  }, [tab, source, search, page]);
 
   const load = async () => {
     try {
       setLoading(true);
-      const data = await fetchTurnovers(tab, source, search);
+      const data = await fetchTurnovers(tab, source, search, page);
 
       setTurnovers(data.turnovers || []);
       setSummary(data.summary || {});
@@ -132,6 +139,7 @@ const TurnoverHistory = () => {
               onClick={() => {
                 setLoading(true);
                 setTab(item.key);
+                setPage(1);
               }}
               className={`ad-btn ad-btn--sm ${
                 tab === item.key ? "ad-btn--primary" : "ad-btn--ghost"
@@ -147,6 +155,7 @@ const TurnoverHistory = () => {
           onChange={(e) => {
             setLoading(true);
             setSource(e.target.value);
+            setPage(1);
           }}
           className="ad-input w-auto min-w-[170px]"
         >
@@ -167,6 +176,7 @@ const TurnoverHistory = () => {
             onChange={(e) => {
               setLoading(true);
               setSearch(e.target.value);
+              setPage(1);
             }}
             placeholder="Search by username"
             style={{ paddingInlineStart: "38px" }}
@@ -191,7 +201,7 @@ const TurnoverHistory = () => {
           </p>
         </div>
       ) : (
-        <div className="ad-card overflow-x-auto p-0">
+        <div className="ad-card ad-scroll overflow-x-auto p-0">
           <table className="w-full min-w-[860px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">
@@ -281,6 +291,16 @@ const TurnoverHistory = () => {
           </table>
         </div>
       )}
+
+      <Pager
+        page={meta.page || 1}
+        totalPages={meta.totalPages || 1}
+        busy={loading}
+        onChange={(next) => {
+          setLoading(true);
+          setPage(next);
+        }}
+      />
 
       <p className="mt-4 text-[12px] text-[var(--text-disabled)]">
         A turnover&apos;s rules are copied from the config when it is created, so

@@ -13,6 +13,7 @@ import AutoDeposit from "../pages/Deposit/AutoDeposit";
 import Withdraw from "../pages/Withdraw/Withdraw";
 import Profile from "../pages/Member/Profile";
 import History from "../pages/Member/History";
+import Verification from "../pages/Member/Verification";
 import PlayGame from "../pages/PlayGame/PlayGame";
 
 export const routes = createBrowserRouter([
@@ -53,6 +54,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/verification",
+        element: (
+          <PrivateRoute>
+            <Verification />
           </PrivateRoute>
         ),
       },
