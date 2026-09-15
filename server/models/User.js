@@ -111,6 +111,18 @@ const userSchema = new Schema(
     firstName: { type: String, default: "", trim: true },
     lastName: { type: String, default: "", trim: true },
 
+    /* ── প্রোফাইলের তথ্য ──
+     *
+     * নাম আর জন্ম তারিখ একবারই বসে। পরে বদলাতে হলে সাপোর্টের মাধ্যমে —
+     * মূল সাইটেও তাই, কারণ এই দুটো দিয়েই টাকা তোলার সময় পরিচয় মেলানো
+     * হয়; ব্যবহারকারী নিজে বদলাতে পারলে সেই মেলানোর কোনো মানে থাকত না।
+     */
+    fullName: { type: String, default: "", trim: true },
+    dateOfBirth: { type: Date, default: null },
+
+    isEmailVerified: { type: Boolean, default: false },
+    isPhoneVerified: { type: Boolean, default: false },
+
     /* ── নিরাপত্তা ── */
     failedLoginAttempts: { type: Number, default: 0, select: false },
     lockedUntil: { type: Date, default: null, select: false },
@@ -153,6 +165,10 @@ userSchema.methods.toSafeJSON = function toSafeJSON() {
     referralCount: this.referralCount,
     firstName: this.firstName,
     lastName: this.lastName,
+    fullName: this.fullName,
+    dateOfBirth: this.dateOfBirth,
+    isEmailVerified: this.isEmailVerified,
+    isPhoneVerified: this.isPhoneVerified,
     pendingRegisterBonus: this.pendingRegisterBonus,
     createdAt: this.createdAt,
   };

@@ -22,8 +22,18 @@ import {
  */
 export const buildProfileMenu = (t) => [
   { key: "notification", label: t("notification"), Icon: Bell, soon: true },
-  { key: "personal", label: t("menuPersonalInfo"), Icon: User, to: "/member/profile" },
-  { key: "security", label: t("menuSecurity"), Icon: Lock, soon: true },
+  {
+    key: "personal",
+    label: t("menuPersonalInfo"),
+    Icon: User,
+    to: "/member/profile/info",
+  },
+  {
+    key: "security",
+    label: t("menuSecurity"),
+    Icon: Lock,
+    to: "/member/profile/account",
+  },
   {
     key: "verify",
     label: t("verification"),

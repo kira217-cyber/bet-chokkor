@@ -436,6 +436,111 @@ export const locale = {
   menuSecurity: { bn: "লগইন ও সিকিউরিটি", en: "Login & Security" },
   menuReferral: { bn: "মাই রেফারেল", en: "My Referral" },
 
+  // ── প্রোফাইলের ঘরগুলো ──
+  manage: { bn: "ম্যানেজ", en: "Manage" },
+  copy: { bn: "কপি করুন", en: "Copy" },
+  show: { bn: "দেখান", en: "Show" },
+  hide: { bn: "লুকান", en: "Hide" },
+  savedTitle: { bn: "সেভ হয়েছে", en: "Saved" },
+  notVerified: { bn: "যাচাই করা হয়নি", en: "Not verified" },
+
+  rowUsername: { bn: "ব্যবহারকারীর নাম", en: "Username" },
+  rowFullName: { bn: "সম্পূর্ণ লিগ্যাল নাম", en: "Full legal name" },
+  rowBirthday: { bn: "জন্ম তারিখ", en: "Date of birth" },
+  rowPhone: { bn: "ফোন", en: "Phone" },
+  rowEmail: { bn: "ইমেইল", en: "Email" },
+
+  legalNamePlaceholder: {
+    bn: "আপনার সম্পূর্ণ লিগ্যাল নেম লিখুন",
+    en: "Enter your full legal name",
+  },
+  profileLockNote: {
+    bn: "গোপনীয়তা এবং নিরাপত্তার জন্য, নিশ্চিতকরণের পরে তথ্য পরিবর্তন করা যাবে না। প্রয়োজনে কাস্টমার সার্ভিসে যোগাযোগ করুন।",
+    en: "For privacy and security, this cannot be changed once confirmed. Please contact customer service if you need to.",
+  },
+  emailAddress: { bn: "ইমেইল অ্যাড্রেস", en: "Email address" },
+  emailModalText: {
+    bn: "আপনার ইমেইল অ্যাড্রেসটি অ্যাকাউন্টের সাথে যুক্ত থাকবে।",
+    en: "This email will be linked to your account.",
+  },
+  phoneModalText: {
+    bn: "আপনার ফোন নম্বরে SMS এর মাধ্যমে একটি ভেরিফিকেশন কোড পাবেন।",
+    en: "You will get a verification code by SMS on this number.",
+  },
+  otpLabel: { bn: "ভেরিফিকেশন কোড", en: "Verification code" },
+
+  fullNameSaved: { bn: "আপনার নাম সেভ হয়েছে।", en: "Your name has been saved." },
+  birthdaySaved: {
+    bn: "আপনার জন্ম তারিখ সেভ হয়েছে।",
+    en: "Your date of birth has been saved.",
+  },
+  phoneSaved: { bn: "ফোন নম্বর সেভ হয়েছে।", en: "Your phone number has been saved." },
+  emailSaved: { bn: "ইমেইল সেভ হয়েছে।", en: "Your email has been saved." },
+
+  // ── লগইন ও সিকিউরিটি ──
+  passwordLabel: { bn: "পাসওয়ার্ড", en: "Password" },
+  changePassword: { bn: "চেঞ্জ পাসওয়ার্ড", en: "Change password" },
+  currentPassword: { bn: "বর্তমান পাসওয়ার্ড", en: "Current password" },
+  confirmNewPassword: {
+    bn: "নিশ্চিত করুন নতুন পাসওয়ার্ড",
+    en: "Confirm new password",
+  },
+  passwordChangedNote: {
+    bn: "আপনার পাসওয়ার্ড বদলে গেছে।",
+    en: "Your password has been changed.",
+  },
+
+  pwRule_length: { bn: "৬-২০ অক্ষর হতে হবে", en: "Must be 6-20 characters" },
+  pwRule_upper: {
+    bn: "১টি বড় হাতের বর্ণমালা (A-Z) থাকতে হবে",
+    en: "Must have one uppercase letter (A-Z)",
+  },
+  pwRule_lower: {
+    bn: "১টি ছোট হাতের বর্ণমালা (a-z) থাকতে হবে",
+    en: "Must have one lowercase letter (a-z)",
+  },
+  pwRule_digit: {
+    bn: "(0-9) এর মধ্যে অবশ্যই একটি নাম্বার থাকতে হবে",
+    en: "Must have one number (0-9)",
+  },
+  pwRule_charset: {
+    bn: "অনুমোদিত স্পেশাল চিহ্ন (!@#$%*)",
+    en: "Allowed special characters (!@#$%*)",
+  },
+
+  // ── প্রোফাইলের ভুলগুলো ──
+  errBadFullName: {
+    bn: "নামটা ইংরেজি অক্ষরে, ৩ থেকে ৬০ অক্ষরের মধ্যে লিখুন",
+    en: "Write the name in English letters, 3 to 60 characters",
+  },
+  errBadBirthday: { bn: "তারিখটা ঠিক নেই", en: "That date is not valid" },
+  errTooYoung: { bn: "কমপক্ষে ১৮ বছর হতে হবে", en: "You must be at least 18" },
+  errAlreadySet: {
+    bn: "এই তথ্য আগেই বসানো হয়েছে, বদলাতে কাস্টমার সার্ভিসে যোগাযোগ করুন",
+    en: "This is already set — contact customer service to change it",
+  },
+  errBadEmail: { bn: "ইমেইলটা ঠিক নেই", en: "That email is not valid" },
+  errEmailTaken: {
+    bn: "এই ইমেইলে আগেই অ্যাকাউন্ট আছে",
+    en: "This email is already used",
+  },
+  errBadPassword: {
+    bn: "বর্তমান পাসওয়ার্ডটা ঠিক নেই",
+    en: "Your current password is not correct",
+  },
+  errWeakPassword: {
+    bn: "নতুন পাসওয়ার্ডটা নিয়মগুলো মানছে না",
+    en: "The new password does not meet the rules",
+  },
+  errSamePassword: {
+    bn: "নতুন পাসওয়ার্ড আগেরটার থেকে আলাদা হতে হবে",
+    en: "The new password must be different",
+  },
+  errPasswordMismatch: {
+    bn: "দুটো পাসওয়ার্ড মিলছে না",
+    en: "The two passwords do not match",
+  },
+
   // ── গেম ──
   gamePreparing: { bn: "গেম প্রস্তুত করা হচ্ছে…", en: "Preparing your game…" },
   gameFailedTitle: { bn: "গেম চালু হয়নি", en: "Game did not start" },

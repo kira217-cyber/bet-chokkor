@@ -12,6 +12,8 @@ import ManualDeposit from "../pages/Deposit/ManualDeposit";
 import AutoDeposit from "../pages/Deposit/AutoDeposit";
 import Withdraw from "../pages/Withdraw/Withdraw";
 import Profile from "../pages/Member/Profile";
+import ProfileInfo from "../pages/Member/ProfileInfo";
+import ProfileSecurity from "../pages/Member/ProfileSecurity";
 import History from "../pages/Member/History";
 import Verification from "../pages/Member/Verification";
 import Referral from "../pages/Member/Referral";
@@ -55,6 +57,22 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/profile/info",
+        element: (
+          <PrivateRoute>
+            <ProfileInfo />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/profile/account",
+        element: (
+          <PrivateRoute>
+            <ProfileSecurity />
           </PrivateRoute>
         ),
       },
