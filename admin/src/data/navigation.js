@@ -155,6 +155,13 @@ export const navItems = [
         icon: "KeyRound",
         motherOnly: true,
       },
+      {
+        key: "game-launch-key",
+        path: "/game-launch-key",
+        label: "Add Game Launch Key",
+        icon: "Play",
+        motherOnly: true,
+      },
     ],
   },
 ];

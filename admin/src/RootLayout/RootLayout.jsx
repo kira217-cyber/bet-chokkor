@@ -20,6 +20,7 @@ import {
   UserRoundCheck,
   Scale,
   Dices,
+  Play,
   Banknote,
   ChevronDown,
   User,
@@ -52,6 +53,7 @@ const ICONS = {
   UserRoundCheck,
   Scale,
   Dices,
+  Play,
   Banknote,
   User,
 };

@@ -15,6 +15,7 @@ import Profile from "../pages/Member/Profile";
 import TransactionRecords from "../pages/Member/TransactionRecords";
 import BettingRecords from "../pages/Member/BettingRecords";
 import TurnoverRecords from "../pages/Member/TurnoverRecords";
+import PlayGame from "../pages/PlayGame/PlayGame";
 
 export const routes = createBrowserRouter([
   {
@@ -98,6 +99,18 @@ export const routes = createBrowserRouter([
         ),
       },
     ],
+  },
+
+  // গেম পুরো পর্দা নেয় — হেডার, সাইডবার বা বটম বার কিছুই থাকে না,
+  // তাই এটাও RootLayout এর বাইরে
+  {
+    path: "/play/:gameUId",
+    element: (
+      <PrivateRoute>
+        <PlayGame />
+      </PrivateRoute>
+    ),
+    errorElement: <NotFoundPage />,
   },
 
   // লগইন/রেজিস্টার/ফরগেট পাসওয়ার্ড পেজে সাইডবার-ফুটার-বটমবার নেই,

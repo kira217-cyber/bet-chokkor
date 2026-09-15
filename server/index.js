@@ -23,6 +23,7 @@ import adminUserRoutes from "./routes/adminUserRoutes.js";
 import bulkAdjustmentRoutes from "./routes/bulkAdjustmentRoutes.js";
 import callbackRoutes from "./routes/callbackRoutes.js";
 import gameHistoryRoutes from "./routes/gameHistoryRoutes.js";
+import playGameRoutes from "./routes/playGameRoutes.js";
 import withdrawMethodRoutes from "./routes/withdrawMethodRoutes.js";
 import eWalletRoutes from "./routes/eWalletRoutes.js";
 import withdrawRequestRoutes from "./routes/withdrawRequestRoutes.js";
@@ -120,6 +121,7 @@ app.use("/api/admin/bulk-adjustment", bulkAdjustmentRoutes);
 // white-label মাস্টার প্রতিটা বাজি ও ফলের খবর এখানে পাঠায়
 app.use("/api/callback", callbackRoutes);
 app.use("/api/game-history", gameHistoryRoutes);
+app.use("/api/play-game", playGameRoutes);
 app.use("/api/withdraw-methods", withdrawMethodRoutes);
 app.use("/api/e-wallets", eWalletRoutes);
 app.use("/api/withdraw-requests", withdrawRequestRoutes);

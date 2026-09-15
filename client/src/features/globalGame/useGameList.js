@@ -14,6 +14,9 @@ const GAME_PROXY_API = "/api/admin/game-api-key/client";
 const toPageShape = (game) => ({
   gameId: game.gameId || game.key,
   gameCode: game.gameUId || game.key,
+  // গেম চালু করতে এটাই লাগে — বিল্ট-ইন নমুনা তালিকায় থাকে না, তাই
+  // key বসানো না থাকলে কার্ডে ক্লিকে "শীঘ্রই আসছে" ই দেখায়
+  gameUId: game.gameUId || "",
   gameName: game.name,
   vendorName: game.vendor,
   // master গেমের সাথে প্রোভাইডারের নাম পাঠায় না, আইডি পাঠায় —

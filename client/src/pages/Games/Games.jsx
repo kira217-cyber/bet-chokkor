@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
-import { useComingSoon } from "../../Context/comingSoonContext";
+import { useOpenGame } from "../../features/game/useOpenGame";
 import { usePanel } from "../../Context/panelContext";
 import { useGameList } from "../../features/globalGame/useGameList";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
@@ -70,7 +70,7 @@ const writeRecent = (list) => {
 
 const Games = () => {
   const { t, tv } = useLanguage();
-  const { openComingSoon } = useComingSoon();
+  const openGame = useOpenGame();
   const { setPanelWidth } = usePanel();
   const { category } = useParams();
   const [searchParams] = useSearchParams();
@@ -311,12 +311,12 @@ const Games = () => {
 
   /** গেম কার্ড — মূল গ্রিড আর সার্চ দুই জায়গাতেই */
   const gameCard = (game) => (
-    // গেম খেলা এখনো চালু হয়নি — ক্লিকে "শীঘ্রই আসছে" মডাল
     <button
       key={game.gameId}
       type="button"
       onClick={() =>
-        openComingSoon({
+        openGame({
+          gameUId: game.gameUId,
           name: game.gameName,
           image: game.icon,
           vendor: vendorNameOf(game),

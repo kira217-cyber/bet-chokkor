@@ -417,6 +417,19 @@ export const locale = {
   menuPersonalInfo: { bn: "ব্যক্তিগত তথ্য", en: "Personal Info" },
   menuSecurity: { bn: "লগইন ও সিকিউরিটি", en: "Login & Security" },
   menuReferral: { bn: "মাই রেফারেল", en: "My Referral" },
+
+  // ── গেম ──
+  gamePreparing: { bn: "গেম প্রস্তুত করা হচ্ছে…", en: "Preparing your game…" },
+  gameFailedTitle: { bn: "গেম চালু হয়নি", en: "Game did not start" },
+  gameFailedText: {
+    bn: "গেমটি চালু করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    en: "There was a problem starting this game. Please try again.",
+  },
+  gameLaunchFailed: { bn: "গেম চালু করা যায়নি", en: "Could not start the game" },
+  errGameNotReady: {
+    bn: "গেম এখন চালু করা যাচ্ছে না, একটু পরে চেষ্টা করুন",
+    en: "Games are unavailable right now, please try again later",
+  },
   notification: { bn: "নোটিফিকেশন", en: "Notification" },
   verification: { bn: "প্রতিপাদন", en: "Verification" },
   myVip: { bn: "মাই ভিআইপি", en: "My VIP" },

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useDispatch } from "react-redux";
 import { Eye, EyeOff, X } from "lucide-react";
 
@@ -26,6 +26,19 @@ const Login = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+
+  /**
+   * লগইনের পর কোথায় যাবে।
+   *
+   * লগইন ছাড়া গেমে ক্লিক করলে এখানে পাঠানো হয়, আর লগইন হলে সেই গেমেই
+   * ফেরত — নইলে হোমে এসে আবার গেমটা খুঁজতে হতো। শুধু নিজের সাইটের
+   * ভিতরের পথই মানা হয়, যাতে বাইরের কোনো ঠিকানায় পাঠানো না যায়।
+   */
+  const nextPath = (() => {
+    const value = searchParams.get("next") || "";
+    return value.startsWith("/") && !value.startsWith("//") ? value : "/";
+  })();
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -36,10 +49,10 @@ const Login = () => {
 
   const canSubmit = form.username.trim() && form.password.trim() && !busy;
 
-  /** পাসওয়ার্ড ঠিক থাকলে টোকেন বসিয়ে হোমে */
+  /** পাসওয়ার্ড ঠিক থাকলে টোকেন বসিয়ে যেখানে যাওয়ার কথা সেখানে */
   const finish = (data) => {
     dispatch(setCredentials({ user: data.user, token: data.token }));
-    navigate("/", { replace: true });
+    navigate(nextPath, { replace: true });
   };
 
   const handleSubmit = async (event) => {

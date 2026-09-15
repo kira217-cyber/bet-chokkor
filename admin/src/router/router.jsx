@@ -7,6 +7,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
+import GameLaunchKey from "../pages/GameLaunchKey/GameLaunchKey";
 import GameHistory from "../pages/GameHistory/GameHistory";
 import Maintenance from "../pages/Maintenance/Maintenance";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
@@ -136,6 +137,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <GameApiKey />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "game-launch-key",
+        element: (
+          <PrivateRoute motherOnly>
+            <GameLaunchKey />
           </PrivateRoute>
         ),
       },
