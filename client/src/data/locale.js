@@ -170,6 +170,46 @@ export const locale = {
     en: "Enter an amount within the limit",
   },
 
+  // ── উইথড্র ──
+  withdrawTitle: { bn: "উইথড্র", en: "Withdraw" },
+  selectWithdrawMethod: { bn: "উপায় নির্বাচন করুন", en: "Select a method" },
+  selectWallet: { bn: "নম্বর নির্বাচন করুন", en: "Select a number" },
+  addNumber: { bn: "নতুন নম্বর যোগ করুন", en: "Add a number" },
+  numberLabel: { bn: "নামের ঘর (ঐচ্ছিক)", en: "Label (optional)" },
+  numberPlaceholder: { bn: "০১XXXXXXXXX", en: "01XXXXXXXXX" },
+  registrationNumber: { bn: "রেজিস্ট্রেশনের নম্বর", en: "Registration number" },
+  withdrawAmount: { bn: "কত টাকা তুলবেন", en: "How much to withdraw" },
+  availableBalance: { bn: "তোলার মতো আছে", en: "Available" },
+  withdrawNow: { bn: "উইথড্র করুন", en: "Withdraw" },
+  withdrawDone: {
+    bn: "আপনার উইথড্র জমা হয়েছে",
+    en: "Your withdraw has been submitted",
+  },
+  withdrawDoneText: {
+    bn: "অ্যাডমিন দেখে অনুমোদন দিলে টাকা আপনার নম্বরে চলে যাবে।",
+    en: "Once an admin approves it, the money goes to your number.",
+  },
+  noWithdrawMethod: {
+    bn: "এখন কোনো উইথড্রের উপায় চালু নেই",
+    en: "No withdraw method is open right now",
+  },
+  turnoverLeftTitle: { bn: "টার্নওভার বাকি আছে", en: "Turnover is not finished" },
+  turnoverLeftText: {
+    bn: "শর্ত পূরণ হলে টাকা তুলতে পারবেন। এখনো বাকি",
+    en: "You can withdraw once the condition is met. Still left",
+  },
+  pendingWithdrawTitle: {
+    bn: "একটি উইথড্র অপেক্ষা করছে",
+    en: "A withdraw is waiting",
+  },
+  pendingWithdrawText: {
+    bn: "আগেরটি শেষ হলে নতুন করে আবেদন করতে পারবেন।",
+    en: "You can ask again once that one is finished.",
+  },
+  removeNumber: { bn: "সরান", en: "Remove" },
+  numberRemoved: { bn: "নম্বরটি সরানো হয়েছে", en: "The number was removed" },
+  numberAdded: { bn: "নম্বর যোগ হয়েছে", en: "The number was added" },
+
   // ── প্রোফাইল ──
   profileTitle: { bn: "প্রোফাইল", en: "Profile" },
   balanceLabel: { bn: "আপনার ব্যালেন্স", en: "Your balance" },
@@ -260,6 +300,30 @@ export const locale = {
   errOtpTooManyTries: {
     bn: "অনেকবার ভুল হয়েছে, নতুন কোড নিন",
     en: "Too many wrong tries, ask for a new code",
+  },
+  errBadWalletNumber: {
+    bn: "নম্বরটি ঠিক নয়",
+    en: "That number is not valid",
+  },
+  errWalletCap: {
+    bn: "এর বেশি নম্বর যোগ করা যাবে না",
+    en: "You cannot add more numbers",
+  },
+  errWalletExists: {
+    bn: "এই নম্বরটি আগেই যোগ করা আছে",
+    en: "This number is already added",
+  },
+  errLowBalance: {
+    bn: "ব্যালেন্সে যথেষ্ট টাকা নেই",
+    en: "Not enough balance",
+  },
+  errPendingWithdraw: {
+    bn: "আপনার একটি উইথড্র এখনো অপেক্ষমাণ",
+    en: "You already have a withdraw waiting",
+  },
+  errTurnoverLeft: {
+    bn: "টার্নওভারের শর্ত এখনো পূরণ হয়নি",
+    en: "The turnover condition is not met yet",
   },
   errOtpNotVerified: {
     bn: "আগে কোডটি যাচাই করুন",

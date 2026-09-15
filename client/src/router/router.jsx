@@ -10,6 +10,7 @@ import PrivateRoute from "../PrivateRoute/PrivateRoute";
 import Deposit from "../pages/Deposit/Deposit";
 import ManualDeposit from "../pages/Deposit/ManualDeposit";
 import AutoDeposit from "../pages/Deposit/AutoDeposit";
+import Withdraw from "../pages/Withdraw/Withdraw";
 import Profile from "../pages/Member/Profile";
 
 export const routes = createBrowserRouter([
@@ -34,6 +35,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Deposit />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/wallet/withdraw",
+        element: (
+          <PrivateRoute>
+            <Withdraw />
           </PrivateRoute>
         ),
       },

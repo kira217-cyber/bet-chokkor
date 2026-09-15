@@ -19,6 +19,10 @@ import DepositRequest from "../models/DepositRequest.js";
 import TurnOver from "../models/TurnOver.js";
 import AutoDeposit from "../models/AutoDeposit.js";
 import RegisterBonusCampaign from "../models/RegisterBonusCampaign.js";
+import WithdrawMethod from "../models/WithdrawMethod.js";
+import WithdrawRequest from "../models/WithdrawRequest.js";
+import EWallet from "../models/EWallet.js";
+import GameHistory from "../models/GameHistory.js";
 
 dotenv.config();
 
@@ -26,6 +30,7 @@ const BCRYPT_ROUNDS = 12;
 const PASSWORD = "Demo#2026";
 
 const METHODS = ["demo-bkash", "demo-nagad", "demo-usdt"];
+const WITHDRAW_METHODS = ["DEMO-BKASH", "DEMO-NAGAD"];
 const USER_RE = /^demo/;
 
 const wipe = async () => {
@@ -36,7 +41,12 @@ const wipe = async () => {
     DepositRequest.deleteMany({ user: { $in: ids } }),
     TurnOver.deleteMany({ user: { $in: ids } }),
     AutoDeposit.deleteMany({ user: { $in: ids } }),
+    WithdrawRequest.deleteMany({ user: { $in: ids } }),
+    EWallet.deleteMany({ user: { $in: ids } }),
+    GameHistory.deleteMany({ user: { $in: ids } }),
   ]);
+
+  await WithdrawMethod.deleteMany({ methodId: { $in: WITHDRAW_METHODS } });
 
   await User.deleteMany({ _id: { $in: ids } });
 
@@ -218,6 +228,24 @@ const run = async () => {
     channels: [{ id: "trc20", name: { bn: "TRC20", en: "TRC20" }, tagText: "+0%", bonusPercent: 0 }],
   });
 
+  /* ── টাকা তোলার উপায় ── */
+  await WithdrawMethod.create([
+    {
+      methodId: "DEMO-BKASH",
+      name: { bn: "বিকাশ", en: "bKash" },
+      minimumWithdrawAmount: 500,
+      maximumWithdrawAmount: 25000,
+      sort: 0,
+    },
+    {
+      methodId: "DEMO-NAGAD",
+      name: { bn: "নগদ", en: "Nagad" },
+      minimumWithdrawAmount: 500,
+      maximumWithdrawAmount: 20000,
+      sort: 1,
+    },
+  ]);
+
   /* ── রেজিস্টার বোনাস ── */
   await RegisterBonusCampaign.create({
     title: { bn: "ডেমো সাইন আপ বোনাস", en: "Demo sign up bonus" },
@@ -397,12 +425,16 @@ const run = async () => {
     completedAt: new Date(now - day),
   });
 
+  // একজনের কোনো চলতি শর্ত থাকবে না, তাই তাঁকে দিয়ে উইথড্র পরীক্ষা করা যায়
+  await User.updateOne({ _id: players[3]._id }, { $set: { balance: 5000 } });
+
   console.log("নমুনা ডেটা বসানো হলো:");
   console.log(`  ৩টি ডিপোজিট মেথড (ফর্ম ও বোনাসের নিয়মসহ)`);
   console.log(`  ১টি রেজিস্টার বোনাস ক্যাম্পেইন`);
   console.log(`  ৩ জন অ্যাফিলিয়েট — demoaff1..3`);
   console.log(`  ৮ জন প্লেয়ার — demouser1..8 (demouser6 বন্ধ)`);
   console.log(`  ৭টি ডিপোজিট (৩টি অপেক্ষমাণ), ২টি অটো ডিপোজিট, টার্নওভার`);
+  console.log(`  ২টি উইথড্র মেথড — demouser4 এর টার্নওভার শেষ, তাই তুলতে পারবেন`);
   console.log(`\n  সবার পাসওয়ার্ড: ${PASSWORD}`);
 
   await mongoose.disconnect();

@@ -115,6 +115,28 @@ export const navItems = [
   },
 
   {
+    key: "withdraw",
+    label: "Withdraw",
+    icon: "Banknote",
+    children: [
+      {
+        key: "withdraw-requests",
+        path: "/withdraw-requests",
+        label: "Withdraw Requests",
+        icon: "Receipt",
+        perm: "withdraw-requests",
+      },
+      {
+        key: "withdraw-methods",
+        path: "/withdraw-methods",
+        label: "Add Withdraw Method",
+        icon: "Banknote",
+        motherOnly: true,
+      },
+    ],
+  },
+
+  {
     key: "game",
     label: "Game",
     icon: "Gamepad2",
@@ -142,6 +164,11 @@ export const allPermissions = [
   { key: "dashboard", label: "Dashboard", path: "/" },
   { key: "users", label: "Users", path: "/users" },
   { key: "game-history", label: "Game History", path: "/game-history" },
+  {
+    key: "withdraw-requests",
+    label: "Withdraw Requests",
+    path: "/withdraw-requests",
+  },
   { key: "affiliates", label: "Affiliates", path: "/affiliates" },
   { key: "manual-deposit", label: "Manual Deposit", path: "/manual-deposit" },
   { key: "deposit-requests", label: "Deposit Requests", path: "/deposit-requests" },

@@ -22,6 +22,8 @@ import ManualDeposit from "../pages/ManualDeposit/ManualDeposit";
 import DepositRequests from "../pages/DepositRequests/DepositRequests";
 import AutoDeposit from "../pages/AutoDeposit/AutoDeposit";
 import AutoDepositHistory from "../pages/AutoDepositHistory/AutoDepositHistory";
+import WithdrawMethods from "../pages/WithdrawMethods/WithdrawMethods";
+import WithdrawRequests from "../pages/WithdrawRequests/WithdrawRequests";
 import TurnoverHistory from "../pages/TurnoverHistory/TurnoverHistory";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
@@ -118,6 +120,15 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "auto-deposit-history", element: <AutoDepositHistory /> },
+      {
+        path: "withdraw-methods",
+        element: (
+          <PrivateRoute motherOnly>
+            <WithdrawMethods />
+          </PrivateRoute>
+        ),
+      },
+      { path: "withdraw-requests", element: <WithdrawRequests /> },
       { path: "turnover-history", element: <TurnoverHistory /> },
       { path: "game-history", element: <GameHistory /> },
       {

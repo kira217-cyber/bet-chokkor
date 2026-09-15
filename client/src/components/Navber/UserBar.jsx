@@ -82,6 +82,19 @@ const UserBar = () => {
       </div>
 
       <Link
+        to="/member/wallet/withdraw"
+        className="auth-btn auth-btn--secondary hidden shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110 lg:flex"
+        style={{
+          height: "calc(var(--u) * 9.067)",
+          borderRadius: "var(--radius-10)",
+          fontSize: "var(--fs-larger)",
+          paddingInline: "calc(var(--u) * 2.667)",
+        }}
+      >
+        {t("withdrawTitle")}
+      </Link>
+
+      <Link
         to="/member/wallet/deposit"
         aria-label={t("deposit")}
         className="auth-btn auth-btn--primary flex shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
