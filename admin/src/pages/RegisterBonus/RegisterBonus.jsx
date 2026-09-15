@@ -445,6 +445,44 @@ const RegisterBonus = () => {
                       </span>
                       <span>Order {campaign.order}</span>
                     </div>
+
+                    {/* কোন প্রোভাইডারে খেললে টার্নওভার এগোবে — Edit না
+                        খুলেই দেখা যাক, নইলে সেট করা আছে কিনা বোঝা যায় না */}
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px]">
+                      <span className="text-[var(--text-disabled)]">
+                        Providers
+                      </span>
+
+                      {campaign.eligibleProviders?.length ? (
+                        <>
+                          {campaign.eligibleProviders.map((item) => (
+                            <span
+                              key={item.providerCode}
+                              className="rounded-full bg-white/[0.06] px-2 py-[2px] font-semibold text-[var(--text-secondary)]"
+                            >
+                              {item.providerCode} {item.percent}%
+                            </span>
+                          ))}
+
+                          <span className="text-[var(--text-disabled)]">
+                            · open{" "}
+                            {Math.max(
+                              0,
+                              100 -
+                                campaign.eligibleProviders.reduce(
+                                  (sum, item) => sum + Number(item.percent || 0),
+                                  0,
+                                ),
+                            )}
+                            %
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[var(--text-muted)]">
+                          any provider counts in full
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex gap-2">

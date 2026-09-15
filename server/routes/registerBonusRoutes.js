@@ -27,7 +27,10 @@ const cleanProviders = (list) => {
   return list
     .map((item) => ({
       providerCode: text(item?.providerCode).toUpperCase(),
-      percent: Math.min(100, Math.max(0, num(item?.percent, 100))),
+      // `num()` একটাই আর্গুমেন্ট নেয় — দ্বিতীয়টা দিলে কিছুই হতো না, আর
+      // শতাংশ না পাঠালে ১০০ এর বদলে ০ বসে যেত। ০ মানে ওই প্রোভাইডারের
+      // নিজের কোনো ভাগ নেই, তাই বেছে দেওয়ার পরেও কিছু বদলাত না
+      percent: Math.min(100, Math.max(0, num(item?.percent ?? 100))),
     }))
     .filter((item) => item.providerCode);
 };
@@ -116,7 +119,9 @@ router.post(
         title,
         description: langText(body.description),
         bonusAmount,
-        turnoverMultiplier: Math.max(0, num(body.turnoverMultiplier, 1)),
+        // এখানেও দ্বিতীয় আর্গুমেন্টটা কাজ করত না — গুণক না পাঠালে ১ এর
+        // বদলে ০ বসত, আর ০ গুণক মানে টার্নওভারই তৈরি হতো না
+        turnoverMultiplier: Math.max(0, num(body.turnoverMultiplier ?? 1)),
         eligibleProviders: providers,
         startDate: body.startDate ? new Date(body.startDate) : new Date(),
         endDate: body.endDate ? new Date(body.endDate) : null,
