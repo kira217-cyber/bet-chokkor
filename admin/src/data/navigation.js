@@ -137,6 +137,14 @@ export const navItems = [
   },
 
   {
+    key: "referral",
+    path: "/referral",
+    label: "Referral Program",
+    icon: "Gift",
+    motherOnly: true,
+  },
+
+  {
     key: "verification",
     path: "/verification",
     label: "Verification",

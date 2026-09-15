@@ -69,6 +69,16 @@ const userSchema = new Schema(
     currency: { type: String, default: "BDT" },
     balance: { type: Number, default: 0 },
 
+    /**
+     * এ পর্যন্ত মোট কত বাজি ধরেছেন ও কত জমা দিয়েছেন।
+     *
+     * রেফারেল কমিশনের ধাপ ঠিক হয় এই দুটো দেখে। প্রতিবার যোগ করে না
+     * বের করে চলতি যোগফল রাখা হয় — নইলে প্রতিটা রাউন্ডে পুরো ইতিহাস
+     * গুনতে হতো।
+     */
+    totalTurnover: { type: Number, default: 0, min: 0 },
+    totalDeposit: { type: Number, default: 0, min: 0 },
+
     pendingRegisterBonus: {
       type: pendingRegisterBonusSchema,
       default: () => ({}),

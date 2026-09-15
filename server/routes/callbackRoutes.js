@@ -5,6 +5,7 @@ import GameHistory from "../models/GameHistory.js";
 
 import { applyTurnoverProgress } from "../utils/turnoverProgress.js";
 import { peekGameInfo, resolveGameInfo } from "../utils/gameProviderCatalog.js";
+import { applyReferralCommission } from "../utils/referral.js";
 
 const router = express.Router();
 
@@ -227,11 +228,40 @@ router.post("/", async (req, res) => {
       masterTimestamp: text(timestamp),
     });
 
+    // মোট টার্নওভার — রেফারেল কমিশনের ধাপ এটা দেখেই ঠিক হয়
+    if (betAmount > 0) {
+      await User.updateOne(
+        { _id: player._id },
+        { $inc: { totalTurnover: betAmount } },
+      );
+    }
+
     reply({
       success: true,
       balance: money(updated?.balance),
       message: "OK",
     });
+
+    /*
+     * রেফারেল কমিশন — উত্তর পাঠানোর পরে।
+     *
+     * উপরের তিন ধাপ পর্যন্ত ঘুরতে হয়, তাই কয়েকটা কোয়েরি লাগে। মাস্টার
+     * অপেক্ষা করে থাকে বলে সেটা উত্তরের আগে করা যায় না; এই হিসাবটা
+     * দেরিতে হলেও ক্ষতি নেই, কারণ টাকাটা খেলোয়াড়ের নয়, রেফারকারীর।
+     */
+    if (betAmount > 0) {
+      applyReferralCommission({
+        player: {
+          _id: player._id,
+          userId: player.userId,
+          referredBy: player.referredBy,
+          totalTurnover: num(player.totalTurnover) + betAmount,
+          totalDeposit: player.totalDeposit,
+        },
+        wager: betAmount,
+        gameHistoryId: history._id,
+      }).catch(() => {});
+    }
 
     /*
      * গেমের নাম বা প্রোভাইডার ক্যাশে না থাকলে পরে বসানো।

@@ -287,6 +287,11 @@ router.patch("/admin/:id/approve", protectAdmin, requireWrite, async (req, res) 
     const targetTurnover = money(claimed.calc?.targetTurnover);
 
     user.balance = money(num(user.balance) + creditedAmount);
+
+    // মোট জমা — রেফারেল কমিশনের ধাপ ও "সক্রিয় ডাউনলাইন" এটা দেখে ঠিক
+    // হয়, তাই বোনাস বাদে আসল জমাটুকুই গোনা হয়
+    user.totalDeposit = money(num(user.totalDeposit) + num(claimed.amount));
+
     await user.save();
 
     creditedUserId = user._id;

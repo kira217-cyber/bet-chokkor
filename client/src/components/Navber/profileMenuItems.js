@@ -51,5 +51,10 @@ export const buildProfileMenu = (t) => [
     to: "/member/history/turnover",
   },
   { key: "vip", label: t("myVip"), Icon: Crown, soon: true },
-  { key: "referral", label: t("menuReferral"), Icon: Users, soon: true },
+  {
+    key: "referral",
+    label: t("menuReferral"),
+    Icon: Users,
+    to: "/member/referral",
+  },
 ];

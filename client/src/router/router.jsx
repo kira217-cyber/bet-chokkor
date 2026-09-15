@@ -14,6 +14,7 @@ import Withdraw from "../pages/Withdraw/Withdraw";
 import Profile from "../pages/Member/Profile";
 import History from "../pages/Member/History";
 import Verification from "../pages/Member/Verification";
+import Referral from "../pages/Member/Referral";
 import PlayGame from "../pages/PlayGame/PlayGame";
 
 export const routes = createBrowserRouter([
@@ -54,6 +55,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/referral",
+        element: (
+          <PrivateRoute>
+            <Referral />
           </PrivateRoute>
         ),
       },

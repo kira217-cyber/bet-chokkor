@@ -515,6 +515,57 @@ export const locale = {
     en: "Your identity is already verified",
   },
 
+  // ── রেফারেল প্রোগ্রাম ──
+  referralOff: {
+    bn: "রেফারেল প্রোগ্রাম এখন বন্ধ আছে",
+    en: "The referral program is off right now",
+  },
+  yourReferralCode: { bn: "আপনার রেফারেল কোড", en: "Your referral code" },
+  copyLink: { bn: "কপি লিংক", en: "Copy link" },
+  copyCode: { bn: "কোড কপি", en: "Copy code" },
+
+  refTabInfo: { bn: "তথ্য", en: "Info" },
+  refTabDetails: { bn: "বিস্তারিত", en: "Details" },
+  refTabRewards: { bn: "পুরস্কার", en: "Rewards" },
+
+  refHowItWorks: { bn: "রেফারেল প্রোগ্রাম কী?", en: "What is the referral program?" },
+  refHowItWorksText: {
+    bn: "আপনার কোড দিয়ে বন্ধু অ্যাকাউন্ট খুললে তিনি যত খেলবেন, তার একটা অংশ আপনি পাবেন। মাসে বেশি বন্ধু আনলে বাড়তি থোক বোনাসও আছে।",
+    en: "When a friend signs up with your code, you earn a share of everything they play. Bring in more friends in a month and there are extra lump-sum bonuses too.",
+  },
+  refCommissionTable: { bn: "কত শতাংশ পাবেন", en: "How much you earn" },
+  refTurnoverFrom: { bn: "বন্ধুর টার্নওভার", en: "Friend's turnover" },
+  refTier: { bn: "ধাপ", en: "Tier" },
+  refTierNote: {
+    bn: "ধাপ ১ মানে সরাসরি আপনার আনা বন্ধু, ধাপ ২ তাঁর আনা বন্ধু — এভাবে।",
+    en: "Tier 1 is a friend you brought in, tier 2 is a friend they brought in, and so on.",
+  },
+
+  refActiveDownline: { bn: "সক্রিয় বন্ধু", en: "Active friends" },
+  refDownlineTurnover: { bn: "তাঁদের টার্নওভার", en: "Their turnover" },
+  refClaimable: { bn: "তুলতে পারবেন", en: "Ready to claim" },
+  refClaimed: { bn: "নেওয়া হয়েছে", en: "Claimed" },
+  refPending: { bn: "জমা আছে", en: "Waiting" },
+  refClaimNow: { bn: "নিয়ে নিন", en: "Claim" },
+  referralClaimed: { bn: "টাকা যোগ হয়েছে", en: "Added to your balance" },
+  referralClaimedText: { bn: "ব্যালেন্সে যোগ হলো", en: "Added to your balance:" },
+
+  refMilestones: { bn: "মাইলফলক বোনাস", en: "Milestone bonus" },
+  refInvite: { bn: "ইনভাইট", en: "Invite" },
+  refInvited: { bn: "এনেছেন", en: "brought in" },
+  refGiven: { bn: "পেয়েছেন", en: "earned" },
+  refMyDownline: { bn: "আমার বন্ধুরা", en: "My friends" },
+  refNoDownline: {
+    bn: "এখনো কেউ আপনার কোড দিয়ে আসেননি",
+    en: "Nobody has signed up with your code yet",
+  },
+  refCommission: { bn: "কমিশন", en: "Commission" },
+  refMilestone: { bn: "মাইলফলক", en: "Milestone" },
+
+  periodDaily: { bn: "প্রতিদিন", en: "Daily" },
+  periodWeekly: { bn: "সাপ্তাহিক", en: "Weekly" },
+  periodMonthly: { bn: "মান্থলি", en: "Monthly" },
+
   // ── 404 ──
   notFoundText: {
     bn: "দুঃখিত, আপনি যে পেজটি খুঁজছেন তা পাওয়া যায়নি।",
