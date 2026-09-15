@@ -7,6 +7,7 @@ import DepositRequest from "../models/DepositRequest.js";
 import AutoDeposit from "../models/AutoDeposit.js";
 import GameHistory from "../models/GameHistory.js";
 import TurnOver from "../models/TurnOver.js";
+import WithdrawRequest from "../models/WithdrawRequest.js";
 
 import {
   protectAdmin,
@@ -191,35 +192,128 @@ router.get("/affiliates/:id/referrals", protectAdmin, async (req, res) => {
  * বিস্তারিত পেজে চার-পাঁচটা ইতিহাস থাকে; একসাথে সব আনলে ভারী হয়ে যেত,
  * তাই প্রতিটা নিজের মতো করে পাতা ঘোরায়।
  */
-const historyPage = async (req, res, Model, extra = {}, statusField = "status") => {
+/**
+ * একজনের একটা ইতিহাস — পাতা, ছাঁকনি, খোঁজা আর সারাংশ।
+ *
+ * `searchFields` এ যে ঘরগুলো দেওয়া হবে সেগুলোতেই খোঁজা হয়; `totals` এ
+ * `{ নাম: ঘর }` দিলে সেই ঘরগুলোর যোগফল আসে। সারাংশটা **ছাঁকনি সহ**
+ * হিসাব হয়, তাই "শুধু অনুমোদিতগুলো" বাছলে অঙ্কগুলোও সেটারই হয়।
+ *
+ * স্ট্যাটাস অনুযায়ী গোনাটা ছাঁকনি ছাড়াই হয় — নইলে "পেন্ডিং ৩টা" এর
+ * মতো তথ্য ছাঁকনি বদলালেই হারিয়ে যেত।
+ */
+const historyPage = async (
+  req,
+  res,
+  Model,
+  {
+    extra = {},
+    statusField = "status",
+    searchFields = [],
+    searchObjects = [],
+    totals = {},
+  } = {},
+) => {
   if (!isId(req.params.id)) return errorResponse(res, "Invalid id", 400);
 
   const page = Math.max(1, num(req.query.page) || 1);
   const limit = Math.min(100, Math.max(1, num(req.query.limit) || 10));
 
-  const filter = { user: req.params.id, ...extra };
-  const status = text(req.query.status);
+  const base = { user: new mongoose.Types.ObjectId(req.params.id), ...extra };
+  const filter = { ...base };
 
+  const status = text(req.query.status);
   if (status && status !== "all") filter[statusField] = status;
 
-  const [rows, total] = await Promise.all([
+  const search = text(req.query.q);
+
+  if (search && (searchFields.length || searchObjects.length)) {
+    const safe = escapeRegex(search);
+    const regex = new RegExp(safe, "i");
+
+    const clauses = searchFields.map((field) => ({ [field]: regex }));
+
+    /*
+     * যে ঘরগুলোর কী অ্যাডমিন নিজে ঠিক করেন (ডিপোজিট ফর্মের `fields`)
+     * সেখানে নাম ধরে খোঁজা যায় না — একটা মেথডে `trxId`, আরেকটায়
+     * `transactionId` হতে পারে। তাই পুরো অবজেক্টটা জোড়ায় ভেঙে যেকোনো
+     * মানের সাথে মেলানো হয়।
+     */
+    searchObjects.forEach((field) => {
+      clauses.push({
+        $expr: {
+          $gt: [
+            {
+              $size: {
+                $filter: {
+                  input: { $objectToArray: { $ifNull: [`$${field}`, {}] } },
+                  cond: {
+                    $regexMatch: {
+                      input: { $toString: "$$this.v" },
+                      regex: safe,
+                      options: "i",
+                    },
+                  },
+                },
+              },
+            },
+            0,
+          ],
+        },
+      });
+    });
+
+    filter.$or = clauses;
+  }
+
+  const sumStage = Object.entries(totals).reduce(
+    (acc, [key, field]) => ({ ...acc, [key]: { $sum: `$${field}` } }),
+    {},
+  );
+
+  const [rows, total, sums, byStatus] = await Promise.all([
     Model.find(filter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean(),
     Model.countDocuments(filter),
+    Object.keys(sumStage).length
+      ? Model.aggregate([{ $match: filter }, { $group: { _id: null, ...sumStage } }])
+      : Promise.resolve([]),
+    Model.aggregate([
+      { $match: base },
+      { $group: { _id: `$${statusField}`, count: { $sum: 1 } } },
+    ]),
   ]);
+
+  const summary = Object.keys(totals).reduce(
+    (acc, key) => ({ ...acc, [key]: money(sums[0]?.[key] || 0) }),
+    { count: total },
+  );
 
   return successResponse(res, "History loaded", {
     rows,
+    summary,
+    counts: byStatus.reduce(
+      (acc, item) => ({ ...acc, [item._id]: item.count }),
+      {},
+    ),
     meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
   });
 };
 
 router.get("/:id/history/deposits", protectAdmin, async (req, res) => {
   try {
-    return await historyPage(req, res, DepositRequest);
+    return await historyPage(req, res, DepositRequest, {
+      searchFields: ["methodId", "channelId"],
+      searchObjects: ["fields"],
+      totals: {
+        amount: "amount",
+        bonus: "calc.totalBonus",
+        credited: "calc.creditedAmount",
+      },
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
@@ -227,7 +321,25 @@ router.get("/:id/history/deposits", protectAdmin, async (req, res) => {
 
 router.get("/:id/history/auto-deposits", protectAdmin, async (req, res) => {
   try {
-    return await historyPage(req, res, AutoDeposit);
+    return await historyPage(req, res, AutoDeposit, {
+      searchFields: ["invoiceNumber"],
+      totals: {
+        amount: "amount",
+        bonus: "calc.bonusAmount",
+        credited: "calc.creditedAmount",
+      },
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/withdraws", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, WithdrawRequest, {
+      searchFields: ["methodId", "walletSnapshot.walletNumber"],
+      totals: { amount: "amount" },
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
@@ -235,7 +347,11 @@ router.get("/:id/history/auto-deposits", protectAdmin, async (req, res) => {
 
 router.get("/:id/history/games", protectAdmin, async (req, res) => {
   try {
-    return await historyPage(req, res, GameHistory, {}, "resultType");
+    return await historyPage(req, res, GameHistory, {
+      statusField: "resultType",
+      searchFields: ["gameName", "gameUId", "gameRound", "serialNumber"],
+      totals: { bet: "betAmount", win: "winAmount", net: "netAmount" },
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
@@ -243,7 +359,14 @@ router.get("/:id/history/games", protectAdmin, async (req, res) => {
 
 router.get("/:id/history/turnovers", protectAdmin, async (req, res) => {
   try {
-    return await historyPage(req, res, TurnOver);
+    return await historyPage(req, res, TurnOver, {
+      searchFields: ["sourceType", "title"],
+      totals: {
+        credited: "creditedAmount",
+        required: "required",
+        progress: "progress",
+      },
+    });
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }

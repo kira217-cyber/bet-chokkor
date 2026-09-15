@@ -4,10 +4,14 @@ import { toast } from "react-toastify";
 import {
   ArrowLeft,
   BadgeCheck,
+  BanknoteArrowDown,
+  Dices,
   Eye,
   EyeOff,
+  Landmark,
   Loader2,
   RefreshCw,
+  RotateCcw,
   Save,
   Shuffle,
   UserCheck,
@@ -607,16 +611,48 @@ const UserDetails = ({ kind }) => {
         </button>
       </form>
 
-      {/* ── ইতিহাস ── */}
+      {/* ── ইতিহাস ──
+          Bajiman এর single-user সেকশনগুলোর মতো: প্রতিটার নিজের
+          সারাংশ, খোঁজা, ছাঁকনি আর পাতা। সারাংশের অঙ্কগুলো ছাঁকনি
+          মেনেই আসে, তাই "শুধু অনুমোদিত" বাছলে অঙ্কও সেটারই */}
       <HistoryTable
         title="Game history"
+        subtitle="Every round this player has played."
+        icon={<Dices size={17} />}
         userId={id}
         path="games"
+        minWidth={1150}
         statuses={[
           { key: "all", label: "All" },
           { key: "win", label: "Win" },
           { key: "loss", label: "Loss" },
           { key: "push", label: "Push" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total bet",
+            value: money(sum.bet),
+            tone: "var(--primary500)",
+            sub: `${sum.count || 0} rounds`,
+          }),
+          (sum) => ({
+            label: "Total win",
+            value: money(sum.win),
+            tone: "var(--status-success)",
+          }),
+          (sum) => ({
+            label: "Player net",
+            value: money(sum.net),
+            tone:
+              Number(sum.net) >= 0
+                ? "var(--status-success)"
+                : "var(--status-danger)",
+            sub: Number(sum.net) >= 0 ? "Player ahead" : "Player behind",
+          }),
+          (sum, counts) => ({
+            label: "Win / loss / push",
+            value: `${counts.win || 0} / ${counts.loss || 0} / ${counts.push || 0}`,
+          }),
         ]}
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
@@ -635,10 +671,23 @@ const UserDetails = ({ kind }) => {
             ),
           },
           { key: "provider", label: "Provider", render: (r) => r.providerCode || "—" },
+          {
+            key: "round",
+            label: "Round",
+            render: (r) => (
+              <>
+                <span className="block break-all">{r.gameRound || "—"}</span>
+                <span className="mt-0.5 block break-all text-[11px] text-[var(--text-disabled)]">
+                  {r.serialNumber || "—"}
+                </span>
+              </>
+            ),
+          },
           { key: "bet", label: "Bet", render: (r) => money(r.betAmount) },
           { key: "win", label: "Win", render: (r) => money(r.winAmount) },
           { key: "net", label: "Net", render: (r) => money(r.netAmount) },
-          { key: "after", label: "Balance after", render: (r) => money(r.balanceAfter) },
+          { key: "before", label: "Before", render: (r) => money(r.balanceBefore) },
+          { key: "after", label: "After", render: (r) => money(r.balanceAfter) },
           {
             key: "turnover",
             label: "Turnover",
@@ -650,47 +699,188 @@ const UserDetails = ({ kind }) => {
 
       <HistoryTable
         title="Deposit history"
+        subtitle="Manual deposits this player has sent in."
+        icon={<Wallet size={17} />}
         userId={id}
         path="deposits"
+        minWidth={1100}
         statuses={[
           { key: "all", label: "All" },
           { key: "pending", label: "Pending" },
           { key: "approved", label: "Approved" },
           { key: "rejected", label: "Rejected" },
         ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total deposit",
+            value: money(sum.amount),
+            tone: "var(--primary500)",
+            sub: `${sum.count || 0} requests`,
+          }),
+          (sum) => ({
+            label: "Total bonus",
+            value: money(sum.bonus),
+            tone: "var(--status-success)",
+          }),
+          (sum) => ({ label: "Credited", value: money(sum.credited) }),
+          (sum, counts) => ({
+            label: "Pending / rejected",
+            value: `${counts.pending || 0} / ${counts.rejected || 0}`,
+            tone: counts.pending ? "var(--status-pending)" : undefined,
+          }),
+        ]}
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
           { key: "method", label: "Method", render: (r) => r.display?.methodName?.en || r.methodId },
+          { key: "channel", label: "Channel", render: (r) => r.display?.channelName?.en || r.channelId || "—" },
+          {
+            key: "trx",
+            label: "Transaction",
+            render: (r) =>
+              r.fields?.transactionId || r.fields?.trxId || r.fields?.senderNumber || "—",
+          },
           { key: "amount", label: "Amount", render: (r) => money(r.amount) },
           { key: "bonus", label: "Bonus", render: (r) => money(r.calc?.totalBonus) },
           { key: "credited", label: "Credited", render: (r) => money(r.calc?.creditedAmount) },
+          { key: "turnover", label: "Turnover", render: (r) => `x${r.calc?.turnoverMultiplier ?? 1}` },
           { key: "source", label: "Source", render: (r) => r.display?.source || "User" },
+          { key: "note", label: "Note", render: (r) => r.adminNote || "—" },
           { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
         ]}
       />
 
       <HistoryTable
         title="Auto deposit history"
+        subtitle="Payments made on the gateway page."
+        icon={<Landmark size={17} />}
         userId={id}
         path="auto-deposits"
+        minWidth={950}
+        statuses={[
+          { key: "all", label: "All" },
+          { key: "PENDING", label: "Pending" },
+          { key: "PAID", label: "Paid" },
+          { key: "FAILED", label: "Failed" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total deposit",
+            value: money(sum.amount),
+            tone: "var(--primary500)",
+            sub: `${sum.count || 0} payments`,
+          }),
+          (sum) => ({
+            label: "Total bonus",
+            value: money(sum.bonus),
+            tone: "var(--status-success)",
+          }),
+          (sum) => ({ label: "Credited", value: money(sum.credited) }),
+          (sum, counts) => ({
+            label: "Paid / failed",
+            value: `${counts.PAID || 0} / ${counts.FAILED || 0}`,
+          }),
+        ]}
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
           { key: "invoice", label: "Invoice", render: (r) => r.invoiceNumber },
           { key: "amount", label: "Amount", render: (r) => money(r.amount) },
           { key: "bonus", label: "Bonus", render: (r) => money(r.calc?.bonusAmount) },
           { key: "credited", label: "Credited", render: (r) => money(r.calc?.creditedAmount) },
+          { key: "turnover", label: "Turnover", render: (r) => `x${r.calc?.turnoverMultiplier ?? 0}` },
+          { key: "added", label: "Balance added", render: (r) => (r.balanceAdded ? "yes" : "—") },
+          { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
+        ]}
+      />
+
+      <HistoryTable
+        title="Withdraw history"
+        subtitle="Money this player has asked to take out."
+        icon={<BanknoteArrowDown size={17} />}
+        userId={id}
+        path="withdraws"
+        minWidth={1000}
+        statuses={[
+          { key: "all", label: "All" },
+          { key: "pending", label: "Pending" },
+          { key: "approved", label: "Approved" },
+          { key: "rejected", label: "Rejected" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total withdraw",
+            value: money(sum.amount),
+            tone: "var(--status-danger)",
+            sub: `${sum.count || 0} requests`,
+          }),
+          (sum, counts) => ({
+            label: "Pending",
+            value: counts.pending || 0,
+            tone: counts.pending ? "var(--status-pending)" : undefined,
+          }),
+          (sum, counts) => ({
+            label: "Approved",
+            value: counts.approved || 0,
+            tone: "var(--status-success)",
+          }),
+          (sum, counts) => ({
+            label: "Rejected",
+            value: counts.rejected || 0,
+            tone: counts.rejected ? "var(--status-danger)" : undefined,
+          }),
+        ]}
+        columns={[
+          { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
+          {
+            key: "method",
+            label: "Method",
+            render: (r) => r.walletSnapshot?.methodName?.en || r.methodId,
+          },
+          {
+            key: "wallet",
+            label: "Number",
+            render: (r) => r.walletSnapshot?.walletNumber || "—",
+          },
+          { key: "amount", label: "Amount", render: (r) => money(r.amount) },
+          { key: "before", label: "Before", render: (r) => money(r.balanceBefore) },
+          { key: "after", label: "After", render: (r) => money(r.balanceAfter) },
+          { key: "note", label: "Note", render: (r) => r.adminNote || "—" },
           { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
         ]}
       />
 
       <HistoryTable
         title="Turnover history"
+        subtitle="How much play is still owed on each bonus."
+        icon={<RotateCcw size={17} />}
         userId={id}
         path="turnovers"
+        minWidth={1050}
         statuses={[
           { key: "all", label: "All" },
           { key: "running", label: "Running" },
           { key: "completed", label: "Completed" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total required",
+            value: money(sum.required),
+            tone: "var(--primary500)",
+            sub: `${sum.count || 0} conditions`,
+          }),
+          (sum) => ({
+            label: "Played so far",
+            value: money(sum.progress),
+            tone: "var(--status-success)",
+          }),
+          (sum) => ({
+            label: "Still owed",
+            value: money(Math.max(0, Number(sum.required || 0) - Number(sum.progress || 0))),
+            tone: "var(--status-pending)",
+          }),
+          (sum, counts) => ({
+            label: "Running / done",
+            value: `${counts.running || 0} / ${counts.completed || 0}`,
+          }),
         ]}
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
@@ -701,12 +891,22 @@ const UserDetails = ({ kind }) => {
             r.required ? Math.min(100, Math.round((r.progress / r.required) * 100)) : 100
           }%)` },
           {
+            key: "left",
+            label: "Left",
+            render: (r) => money(Math.max(0, Number(r.required || 0) - Number(r.progress || 0))),
+          },
+          {
             key: "providers",
             label: "Providers",
             render: (r) =>
               r.eligibleProviders?.length
                 ? r.eligibleProviders.map((p) => `${p.providerCode} ${p.percent}%`).join(", ")
                 : "Any",
+          },
+          {
+            key: "done",
+            label: "Completed",
+            render: (r) => (r.completedAt ? new Date(r.completedAt).toLocaleString() : "—"),
           },
           { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
         ]}
