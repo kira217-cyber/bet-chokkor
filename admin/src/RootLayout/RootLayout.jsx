@@ -60,9 +60,15 @@ const ICONS = {
   User,
 };
 
-/** একটা মেনু লিংকের চেহারা — সাধারণ আইটেম আর ড্রপডাউনের ভিতরের লিংক দুটোতেই */
+/**
+ * একটা মেনু লিংকের চেহারা — সাধারণ আইটেম আর ড্রপডাউনের ভিতরের লিংক দুটোতেই।
+ *
+ * `shrink-0` না থাকলে ড্রপডাউন খুলে আইটেম বেড়ে গেলে flex সবগুলোকে
+ * চেপে ছোট করে ফেলত (৪৪px থেকে ২১px পর্যন্ত), স্ক্রল করত না — ছোট
+ * পর্দার ল্যাপটপে সেটাই দেখা যেত।
+ */
 const linkClass = ({ isActive }) =>
-  `flex h-11 items-center gap-3 rounded-[14px] px-4 text-[14px] transition ${
+  `flex h-11 shrink-0 items-center gap-3 rounded-[14px] px-4 text-[14px] transition ${
     isActive
       ? "bg-gradient-to-r from-[var(--primary400)] via-[var(--primary500)] to-[var(--primary600)] font-black text-[var(--neutral1000)] shadow-[0_10px_26px_rgba(249,185,1,0.22)]"
       : "font-medium text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
@@ -151,11 +157,12 @@ const RootLayout = () => {
             const isOpen = openGroups.includes(item.key);
 
             return (
-              <div key={item.key}>
+              // গ্রুপটাও nav এর flex আইটেম — এটাও যেন চাপা না পড়ে
+              <div key={item.key} className="shrink-0">
                 <button
                   type="button"
                   onClick={() => toggleGroup(item.key)}
-                  className="flex h-11 w-full cursor-pointer items-center gap-3 rounded-[14px] px-4 text-[14px] font-medium text-[var(--text-secondary)] transition hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
+                  className="flex h-11 w-full shrink-0 cursor-pointer items-center gap-3 rounded-[14px] px-4 text-[14px] font-medium text-[var(--text-secondary)] transition hover:bg-white/[0.06] hover:text-[var(--neutral100)]"
                 >
                   <Icon size={18} className="shrink-0" />
                   {item.label}
