@@ -27,7 +27,18 @@ const TONE = {
 
 /** নিজের তোলা টাকার ইতিহাস */
 const WithdrawHistory = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
+
+  /**
+   * ঘরের নামটা আবেদনের সাথেই তুলে রাখা আছে।
+   *
+   * অ্যাডমিন পরে উপায়টা বদলে ফেললেও পুরোনো আবেদনে যা চাওয়া হয়েছিল
+   * সেই নামই দেখা যায়।
+   */
+  const labelOf = (row, key) => {
+    const field = (row.methodSnapshot?.fields || []).find((f) => f.key === key);
+    return field ? tv(field.label) : key;
+  };
 
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
@@ -83,7 +94,7 @@ const WithdrawHistory = () => {
           <table className="w-full border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">
-                {["thWhen", "thMethod", "thNumber", "thAmount", "thAfter", "thStatus"].map(
+                {["thWhen", "thMethod", "thDetails", "thAmount", "thAfter", "thStatus"].map(
                   (key) => (
                     <th
                       key={key}
@@ -107,11 +118,18 @@ const WithdrawHistory = () => {
                   </td>
 
                   <td className="px-3 py-3 text-[13px] text-[var(--text-secondary)]">
-                    {row.walletSnapshot?.methodName?.en || row.methodId}
+                    {tv(row.methodSnapshot?.name) || row.methodId}
                   </td>
 
-                  <td className="px-3 py-3 text-[13px] text-[var(--text-primary)]">
-                    {row.walletSnapshot?.walletNumber || "—"}
+                  {/* অ্যাডমিনের চাওয়া ঘরগুলো যেভাবে ভরা হয়েছিল */}
+                  <td className="max-w-[240px] px-3 py-3 text-[12px] text-[var(--text-primary)]">
+                    {Object.entries(row.fields || {}).length === 0
+                      ? "—"
+                      : Object.entries(row.fields).map(([key, value]) => (
+                          <span key={key} className="block truncate">
+                            {labelOf(row, key)}: {value}
+                          </span>
+                        ))}
                   </td>
 
                   <td className="px-3 py-3 text-[14px] font-bold text-[var(--primary500)]">

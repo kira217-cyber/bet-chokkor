@@ -288,6 +288,20 @@ export const locale = {
     bn: "যত বেশি সক্রিয় খেলোয়াড়, তত বেশি কমিশন।",
     en: "The more active players, the more commission.",
   },
+  welcomeBack: { bn: "স্বাগতম", en: "Welcome back" },
+  dashSubtitle: {
+    bn: "আপনার খেলোয়াড় আর কমিশনের এক নজরের হিসাব।",
+    en: "Your players and commission at a glance.",
+  },
+  affBalanceText: {
+    bn: "অ্যাডমিন হিসাব মিলিয়ে দিলে কমিশন এখানে জমা হয়।",
+    en: "Commission lands here once an admin settles it.",
+  },
+  recentPlayers: { bn: "নতুন খেলোয়াড়", en: "Recent players" },
+  viewAll: { bn: "সবগুলো", en: "View all" },
+  shareLink: { bn: "শেয়ার", en: "Share" },
+  scanToJoin: { bn: "স্ক্যান করে যোগ দিন", en: "Scan to join" },
+  joinedOn: { bn: "যোগ দিয়েছেন", en: "Joined" },
   dashboardNote: {
     bn: "খেলোয়াড় হারলে আপনার পাওনা বাড়ে, জিতলে জেতার ভাগটা বাদ যায় — তাই শেষ হিসাব ঋণাত্মকও হতে পারে।",
     en: "A player's loss adds to what you are owed; their win is deducted — so the net can be negative.",
@@ -372,6 +386,35 @@ export const locale = {
     bn: "আগে পরিচয় যাচাই সম্পন্ন করতে হবে।",
     en: "Please complete identity verification first.",
   },
+
+  optional: { bn: "ঐচ্ছিক", en: "optional" },
+  thDetails: { bn: "বিবরণ", en: "Details" },
+  affWithdrawText: {
+    bn: "কমিশন মেলানোর পর ব্যালেন্স থেকে টাকা নিন।",
+    en: "Once your commission is settled, take the money from your balance.",
+  },
+  activePlayersBrought: { bn: "সক্রিয় খেলোয়াড়", en: "Active players" },
+  activePlayersText: { bn: "তোলার শর্ত", en: "Requirement to withdraw" },
+  withdrawStatus: { bn: "তোলা যাবে?", en: "Can withdraw?" },
+  withdrawOpen: { bn: "হ্যাঁ", en: "Yes" },
+  withdrawClosed: { bn: "এখন নয়", en: "Not yet" },
+
+  blockReferrals: { bn: "আরও", en: "You need" },
+  blockReferralsTail: {
+    bn: "জন সক্রিয় খেলোয়াড় আনতে হবে।",
+    en: "more active player(s).",
+  },
+  blockUnsettled: {
+    bn: "জমে থাকা কমিশন অ্যাডমিন মেলানোর পর তোলা যাবে। এখন জমা আছে:",
+    en: "An admin has to settle your commission first. Waiting:",
+  },
+  blockPending: {
+    bn: "আপনার একটা আবেদন এখনো দেখা হচ্ছে।",
+    en: "You already have a request being checked.",
+  },
+  blockNoBalance: { bn: "ব্যালেন্সে টাকা নেই।", en: "There is nothing in your balance." },
+  blockGeneric: { bn: "এখন তোলা যাচ্ছে না।", en: "You cannot withdraw right now." },
+  errNotEligible: { bn: "এখন তোলা যাচ্ছে না", en: "You cannot withdraw right now" },
 
   // ── সার্ভারের ভুলের বার্তা ──
   errMissingFields: { bn: "সব ঘর পূরণ করুন", en: "Please fill in every field" },

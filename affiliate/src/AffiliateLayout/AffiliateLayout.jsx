@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
   BanknoteArrowDown,
@@ -13,9 +13,12 @@ import {
   X,
 } from "lucide-react";
 
+import LanguageMenu from "../components/LanguageMenu/LanguageMenu";
+import { money } from "../components/Panel/panelFormat";
 import { useLanguage } from "../Context/LanguageProvider";
-import { logout } from "../features/auth/authSlice";
+import { logout, updateUser } from "../features/auth/authSlice";
 import { selectUser } from "../features/auth/authSelectors";
+import { fetchMe } from "../features/affiliate/affiliateApi";
 
 const NAV = [
   { to: "/dashboard", end: true, label: "navDashboard", Icon: LayoutDashboard },
@@ -47,6 +50,7 @@ const AffiliateLayout = () => {
   const user = useSelector(selectUser);
 
   const [open, setOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -55,6 +59,25 @@ const AffiliateLayout = () => {
     };
   }, [open]);
 
+  /*
+   * ব্যালেন্সটা লগইনের সময় যা ছিল তাই বসে থাকত — উইথড্র করার পরেও
+   * পুরোনো সংখ্যা দেখাত। খোলসটা একবার নিজেই মিলিয়ে নেয়, তাই যে
+   * পাতাতেই ঢোকেন হেডারের সংখ্যাটা ঠিক থাকে।
+   */
+  useEffect(() => {
+    let alive = true;
+
+    fetchMe()
+      .then((me) => {
+        if (alive && me) dispatch(updateUser(me));
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, [dispatch]);
+
   const signOut = () => {
     dispatch(logout());
     navigate("/", { replace: true });
@@ -62,16 +85,46 @@ const AffiliateLayout = () => {
 
   const sidebar = (
     <>
-      <div className="flex h-[64px] shrink-0 items-center gap-3 px-5">
+      {/*
+       * শুধু লোগো — পাশে "অ্যাফিলিয়েট প্যানেল" বসালে ২৫০px সাইডবারে
+       * দুই লাইনে ভেঙে যেত, আর লেখাটা হেডারেও আছে।
+       */}
+      <div className="flex h-[64px] shrink-0 items-center px-5">
         <img
           src="/assets/brand/header-logo.png"
           alt="BET CHOKKOR"
-          className="h-7 w-auto object-contain"
+          className="h-8 w-auto object-contain"
           draggable="false"
         />
-        <span className="text-[13px] font-bold uppercase tracking-widest text-[var(--primary500)]">
-          {t("affiliatePanel")}
-        </span>
+      </div>
+
+      {/* কে আছেন আর হাতে কত — সাইডবারের উপরেই, খুঁজতে হয় না */}
+      <div className="mx-3 shrink-0 rounded-[14px] border border-white/[0.07] bg-[var(--neutral1000)] p-3">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--primary500)] text-[14px] font-black text-[var(--neutral1000)]">
+            {String(user?.userId || "?")
+              .slice(0, 1)
+              .toUpperCase()}
+          </span>
+
+          <div className="min-w-0">
+            <p className="truncate text-[14px] font-bold text-[var(--text-primary)]">
+              {user?.userId}
+            </p>
+            <p className="text-[11px] text-[var(--text-muted)]">
+              {t("affiliateRole")}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 border-t border-white/[0.06] pt-3">
+          <p className="text-[11px] uppercase tracking-wider text-[var(--text-disabled)]">
+            {t("availableBalance")}
+          </p>
+          <p className="text-[19px] font-black text-[var(--primary500)]">
+            {money(user?.balance)}
+          </p>
+        </div>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-3">
@@ -94,15 +147,6 @@ const AffiliateLayout = () => {
       </nav>
 
       <div className="shrink-0 border-t border-white/[0.07] p-3">
-        <div className="mb-3 px-2">
-          <p className="truncate text-[14px] font-semibold text-[var(--text-primary)]">
-            {user?.userId}
-          </p>
-          <p className="text-[12px] text-[var(--text-muted)]">
-            {t("affiliateRole")}
-          </p>
-        </div>
-
         <button
           type="button"
           onClick={signOut}
@@ -159,18 +203,45 @@ const AffiliateLayout = () => {
             <Menu size={19} />
           </button>
 
-          <span className="text-[15px] font-bold text-[var(--text-primary)]">
+          <span className="hidden text-[15px] font-bold text-[var(--text-primary)] sm:block">
             {t("affiliatePanel")}
           </span>
 
-          <span className="ms-auto text-[14px] font-bold text-[var(--primary500)]">
-            {user?.userId}
-          </span>
+          {/* ব্যালেন্সে চাপ দিলেই উইথড্র — সবচেয়ে বেশি দরকার হয় এটাই */}
+          <Link
+            to="/dashboard/withdraw"
+            className="ms-auto flex h-9 items-center gap-2 rounded-full border border-[var(--primary500)]/30 bg-[var(--primary500)]/10 ps-3 pe-1 transition hover:bg-[var(--primary500)]/20"
+          >
+            <span className="text-[14px] font-black text-[var(--primary500)]">
+              {money(user?.balance)}
+            </span>
+
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--primary500)] text-[var(--neutral1000)]">
+              <BanknoteArrowDown size={14} />
+            </span>
+          </Link>
+
+          {/* ভাষা বদলানো — লগইন করার পরেও দরকার, শুধু বাইরের পাতায় নয় */}
+          <button
+            type="button"
+            onClick={() => setLangOpen(true)}
+            aria-label={t("currencyAndLanguage")}
+            className="h-8 w-8 shrink-0 cursor-pointer overflow-hidden rounded-full"
+          >
+            <img
+              src="/assets/icons/flag/BD.png"
+              alt="BD"
+              className="h-full w-full object-cover"
+              draggable="false"
+            />
+          </button>
         </header>
 
         <main className="p-4 lg:p-6">
           <Outlet />
         </main>
+
+        <LanguageMenu open={langOpen} onClose={() => setLangOpen(false)} />
       </div>
     </div>
   );

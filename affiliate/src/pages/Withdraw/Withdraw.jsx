@@ -1,72 +1,70 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { BanknoteArrowDown, Check, Plus, TriangleAlert } from "lucide-react";
+import { BanknoteArrowDown, Check, TriangleAlert, Users } from "lucide-react";
 
-import {
-  Card,
-  Loading,
-  Stat,
-} from "../../components/Panel/Panel";
+import { Card, Loading, Stat } from "../../components/Panel/Panel";
 import { money } from "../../components/Panel/panelFormat";
 import FormAlert from "../../components/FormAlert/FormAlert";
 import FormField from "../../components/FormField/FormField";
-import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { selectUser } from "../../features/auth/authSelectors";
 import { updateUser } from "../../features/auth/authSlice";
-import { authError, sendOtp } from "../../features/auth/authApi";
+import { authError } from "../../features/auth/authApi";
 import {
-  addWallet,
-  fetchEligibility,
+  fetchAffEligibility,
+  fetchAffWithdrawMethods,
   fetchMe,
-  fetchWallets,
-  fetchWithdrawMethods,
-  submitWithdraw,
+  submitAffWithdraw,
 } from "../../features/affiliate/affiliateApi";
 
 /**
- * কমিশনের টাকা তোলা।
+ * অ্যাফিলিয়েটের টাকা তোলা — খেলোয়াড়ের থেকে আলাদা।
  *
- * অ্যাফিলিয়েটের জমা কমিশন অ্যাডমিন হিসাব মিলিয়ে ব্যালেন্সে বসান;
- * সেখান থেকেই তোলা হয় — খেলোয়াড়দের সাথে একই ব্যবস্থায়, তাই নিয়মও
- * এক (একসাথে একটাই আবেদন, আর জমা দেওয়ার সাথে সাথেই টাকা কেটে রাখা)।
+ * খেলোয়াড় সেভ করা মোবাইল নম্বরে টাকা নেন; অ্যাফিলিয়েট প্রায়ই ব্যাংকে,
+ * যেখানে অ্যাকাউন্টের নাম-নম্বর-শাখা এরকম কয়েকটা ঘর লাগে। কোন ঘরগুলো
+ * চাওয়া হবে সেটা অ্যাডমিন প্রতিটা উপায়ের জন্য ঠিক করে দেন, তাই এখানে
+ * ফর্মটা সার্ভারের বলে দেওয়া ঘর ধরেই তৈরি হয় — নতুন ব্যাংক যোগ করতে
+ * এই পাতা বদলাতে হয় না।
+ *
+ * তোলার আগে কয়েকটা শর্ত: কতজন সক্রিয় খেলোয়াড় এনেছেন, আর জমে থাকা
+ * কমিশন অ্যাডমিন মিলিয়েছেন কিনা। কোনটায় আটকাচ্ছে সেটা পরিষ্কার করে
+ * বলা হয় — নইলে "পারবেন না" শুনে কী করতে হবে বোঝা যেত না।
  */
 const Withdraw = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
 
   const [methods, setMethods] = useState([]);
-  const [wallets, setWallets] = useState([]);
+  const [setting, setSetting] = useState({});
   const [eligibility, setEligibility] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [methodId, setMethodId] = useState("");
-  const [walletId, setWalletId] = useState("");
   const [amount, setAmount] = useState("");
-
-  const [newNumber, setNewNumber] = useState("");
-  const [adding, setAdding] = useState(false);
+  const [values, setValues] = useState({});
 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(null);
-  const [otpStep, setOtpStep] = useState(null);
+  const [done, setDone] = useState(false);
   const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let alive = true;
 
-    Promise.all([fetchWithdrawMethods(), fetchWallets(), fetchEligibility(), fetchMe()])
-      .then(([list, walletData, elig, me]) => {
+    Promise.all([fetchAffWithdrawMethods(), fetchAffEligibility(), fetchMe()])
+      .then(([methodData, elig, me]) => {
         if (!alive) return;
 
-        setMethods(list);
-        setWallets(walletData.wallets || []);
+        setMethods(methodData.methods || []);
+        setSetting(methodData.setting || {});
         setEligibility(elig);
 
         if (me) dispatch(updateUser(me));
-        if (list.length && !methodId) setMethodId(list[0].methodId);
+
+        if (methodData.methods?.length) {
+          setMethodId((prev) => prev || methodData.methods[0].methodId);
+        }
       })
       .catch(() => {})
       .finally(() => alive && setLoading(false));
@@ -74,89 +72,44 @@ const Withdraw = () => {
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload, dispatch]);
 
   const method = methods.find((item) => item.methodId === methodId);
 
-  const addNumber = async () => {
-    if (newNumber.length !== 11) return;
+  const submit = async (event) => {
+    event.preventDefault();
 
-    try {
-      setAdding(true);
-      setError("");
+    if (busy) return;
 
-      await addWallet({ walletNumber: newNumber });
-
-      setNewNumber("");
-      setReload((prev) => prev + 1);
-    } catch (err) {
-      setError(authError(err, t("somethingWrong"), t));
-    } finally {
-      setAdding(false);
+    if (!methodId || Number(amount) <= 0) {
+      setError(t("errMissingFields"));
+      return;
     }
-  };
 
-  const send = async () => {
     try {
       setBusy(true);
       setError("");
 
-      const request = await submitWithdraw({
+      await submitAffWithdraw({
         methodId,
-        walletId,
         amount: Number(amount),
+        fields: values,
       });
 
-      setDone(request);
-      setOtpStep(null);
+      setDone(true);
+      setAmount("");
+      setValues({});
 
       const me = await fetchMe();
       if (me) dispatch(updateUser(me));
     } catch (err) {
-      // সার্ভার কোড চাইলে তখনই পাঠানো হয়
-      if (err?.response?.data?.code === "otpNotVerified") {
-        try {
-          const sent = await sendOtp({ flow: "withdraw", userId: user?.userId });
-          setOtpStep({ maskedPhone: sent.maskedPhone });
-          return;
-        } catch (otpErr) {
-          setError(authError(otpErr, t("somethingWrong"), t));
-          return;
-        }
-      }
-
       setError(authError(err, t("somethingWrong"), t));
     } finally {
       setBusy(false);
     }
   };
 
-  const submit = (event) => {
-    event.preventDefault();
-
-    if (!methodId || !walletId || Number(amount) <= 0) {
-      setError(t("errMissingFields"));
-      return;
-    }
-
-    send();
-  };
-
   if (loading) return <Loading label={t("loading")} />;
-
-  if (otpStep) {
-    return (
-      <Card title={t("otpTitle")}>
-        <OtpStep
-          flow="withdraw"
-          userId={user?.userId}
-          maskedPhone={otpStep.maskedPhone}
-          onVerified={send}
-        />
-      </Card>
-    );
-  }
 
   if (done) {
     return (
@@ -173,8 +126,7 @@ const Withdraw = () => {
           <button
             type="button"
             onClick={() => {
-              setDone(null);
-              setAmount("");
+              setDone(false);
               setReload((prev) => prev + 1);
             }}
             className="aff-btn aff-btn--primary mt-2"
@@ -186,11 +138,25 @@ const Withdraw = () => {
     );
   }
 
+  /** কোন শর্তে আটকাচ্ছে, আর কী করলে খুলবে */
+  const blockText = () => {
+    if (!eligibility || eligibility.eligible) return "";
+
+    const map = {
+      referrals: `${t("blockReferrals")} ${eligibility.remainingReferrals} ${t("blockReferralsTail")}`,
+      unsettled: `${t("blockUnsettled")} ${money(eligibility.unsettled)}`,
+      pending: t("blockPending"),
+      noBalance: t("blockNoBalance"),
+    };
+
+    return map[eligibility.reason] || t("blockGeneric");
+  };
+
   const blocked = eligibility && !eligibility.eligible;
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Stat
           label={t("availableBalance")}
           value={money(user?.balance)}
@@ -198,9 +164,21 @@ const Withdraw = () => {
           Icon={BanknoteArrowDown}
         />
         <Stat
-          label={t("myNumbers")}
-          value={wallets.length}
-          sub={t("myNumbersText")}
+          label={t("activePlayersBrought")}
+          value={`${eligibility?.activeReferrals ?? 0} / ${eligibility?.requiredActiveReferrals ?? 0}`}
+          sub={t("activePlayersText")}
+          tone={
+            (eligibility?.activeReferrals ?? 0) >=
+            (eligibility?.requiredActiveReferrals ?? 0)
+              ? "var(--status-success)"
+              : "var(--status-pending)"
+          }
+          Icon={Users}
+        />
+        <Stat
+          label={t("withdrawStatus")}
+          value={t(blocked ? "withdrawClosed" : "withdrawOpen")}
+          tone={blocked ? "var(--status-danger)" : "var(--status-success)"}
         />
       </div>
 
@@ -208,35 +186,39 @@ const Withdraw = () => {
         <Card>
           <p className="flex items-start gap-2 text-[14px] text-[var(--status-pending)]">
             <TriangleAlert size={16} className="mt-0.5 shrink-0" />
-            {eligibility.reason === "pendingWithdraw"
-              ? t("pendingWithdrawText")
-              : eligibility.reason === "verification"
-                ? t("needVerificationText")
-                : `${t("turnoverLeftText")} ${money(eligibility.remaining)}`}
+            {blockText()}
           </p>
         </Card>
       ) : null}
 
-      <Card title={t("navWithdraw")} subtitle={t("withdrawText")}>
+      {tv(setting.note) ? (
+        <Card>
+          <p className="text-[13px] text-[var(--text-muted)]">
+            {tv(setting.note)}
+          </p>
+        </Card>
+      ) : null}
+
+      <Card title={t("navWithdraw")} subtitle={t("affWithdrawText")}>
         <form className="flex flex-col gap-5" onSubmit={submit}>
           <FormAlert>{error}</FormAlert>
 
           <FormField label={t("selectWithdrawMethod")}>
-            <div className="flex flex-wrap gap-2">
-              {methods.length === 0 ? (
-                <p className="text-[13px] text-[var(--text-disabled)]">
-                  {t("noWithdrawMethod")}
-                </p>
-              ) : (
-                methods.map((item) => (
+            {methods.length === 0 ? (
+              <p className="text-[13px] text-[var(--text-disabled)]">
+                {t("noWithdrawMethod")}
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {methods.map((item) => (
                   <button
                     key={item.methodId}
                     type="button"
                     onClick={() => {
                       setMethodId(item.methodId);
-                      setWalletId("");
+                      setValues({});
                     }}
-                    className="h-10 cursor-pointer rounded-[10px] px-4 text-[13px] transition"
+                    className="flex h-11 cursor-pointer items-center gap-2 rounded-[10px] px-4 text-[13px] transition"
                     style={{
                       background:
                         methodId === item.methodId
@@ -249,72 +231,33 @@ const Withdraw = () => {
                       fontWeight: methodId === item.methodId ? 700 : 400,
                     }}
                   >
-                    {item.name?.en || item.methodId}
+                    {tv(item.name)}
                   </button>
-                ))
-              )}
-            </div>
-          </FormField>
-
-          <FormField label={t("selectWallet")}>
-            <div className="flex flex-col gap-2">
-              {wallets.length === 0 ? (
-                <p className="text-[13px] text-[var(--text-disabled)]">
-                  {t("noNumberYet")}
-                </p>
-              ) : (
-                wallets.map((wallet) => (
-                  <button
-                    key={wallet._id}
-                      type="button"
-                      onClick={() => setWalletId(wallet._id)}
-                      className="flex h-11 cursor-pointer items-center justify-between rounded-[10px] px-4 text-[14px] transition"
-                      style={{
-                        background:
-                          walletId === wallet._id
-                            ? "var(--primary500)"
-                            : "var(--neutral800)",
-                        color:
-                          walletId === wallet._id
-                            ? "var(--neutral1000)"
-                            : "var(--text-primary)",
-                      }}
-                    >
-                      <span>{wallet.walletNumber}</span>
-                      {wallet.isAutoRegistration ? (
-                        <span className="text-[11px] opacity-80">
-                          {t("registrationNumber")}
-                        </span>
-                      ) : null}
-                    </button>
-                  ))
-              )}
-
-              <div className="mt-1 flex gap-2">
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={11}
-                  value={newNumber}
-                  onChange={(event) =>
-                    setNewNumber(event.target.value.replace(/\D/g, ""))
-                  }
-                  placeholder="01XXXXXXXXX"
-                  className="h-11 min-w-0 flex-1 rounded-[10px] bg-[var(--form-box-bg)] px-4 text-[14px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
-                />
-
-                <button
-                  type="button"
-                  onClick={addNumber}
-                  disabled={newNumber.length !== 11 || adding}
-                  className="flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-[10px] border border-white/[0.07] px-4 text-[13px] text-[var(--text-secondary)] disabled:opacity-40"
-                >
-                  <Plus size={14} />
-                  {t("addNumber")}
-                </button>
+                ))}
               </div>
-            </div>
+            )}
           </FormField>
+
+          {/* অ্যাডমিনের ঠিক করা ঘরগুলো */}
+          {(method?.fields || []).map((field) => (
+            <FormField
+              key={field.key}
+              label={`${tv(field.label)}${field.required ? "" : ` (${t("optional")})`}`}
+            >
+              <input
+                type={field.type === "number" ? "number" : field.type}
+                value={values[field.key] || ""}
+                onChange={(event) =>
+                  setValues((prev) => ({
+                    ...prev,
+                    [field.key]: event.target.value,
+                  }))
+                }
+                placeholder={tv(field.placeholder)}
+                className="h-12 w-full rounded-[12px] bg-[var(--form-box-bg)] px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
+              />
+            </FormField>
+          ))}
 
           <FormField
             label={t("withdrawAmount")}
@@ -336,8 +279,8 @@ const Withdraw = () => {
 
           <button
             type="submit"
-            disabled={busy || blocked}
-            className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={busy || blocked || methods.length === 0}
+            className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? t("loading") : t("withdrawNow")}
           </button>

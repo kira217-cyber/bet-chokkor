@@ -133,6 +133,20 @@ export const navItems = [
         icon: "Banknote",
         motherOnly: true,
       },
+      {
+        key: "aff-withdraw-requests",
+        path: "/aff-withdraw-requests",
+        label: "Affiliate Withdraws",
+        icon: "Handshake",
+        perm: "aff-withdraw-requests",
+      },
+      {
+        key: "aff-withdraw-methods",
+        path: "/aff-withdraw-methods",
+        label: "Affiliate Withdraw Method",
+        icon: "Landmark",
+        motherOnly: true,
+      },
     ],
   },
 
@@ -205,6 +219,11 @@ export const allPermissions = [
     key: "turnover-history",
     label: "All Turnover History",
     path: "/turnover-history",
+  },
+  {
+    key: "aff-withdraw-requests",
+    label: "Affiliate Withdraws",
+    path: "/aff-withdraw-requests",
   },
 ];
 

@@ -41,35 +41,30 @@ export const fetchCommissionHistory = async ({ page = 1, limit = 20, type } = {}
   return data?.data || { rows: [], meta: {} };
 };
 
-/* ── উইথড্র — খেলোয়াড়ের সাথে একই রুট ── */
+/* ── উইথড্র — অ্যাফিলিয়েটের নিজের, খেলোয়াড়ের থেকে আলাদা ──
+ *
+ * খেলোয়াড়ের উইথড্র সেভ করা মোবাইল নম্বর ধরে চলে; অ্যাফিলিয়েটের
+ * উপায়গুলোতে অ্যাডমিনের ঠিক করা কয়েকটা ঘর থাকে (ব্যাংকের নাম,
+ * অ্যাকাউন্ট নম্বর…), তাই রুটও আলাদা।
+ */
 
-export const fetchWithdrawMethods = async () => {
-  const { data } = await api.get("/api/withdraw-methods/public");
-  return data?.data?.methods || [];
+export const fetchAffWithdrawMethods = async () => {
+  const { data } = await api.get("/api/aff-withdraw/methods/public");
+  return data?.data || { methods: [], setting: {} };
 };
 
-export const fetchWallets = async () => {
-  const { data } = await api.get("/api/e-wallets");
-  return data?.data || { wallets: [], manualCap: 0, manualCount: 0 };
-};
-
-export const addWallet = async (payload) => {
-  const { data } = await api.post("/api/e-wallets", payload);
-  return data?.data?.wallet || null;
-};
-
-export const fetchEligibility = async () => {
-  const { data } = await api.get("/api/withdraw-requests/eligibility");
+export const fetchAffEligibility = async () => {
+  const { data } = await api.get("/api/aff-withdraw/eligibility");
   return data?.data || { eligible: false };
 };
 
-export const submitWithdraw = async (payload) => {
-  const { data } = await api.post("/api/withdraw-requests", payload);
+export const submitAffWithdraw = async (payload) => {
+  const { data } = await api.post("/api/aff-withdraw", payload);
   return data?.data?.request || null;
 };
 
 export const fetchMyWithdraws = async ({ page = 1, limit = 20, status } = {}) => {
-  const { data } = await api.get(`/api/withdraw-requests/my${qs({ page, limit, status })}`);
+  const { data } = await api.get(`/api/aff-withdraw/my${qs({ page, limit, status })}`);
   return data?.data || { requests: [], meta: {} };
 };
 

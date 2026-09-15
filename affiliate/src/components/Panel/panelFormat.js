@@ -17,3 +17,19 @@ export const when = (value) =>
         hour12: false,
       })
     : "—";
+
+/**
+ * শুধু তারিখ।
+ *
+ * `toLocaleDateString()` খালি হাতে ডাকলে ব্রাউজারের ভাষা ধরত — বাংলা
+ * ব্রাউজারে ইংরেজি সাইটেও "১৫/৯/২০২৬" বসে যেত। তাই `when` এর মতোই
+ * এখানেও লোকেল বেঁধে দেওয়া।
+ */
+export const day = (value) =>
+  value
+    ? new Date(value).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "—";

@@ -104,6 +104,18 @@ const Profile = () => {
           {user.referralCode}
         </p>
 
+        {/* QR — ফোনে দেখানোর জন্য, টাইপ করতে হয় না */}
+        <div className="mt-4 flex justify-center">
+          <span className="flex h-[132px] w-[132px] items-center justify-center rounded-[10px] bg-white p-2">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(link)}`}
+              alt={user.referralCode}
+              className="h-full w-full object-contain"
+              draggable="false"
+            />
+          </span>
+        </div>
+
         <p className="mt-3 break-all rounded-[10px] bg-[var(--neutral800)] p-3 text-center text-[13px] text-[var(--text-secondary)]">
           {link}
         </p>

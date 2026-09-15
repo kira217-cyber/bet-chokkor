@@ -23,6 +23,8 @@ import {
   Play,
   ShieldCheck,
   Banknote,
+  Handshake,
+  Landmark,
   ChevronDown,
   User,
   Menu,
@@ -57,6 +59,8 @@ const ICONS = {
   Play,
   ShieldCheck,
   Banknote,
+  Handshake,
+  Landmark,
   User,
 };
 

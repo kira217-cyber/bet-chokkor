@@ -27,6 +27,8 @@ import AutoDeposit from "../pages/AutoDeposit/AutoDeposit";
 import AutoDepositHistory from "../pages/AutoDepositHistory/AutoDepositHistory";
 import WithdrawMethods from "../pages/WithdrawMethods/WithdrawMethods";
 import WithdrawRequests from "../pages/WithdrawRequests/WithdrawRequests";
+import AffWithdrawMethods from "../pages/AffWithdrawMethods/AffWithdrawMethods";
+import AffWithdrawRequests from "../pages/AffWithdrawRequests/AffWithdrawRequests";
 import TurnoverHistory from "../pages/TurnoverHistory/TurnoverHistory";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
@@ -132,6 +134,15 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "withdraw-requests", element: <WithdrawRequests /> },
+      { path: "aff-withdraw-requests", element: <AffWithdrawRequests /> },
+      {
+        path: "aff-withdraw-methods",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffWithdrawMethods />
+          </PrivateRoute>
+        ),
+      },
       { path: "verification", element: <Verification /> },
       {
         path: "referral",
