@@ -33,6 +33,35 @@ const ProfileMenu = () => {
 
   const wrapRef = useRef(null);
 
+  /**
+   * মাউস সরালেই সাথে সাথে বন্ধ নয় — একটু দেরি।
+   *
+   * বাটনের নিচ আর প্যানেলের উপরের মাঝে হেডারের কয়েক পিক্সেল ফাঁক
+   * আছে; মাউস ওই ফাঁক পেরোনোর সময় সাথে সাথে বন্ধ হলে মেনুতে পৌঁছানোই
+   * যেত না।
+   */
+  const closeTimer = useRef(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const openNow = () => {
+    cancelClose();
+    setOpen(true);
+  };
+
+  const closeSoon = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
+  };
+
+  // কম্পোনেন্ট সরে গেলে ঝুলে থাকা টাইমারটা বাতিল
+  useEffect(() => cancelClose, []);
+
   // প্যানেলটা মূল সাইটের মতো হেডারের গা ঘেঁষে ঝোলে। বাটনটা হেডারের
   // মাঝখানে বসে, তাই বাটনের নিচ থেকে মাপলে কয়েক পিক্সেল ফাঁক থেকে
   // যেত — তাই fixed করে হেডারের উচ্চতা থেকেই শুরু, বাঁ দিকটা বাটনের
@@ -106,10 +135,18 @@ const ProfileMenu = () => {
   const items = buildProfileMenu(t);
 
   return (
-    <div ref={wrapRef} className="relative hidden lg:block">
+    <div
+      ref={wrapRef}
+      className="relative hidden lg:block"
+      onMouseEnter={openNow}
+      onMouseLeave={closeSoon}
+    >
       <button
         type="button"
+        // মূল সাইটে শুধু hover এ খোলে; ক্লিকটাও রাখা হলো — টাচ ডিভাইসে
+        // আর কিবোর্ডে hover বলে কিছু নেই
         onClick={() => setOpen((prev) => !prev)}
+        onFocus={openNow}
         aria-haspopup="menu"
         aria-expanded={open}
         className="flex cursor-pointer items-center rounded-[10px] px-3 py-2 font-semibold transition-colors"
@@ -126,6 +163,8 @@ const ProfileMenu = () => {
       {open ? (
         <div
           role="menu"
+          onMouseEnter={cancelClose}
+          onMouseLeave={closeSoon}
           className="fixed overflow-hidden bg-[var(--neutral900)] shadow-lg"
           style={{
             top: "var(--desktop-header-height)",
