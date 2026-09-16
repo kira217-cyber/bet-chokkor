@@ -451,6 +451,98 @@ export const locale = {
     bn: "আপনার একটা আবেদন এখনো ঝুলে আছে",
     en: "You already have a request waiting",
   },
+  applicationSentTitle: {
+    bn: "আবেদন জমা পড়েছে",
+    en: "Application received",
+  },
+  applicationSentText: {
+    bn: "আপনার অ্যাকাউন্টটি তৈরি হয়েছে, এখন অ্যাডমিনের পর্যালোচনার অপেক্ষায়। কমিশনের হার বসিয়ে অনুমোদন দেওয়া হলে আপনি লগইন করতে পারবেন।",
+    en: "Your account has been created and is now waiting for admin review. Once the commission rates are set and the account is approved, you can log in.",
+  },
+  errAffiliatePending: {
+    bn: "আপনার আবেদনটি এখনও পর্যালোচনার অপেক্ষায়। অনুমোদন পেলেই লগইন খুলে যাবে।",
+    en: "Your application is still under review. Login opens as soon as it is approved.",
+  },
+  errAffiliateRejected: {
+    bn: "আপনার আবেদনটি গৃহীত হয়নি।",
+    en: "Your application was not accepted.",
+  },
+
+  verifyFullName: { bn: "কাগজে যে নাম আছে", en: "Name as on the document" },
+  verifyFullNameHint: { bn: "পুরো নাম লিখুন", en: "Enter the full name" },
+  verifyBirthDate: { bn: "জন্ম তারিখ", en: "Date of birth" },
+  verifyDocType: { bn: "কোন কাগজ দিচ্ছেন", en: "Document type" },
+  docNid: { bn: "এনআইডি", en: "NID" },
+  docPassport: { bn: "পাসপোর্ট", en: "Passport" },
+  docDriving: { bn: "ড্রাইভিং লাইসেন্স", en: "Driving licence" },
+  verifyDocNumber: { bn: "কাগজের নম্বর", en: "Document number" },
+  verifyDocNumberHint: { bn: "নম্বরটা লিখুন", en: "Enter the number" },
+  verifyFront: { bn: "কাগজের সামনের দিক", en: "Front of the document" },
+  verifyFrontHint: { bn: "ছবি তুলে দিন", en: "Upload a photo" },
+  verifyBack: { bn: "কাগজের পিছনের দিক", en: "Back of the document" },
+  verifyBackHint: { bn: "থাকলে দিন (ঐচ্ছিক)", en: "If there is one (optional)" },
+  verifySelfie: { bn: "কাগজ হাতে নিজের ছবি", en: "Selfie holding the document" },
+  verifySelfieHint: { bn: "মুখ ও কাগজ দুটোই দেখা যেন যায়", en: "Both your face and the document must be readable" },
+  verifyNeedImages: {
+    bn: "কাগজের সামনের দিক আর নিজের ছবি দুটোই দিতে হবে",
+    en: "The front of the document and a selfie are both required",
+  },
+  verifyIntro: {
+    bn: "নিজের পরিচয় যাচাই করে নিলে অ্যাকাউন্টটা নিরাপদ থাকে।",
+    en: "Verifying your identity keeps your account safe.",
+  },
+  verifyRejected: { bn: "আবেদনটি বাতিল হয়েছে", en: "Your submission was rejected" },
+  errNeedVerification: {
+    bn: "আগে পরিচয় যাচাই সম্পন্ন করুন",
+    en: "Please complete identity verification first",
+  },
+  verifyApprovedTitle: { bn: "যাচাই সম্পন্ন", en: "Verified" },
+  verifyApprovedText: {
+    bn: "আপনার পরিচয় যাচাই হয়ে গেছে।",
+    en: "Your identity has been verified.",
+  },
+  verifyPendingTitle: { bn: "যাচাই চলছে", en: "Being checked" },
+  verifyPendingText: {
+    bn: "আপনার কাগজপত্র দেখা হচ্ছে। হয়ে গেলে জানিয়ে দেওয়া হবে।",
+    en: "Your documents are being reviewed. You will be told once it is done.",
+  },
+  verification: { bn: "প্রতিপাদন", en: "Verification" },
+  myVip: { bn: "মাই ভিআইপি", en: "My VIP" },
+  profileMenu: { bn: "প্রোফাইল", en: "Profile" },
+  soonTitle: { bn: "শীঘ্রই আসছে", en: "Coming soon" },
+  soonText: {
+    bn: "এই অংশটা এখনো তৈরি হচ্ছে। খুব শিগগিরই চালু হবে।",
+    en: "This section is still being built. It will be available soon.",
+  },
+  submitDeposit: { bn: "জমা দিন", en: "Submit" },
+  depositDone: {
+    bn: "আপনার ডিপোজিট জমা হয়েছে",
+    en: "Your deposit has been submitted",
+  },
+
+  verifyUploadHint: {
+    bn: "ছবি বেছে নিন",
+    en: "Choose an image",
+  },
+
+  withdrawNeedVerifyTitle: {
+    bn: "আগে পরিচয় যাচাই করুন",
+    en: "Verify your identity first",
+  },
+  withdrawNeedVerifyText: {
+    bn: "টাকা তোলার আগে পরিচয় যাচাই শেষ করতে হবে। অ্যাডমিন দেখে অনুমোদন দিলেই উইথড্র খুলে যাবে।",
+    en: "You must finish identity verification before withdrawing. Once an admin reviews and approves it, withdrawing opens up.",
+  },
+  goToVerification: {
+    bn: "পরিচয় যাচাই করুন",
+    en: "Verify identity",
+  },
+
+  verifiedBadge: {
+    bn: "পরিচয় যাচাই হয়েছে",
+    en: "Identity verified",
+  },
+
   errNotAffiliate: {
     bn: "এই অংশটা অ্যাফিলিয়েটদের জন্য",
     en: "This area is for affiliates",

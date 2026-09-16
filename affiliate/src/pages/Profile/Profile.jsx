@@ -8,7 +8,7 @@ import {
   Row,
   Stat,
 } from "../../components/Panel/Panel";
-import { money, when } from "../../components/Panel/panelFormat";
+import { money, referralLink, when } from "../../components/Panel/panelFormat";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { selectUser } from "../../features/auth/authSelectors";
 import { updateUser } from "../../features/auth/authSlice";
@@ -50,7 +50,7 @@ const Profile = () => {
   if (loading && !user) return <Loading label={t("loading")} />;
   if (!user) return <Card>{t("somethingWrong")}</Card>;
 
-  const link = `${window.location.origin}/register?ref=${user.referralCode}`;
+  const link = referralLink(user.referralCode);
 
   const copy = async () => {
     try {

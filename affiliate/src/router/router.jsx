@@ -16,6 +16,7 @@ import CommissionStatus from "../pages/CommissionStatus/CommissionStatus";
 import Withdraw from "../pages/Withdraw/Withdraw";
 import WithdrawHistory from "../pages/WithdrawHistory/WithdrawHistory";
 import Profile from "../pages/Profile/Profile";
+import Verification from "../pages/Verification/Verification";
 
 export const routes = createBrowserRouter([
   // ── খোলা অংশ: বিজ্ঞাপনের পাতা ও লগইন-রেজিস্টার ──
@@ -46,6 +47,7 @@ export const routes = createBrowserRouter([
       { path: "commission", element: <CommissionStatus /> },
       { path: "withdraw", element: <Withdraw /> },
       { path: "withdraw-history", element: <WithdrawHistory /> },
+      { path: "verification", element: <Verification /> },
       { path: "profile", element: <Profile /> },
     ],
   },

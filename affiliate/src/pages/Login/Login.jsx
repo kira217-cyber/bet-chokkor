@@ -42,6 +42,30 @@ const Login = () => {
     navigate("/dashboard", { replace: true });
   };
 
+  /**
+   * লগইন আটকানোর কারণটা পরিষ্কার করে বলা।
+   *
+   * অনুমোদনের অপেক্ষায় থাকলে সেটাই বলা হয় — "ইউজারনেম বা পাসওয়ার্ড
+   * ভুল" বললে তিনি বারবার পাসওয়ার্ড বদলাতে বসতেন। বাতিল হলে অ্যাডমিনের
+   * লেখা কারণটাই দেখানো হয়, কারণ কী ঠিক করতে হবে সেটা ওখানেই লেখা।
+   */
+  const showError = (err) => {
+    const code = err?.response?.data?.code;
+
+    if (code === "affiliatePending") {
+      setError(t("errAffiliatePending"));
+      return;
+    }
+
+    if (code === "affiliateRejected") {
+      const note = err?.response?.data?.message;
+      setError(note ? `${t("errAffiliateRejected")} ${note}` : t("errAffiliateRejected"));
+      return;
+    }
+
+    setError(authError(err, t("somethingWrong"), t));
+  };
+
   const submit = async (event) => {
     event.preventDefault();
 
@@ -64,7 +88,7 @@ const Login = () => {
 
       finish(data);
     } catch (err) {
-      setError(authError(err, t("somethingWrong"), t));
+      showError(err);
     } finally {
       setBusy(false);
     }
@@ -82,7 +106,7 @@ const Login = () => {
 
       finish(data);
     } catch (err) {
-      setError(authError(err, t("somethingWrong"), t));
+      showError(err);
       setOtpStep(null);
     } finally {
       setBusy(false);

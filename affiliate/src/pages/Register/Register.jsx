@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { useDispatch } from "react-redux";
-import { Check, ChevronDown } from "lucide-react";
+import { Link } from "react-router";
+import { Check, ChevronDown, Clock, Eye, EyeOff } from "lucide-react";
 
 import AuthCard from "../../components/AuthCard/AuthCard";
 import FormField from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
 import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { setCredentials } from "../../features/auth/authSlice";
 import {
   authError,
   registerAffiliate,
@@ -24,23 +22,24 @@ import {
  */
 const Register = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [otpStep, setOtpStep] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
 
   const [form, setForm] = useState({
     fullName: "",
     username: "",
     email: "",
     phone: "",
-    channel: "",
     password: "",
     confirmPassword: "",
   });
   const [agreed, setAgreed] = useState(false);
+
+  // কোন কোন পাসওয়ার্ডের ঘর এখন খোলা দেখাচ্ছে
+  const [revealed, setRevealed] = useState({});
 
   const update = (key) => (event) =>
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
@@ -71,10 +70,14 @@ const Register = () => {
     ...splitName(),
   });
 
-  const finish = (data) => {
-    dispatch(setCredentials({ user: data.user, token: data.token }));
-    navigate("/dashboard", { replace: true });
-  };
+  /*
+   * রেজিস্টার হলেই ড্যাশবোর্ডে নয়।
+   *
+   * অ্যাডমিন কমিশনের হার বসিয়ে অনুমোদন দেওয়ার আগে অ্যাকাউন্টটা
+   * অপেক্ষায় থাকে — সার্ভার টোকেনই দেয় না। তাই এখানে শুধু জানিয়ে
+   * দেওয়া হয় আবেদন জমা পড়েছে।
+   */
+  const finish = () => setSubmitted(true);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -85,7 +88,8 @@ const Register = () => {
       setBusy(true);
       setError("");
 
-      finish(await registerAffiliate(payload()));
+      await registerAffiliate(payload());
+      finish();
     } catch (err) {
       // সার্ভার কোড চাইলে তখনই পাঠানো হয়
       if (err?.response?.data?.code === "otpNotVerified") {
@@ -113,7 +117,8 @@ const Register = () => {
   const afterOtp = async () => {
     try {
       setBusy(true);
-      finish(await registerAffiliate(payload()));
+      await registerAffiliate(payload());
+      finish();
     } catch (err) {
       setError(authError(err, t("somethingWrong"), t));
       setOtpStep(null);
@@ -127,17 +132,60 @@ const Register = () => {
   const inputClass =
     "h-[48px] w-full bg-transparent px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]";
 
-  const textInput = (key, placeholder, type = "text") => (
-    <div className={boxClass}>
-      <input
-        type={type}
-        value={form[key]}
-        onChange={update(key)}
-        placeholder={placeholder}
-        className={inputClass}
-      />
-    </div>
-  );
+  /**
+   * সাধারণ ঘর, আর পাসওয়ার্ড হলে পাশে দেখা/লুকানোর চোখ।
+   *
+   * চোখটা শুধু লেখা থাকলে দেখা যায় — ফাঁকা ঘরে লুকানোর মতো কিছু নেই।
+   */
+  const textInput = (key, placeholder, type = "text") => {
+    const secret = type === "password";
+    const shown = secret && revealed[key];
+
+    return (
+      <div className={boxClass}>
+        <input
+          type={secret ? (shown ? "text" : "password") : type}
+          value={form[key]}
+          onChange={update(key)}
+          placeholder={placeholder}
+          className={inputClass}
+        />
+
+        {secret && form[key] ? (
+          <button
+            type="button"
+            onClick={() =>
+              setRevealed((prev) => ({ ...prev, [key]: !prev[key] }))
+            }
+            aria-label={t(shown ? "hide" : "show")}
+            className="flex h-[48px] w-11 shrink-0 cursor-pointer items-center justify-center text-[var(--text-disabled)] transition-colors hover:text-[var(--text-secondary)]"
+          >
+            {shown ? <Eye size={17} /> : <EyeOff size={17} />}
+          </button>
+        ) : null}
+      </div>
+    );
+  };
+
+  if (submitted) {
+    return (
+      <AuthCard title={t("applicationSentTitle")}>
+        <div className="flex flex-col items-center gap-4 py-4 text-center">
+          <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[var(--status-pending)]/10 text-[var(--status-pending)]">
+            <Clock size={34} />
+          </span>
+
+          <p className="text-[15px] leading-relaxed text-[var(--text-secondary)]">
+            {t("applicationSentText")}
+          </p>
+
+          <Link to="/login" className="aff-btn aff-btn--primary mt-2 w-full">
+            {t("login")}
+          </Link>
+        </div>
+      </AuthCard>
+    );
+  }
 
   if (otpStep) {
     return (
@@ -228,10 +276,6 @@ const Register = () => {
             </div>
           </FormField>
         </div>
-
-        <FormField label={t("promoChannel")}>
-          {textInput("channel", t("promoChannelPlaceholder"))}
-        </FormField>
 
         <div className="grid gap-5 sm:grid-cols-2">
           <FormField label={t("password")}>

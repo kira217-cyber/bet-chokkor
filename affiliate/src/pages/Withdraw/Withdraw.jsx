@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { BanknoteArrowDown, Check, TriangleAlert, Users } from "lucide-react";
+import { BadgeCheck, BanknoteArrowDown, Check, TriangleAlert, Users } from "lucide-react";
 
 import { Card, Loading, Stat } from "../../components/Panel/Panel";
 import { money } from "../../components/Panel/panelFormat";
@@ -153,6 +154,51 @@ const Withdraw = () => {
   };
 
   const blocked = eligibility && !eligibility.eligible;
+
+  /*
+   * পরিচয় যাচাই না হলে উইথড্রের কিছুই দেখানো হয় না।
+   *
+   * ব্যালেন্স, খেলোয়াড়ের সংখ্যা বা ফর্ম — কোনোটাই নয়, শুধু কী করতে
+   * হবে আর কোথায় যেতে হবে। বাকিটা দেখিয়ে লাভ নেই, কারণ যাচাই না
+   * হওয়া পর্যন্ত কোনোটাই কাজে আসবে না।
+   */
+  if (eligibility?.reason === "verification") {
+    const waiting = eligibility.verificationStatus === "pending";
+
+    return (
+      <Card>
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <span
+            className="flex h-[76px] w-[76px] items-center justify-center rounded-full"
+            style={{
+              background:
+                "color-mix(in srgb, var(--status-pending), transparent 88%)",
+              color: "var(--status-pending)",
+            }}
+          >
+            <BadgeCheck size={34} />
+          </span>
+
+          <p className="text-[17px] font-bold text-[var(--text-primary)]">
+            {t(waiting ? "verifyPendingTitle" : "withdrawNeedVerifyTitle")}
+          </p>
+
+          <p className="max-w-[440px] text-[14px] leading-relaxed text-[var(--text-muted)]">
+            {t(waiting ? "verifyPendingText" : "withdrawNeedVerifyText")}
+          </p>
+
+          {waiting ? null : (
+            <Link
+              to="/dashboard/verification"
+              className="aff-btn aff-btn--primary mt-2 w-full max-w-[320px]"
+            >
+              {t("goToVerification")}
+            </Link>
+          )}
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

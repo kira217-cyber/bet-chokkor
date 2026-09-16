@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  BadgeCheck,
   BanknoteArrowDown,
   LayoutDashboard,
   LogOut,
@@ -26,6 +27,7 @@ const NAV = [
   { to: "/dashboard/commission", label: "navCommissionStatus", Icon: Percent },
   { to: "/dashboard/withdraw", label: "navWithdraw", Icon: BanknoteArrowDown },
   { to: "/dashboard/withdraw-history", label: "navWithdrawHistory", Icon: Receipt },
+  { to: "/dashboard/verification", label: "verification", Icon: BadgeCheck },
   { to: "/dashboard/profile", label: "navProfile", Icon: User },
 ];
 
@@ -108,8 +110,19 @@ const AffiliateLayout = () => {
           </span>
 
           <div className="min-w-0">
-            <p className="truncate text-[14px] font-bold text-[var(--text-primary)]">
+            <p className="flex items-center gap-1.5 truncate text-[14px] font-bold text-[var(--text-primary)]">
               {user?.userId}
+
+              {/* যাচাই হয়ে গেলে টিক — অনুমোদিত হলেই, অপেক্ষায় থাকলে নয় */}
+              {user?.verificationStatus === "approved" ? (
+                <span
+                  title={t("verifiedBadge")}
+                  aria-label={t("verifiedBadge")}
+                  className="flex shrink-0 items-center text-[var(--status-success)]"
+                >
+                  <BadgeCheck size={14} />
+                </span>
+              ) : null}
             </p>
             <p className="text-[11px] text-[var(--text-muted)]">
               {t("affiliateRole")}

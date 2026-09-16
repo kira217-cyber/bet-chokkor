@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import {
+  BadgeCheck,
   BanknoteArrowDown,
   Coins,
   Copy,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { Card, Empty, Loading, Row, Stat } from "../../components/Panel/Panel";
-import { day, money } from "../../components/Panel/panelFormat";
+import { day, money, referralLink } from "../../components/Panel/panelFormat";
 import { useLanguage } from "../../Context/LanguageProvider";
 import {
   fetchAffiliate,
@@ -71,7 +72,7 @@ const Dashboard = () => {
 
   const { commission, players, games } = data;
 
-  const link = `${window.location.origin}/register?ref=${data.referralCode}`;
+  const link = referralLink(data.referralCode);
 
   const copy = async () => {
     try {
@@ -124,8 +125,19 @@ const Dashboard = () => {
               {t("welcomeBack")}
             </p>
 
-            <h1 className="mt-1 truncate text-[24px] font-black text-[var(--text-primary)] lg:text-[30px]">
+            <h1 className="mt-1 flex items-center gap-2 truncate text-[24px] font-black text-[var(--text-primary)] lg:text-[30px]">
               {data.user?.userId}
+
+              {/* যাচাই হয়ে গেলে নামের পাশেই টিক */}
+              {data.user?.verificationStatus === "approved" ? (
+                <span
+                  title={t("verifiedBadge")}
+                  aria-label={t("verifiedBadge")}
+                  className="flex shrink-0 items-center text-[var(--status-success)]"
+                >
+                  <BadgeCheck size={22} />
+                </span>
+              ) : null}
             </h1>
 
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
