@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, Copy, Gift, Loader2, Share2, Users } from "lucide-react";
 
@@ -153,9 +153,13 @@ const Referral = () => {
       if (result) {
         dispatch(updateUser({ ...user, balance: result.balance }));
 
+        // অভিনন্দন মডাল — অটো যোগ হলে চোখেই পড়ত না, তাই নিজে ক্লেইম
+        // করলে সবুজ টিকসহ পরিষ্কার করে জানানো হয়
         showAlert({
-          title: t("referralClaimed"),
-          message: `${t("referralClaimedText")} ${money(result.claimed)}`,
+          type: "success",
+          title: t("refCongratsTitle"),
+          message: `${t("refCongratsText")} ${user?.currency || "BDT"} ${money(result.claimed)}`,
+          okText: t("refCongratsOk"),
         });
       }
 
@@ -534,15 +538,15 @@ const Referral = () => {
               <DarkPanel
                 title={t("refWhatIsTitle")}
                 action={
-                  <a
-                    href="/help"
-                    target="_blank"
-                    rel="noreferrer noopener"
+                  /* নিয়মাবলী → রেফারেল প্রোগ্রামের মূল পাতা (বিস্তারিত ট্যাব),
+                     যেখানে কমিশনের টেবিল ও নিজের হিসাব থাকে */
+                  <Link
+                    to="/member/referral"
                     className="flex h-10 items-center rounded-[10px] border border-white/[0.12] px-5 font-semibold text-[var(--neutral100)] transition-colors hover:bg-white/[0.05]"
                     style={{ fontSize: "var(--fs-normal)" }}
                   >
                     {t("refRulesBtn")}
-                  </a>
+                  </Link>
                 }
               >
                 <p
@@ -620,6 +624,70 @@ const Referral = () => {
 
           {/* ── পুরস্কার ── */}
           {tab === "rewards" ? (
+            <>
+              {/* তুলতে পারবেন এমন বোনাস থাকলে উপরে ক্লেইম কার্ড */}
+              {Number(overview.claimable) > 0 ? (
+                <div
+                  className="mb-4 flex flex-wrap items-center justify-between gap-4"
+                  style={{
+                    borderRadius: "var(--radius-10)",
+                    padding: "calc(var(--u) * 4.267)",
+                    background:
+                      "linear-gradient(135deg, #3a2f05 0%, #1c1c1a 100%)",
+                    border: "1px solid rgba(249,185,1,0.35)",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--primary500), transparent 82%)",
+                        color: "var(--primary500)",
+                      }}
+                    >
+                      <Gift size={22} />
+                    </span>
+
+                    <div>
+                      <p
+                        className="font-bold text-[var(--neutral100)]"
+                        style={{ fontSize: "var(--fs-body)" }}
+                      >
+                        {t("refClaimReadyTitle")}
+                      </p>
+                      <p
+                        className="text-[var(--text-muted)]"
+                        style={{ fontSize: "var(--fs-normal)" }}
+                      >
+                        {t("refClaimable")}:{" "}
+                        <b style={{ color: "#ffdf1a" }}>
+                          {money(overview.claimable)}
+                        </b>
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={claim}
+                    disabled={busy}
+                    className="flex h-11 cursor-pointer items-center gap-2 rounded-[10px] px-6 font-bold text-[var(--neutral900)] transition-[filter] hover:brightness-105 disabled:opacity-50"
+                    style={{
+                      background: "var(--primary500)",
+                      fontSize: "var(--fs-larger)",
+                    }}
+                  >
+                    {busy ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Gift size={16} />
+                    )}
+                    {t("refClaimNow")} {money(overview.claimable)}
+                  </button>
+                </div>
+              ) : null}
+
             <div
               className="bg-[var(--neutral800)]"
               style={{ borderRadius: "5px", padding: "calc(var(--u) * 4.267)" }}
@@ -697,6 +765,7 @@ const Referral = () => {
                 ))
               )}
             </div>
+            </>
           ) : null}
         </div>
       </div>

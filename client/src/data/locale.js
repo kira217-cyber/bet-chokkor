@@ -717,6 +717,10 @@ export const locale = {
 
   refActiveDownline: { bn: "সক্রিয় বন্ধু", en: "Active friends" },
   refDownlineTurnover: { bn: "তাঁদের টার্নওভার", en: "Their turnover" },
+  refClaimReadyTitle: { bn: "আপনার বোনাস তৈরি!", en: "Your bonus is ready!" },
+  refCongratsTitle: { bn: "অভিনন্দন! 🎉", en: "Congratulations! 🎉" },
+  refCongratsText: { bn: "আপনার বোনাস ব্যালেন্সে যোগ হয়েছে:", en: "Your bonus has been added to your balance:" },
+  refCongratsOk: { bn: "দারুণ!", en: "Awesome!" },
   refClaimable: { bn: "তুলতে পারবেন", en: "Ready to claim" },
   refClaimed: { bn: "নেওয়া হয়েছে", en: "Claimed" },
   refPending: { bn: "জমা আছে", en: "Waiting" },
