@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * Help-VIP — BET CHOKKOR এর সাহায্য কেন্দ্র।
+ *
+ * রং help-cazvip.com থেকে মেপে: প্রায়-কালো পটভূমি, সোনালি অ্যাকসেন্ট।
+ * সোনালি টোকেনগুলো BetChokkor এর সাথেই মেলানো।
+ */
+:root {
+  --bg: #0d0d0b;
+  --bg-soft: #16150f;
+  --panel: #17160f;
+  --gold: #d5aa1c;
+  --gold-bright: #ffdf18;
+  --gold-grad-top: #f7d37a;
+  --gold-grad-bottom: #d29a06;
+  --text: #ffffff;
+  --text-soft: #d1d5dc;
+  --text-mute: #99a1af;
+  --line: rgba(213, 170, 28, 0.18);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Bengali",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; }
+
+.hv-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: 20px;
+}
+
+.hv-gold-text {
+  color: var(--gold);
+}
+
+/* টপিক কার্ডের সোনালি ঢাল */
+.hv-topic {
+  background: linear-gradient(
+    160deg,
+    var(--gold-grad-top) 0%,
+    var(--gold-grad-bottom) 100%
+  );
+}
