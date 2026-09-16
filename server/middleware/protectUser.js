@@ -30,6 +30,23 @@ export const protectUser = async (req, res, next) => {
       return errorResponse(res, "This account is disabled", 403);
     }
 
+    /*
+     * অনুমোদন তুলে নিলে চালু টোকেনও কাজ করা বন্ধ করে।
+     *
+     * শুধু লগইনে দেখলে, অনুমোদিত অ্যাফিলিয়েটকে পরে বাতিল করার পরেও
+     * তাঁর হাতের টোকেনটা মেয়াদ শেষ না হওয়া পর্যন্ত চলত।
+     */
+    if (user.role === "aff-user" && user.affiliateStatus !== "approved") {
+      return errorResponse(
+        res,
+        user.affiliateStatus === "rejected"
+          ? "Your application was not accepted"
+          : "Your application is still under review",
+        403,
+        user.affiliateStatus === "rejected" ? "affiliateRejected" : "affiliatePending",
+      );
+    }
+
     req.user = user;
     return next();
   } catch {

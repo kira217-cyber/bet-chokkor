@@ -50,10 +50,12 @@ const applyAffiliateCommission = async ({ player, netAmount }) => {
 
   if (!player?.referredBy) return none;
 
+  // অনুমোদন না থাকলে কমিশন জমে না — বাতিল হওয়া অ্যাফিলিয়েটও নয়
   const affiliate = await User.findOne({
     _id: player.referredBy,
     role: "aff-user",
     isActive: true,
+    affiliateStatus: "approved",
   });
 
   if (!affiliate) return none;

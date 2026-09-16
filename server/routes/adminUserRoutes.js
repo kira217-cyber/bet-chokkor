@@ -40,6 +40,11 @@ const buildFilter = ({ role, q, status }) => {
   if (status === "active") filter.isActive = true;
   if (status === "inactive") filter.isActive = false;
 
+  // অ্যাফিলিয়েটের আবেদনের অবস্থা — কারা এখনো অপেক্ষায় সেটা খুঁজতে
+  if (["pending", "approved", "rejected"].includes(status)) {
+    filter.affiliateStatus = status;
+  }
+
   const keyword = text(q);
 
   if (keyword) {
@@ -68,7 +73,7 @@ const listUsers = async (req, res, role) => {
     status: text(req.query.status),
   });
 
-  const [users, total, active, inactive] = await Promise.all([
+  const [users, total, active, inactive, pending] = await Promise.all([
     User.find(filter)
       .populate("referredBy", "userId phone referralCode")
       .sort({ createdAt: -1 })
@@ -78,12 +83,17 @@ const listUsers = async (req, res, role) => {
     User.countDocuments(filter),
     User.countDocuments({ role, isActive: true }),
     User.countDocuments({ role, isActive: false }),
+
+    // কতজন অ্যাফিলিয়েট এখনো অনুমোদনের অপেক্ষায় — তালিকার উপরেই দেখা যায়
+    role === "aff-user"
+      ? User.countDocuments({ role, affiliateStatus: "pending" })
+      : 0,
   ]);
 
   return successResponse(res, "Users loaded", {
     users,
     meta: { page, limit, total, totalPages: Math.ceil(total / limit) || 1 },
-    stats: { total: active + inactive, active, inactive },
+    stats: { total: active + inactive, active, inactive, pending },
   });
 };
 
@@ -401,6 +411,83 @@ router.patch(
         user.isActive ? "Account activated" : "Account disabled",
         { user: user.toSafeJSON() },
       );
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+/**
+ * অ্যাফিলিয়েটের আবেদন — অনুমোদন বা বাতিল।
+ *
+ * অনুমোদনের সাথেই কমিশনের হারগুলো বসানো যায়, আর চারটে হারই শূন্য
+ * থাকলে অনুমোদন আটকে যায়। নইলে হার না বসিয়েই অনুমোদন দেওয়া যেত,
+ * আর অ্যাফিলিয়েট খেলোয়াড় এনে দেখতেন কিছুই জমছে না।
+ *
+ * বাতিল করলে কারণ লেখা বাধ্যতামূলক — লেখাটা তিনি লগইনের সময় দেখেন,
+ * তাই "পারবেন না" বলে ছেড়ে দেওয়া হয় না।
+ */
+const COMMISSION_KEYS = [
+  "referCommission",
+  "depositCommission",
+  "gameWinCommission",
+  "gameLossCommission",
+];
+
+router.patch(
+  "/:id/affiliate-status",
+  protectAdmin,
+  requireMother,
+  requireWrite,
+  async (req, res) => {
+    try {
+      if (!isId(req.params.id)) return errorResponse(res, "Invalid id", 400);
+
+      const status = text(req.body?.status);
+
+      if (!["approved", "rejected", "pending"].includes(status)) {
+        return errorResponse(res, "Status must be approved, rejected or pending", 400);
+      }
+
+      const user = await User.findOne({ _id: req.params.id, role: "aff-user" });
+
+      if (!user) return errorResponse(res, "Affiliate not found", 404);
+
+      const note = text(req.body?.note);
+
+      if (status === "rejected" && !note) {
+        return errorResponse(res, "Please say why it was rejected", 400, "noteRequired");
+      }
+
+      if (status === "approved") {
+        COMMISSION_KEYS.forEach((key) => {
+          if (req.body?.[key] !== undefined) {
+            user[key] = Math.min(100, Math.max(0, num(req.body[key])));
+          }
+        });
+
+        const anyRate = COMMISSION_KEYS.some((key) => num(user[key]) > 0);
+
+        if (!anyRate) {
+          return errorResponse(
+            res,
+            "Set at least one commission rate before approving",
+            400,
+            "commissionNotSet",
+          );
+        }
+      }
+
+      user.affiliateStatus = status;
+      user.affiliateNote = note;
+      user.affiliateReviewedAt = new Date();
+      user.affiliateReviewedBy = req.admin._id;
+
+      await user.save();
+
+      return successResponse(res, `Affiliate ${status}`, {
+        user: user.toSafeJSON(),
+      });
     } catch (error) {
       return errorResponse(res, error.message, 500);
     }

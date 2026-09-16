@@ -97,6 +97,25 @@ const userSchema = new Schema(
     referralCount: { type: Number, default: 0, min: 0 },
 
     /* ── কমিশনের হার (%) — অ্যাডমিন প্রতিটা অ্যাফিলিয়েটের জন্য বসায় ── */
+    /* ── অ্যাফিলিয়েট অনুমোদন ──
+     *
+     * রেজিস্টার করলেই ঢোকা যায় না। অ্যাডমিন কমিশনের হারগুলো বসিয়ে
+     * অনুমোদন দিলে তবেই লগইন খোলে — নইলে হার শূন্য অবস্থায় কেউ
+     * খেলোয়াড় আনতে শুরু করতেন আর কমিশন জমত না।
+     *
+     * ডিফল্ট "approved", তাই খেলোয়াড় ও আগে থেকে থাকা অ্যাফিলিয়েটরা
+     * অচল হয়ে যান না; রেজিস্টার রুট নতুনদের জন্য "pending" বসায়।
+     */
+    affiliateStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "approved",
+      index: true,
+    },
+    affiliateNote: { type: String, default: "", trim: true },
+    affiliateReviewedAt: { type: Date, default: null },
+    affiliateReviewedBy: { type: Schema.Types.ObjectId, ref: "Admin", default: null },
+
     referCommission: { type: Number, default: 0, min: 0 },
     depositCommission: { type: Number, default: 0, min: 0 },
     gameWinCommission: { type: Number, default: 0, min: 0 },
@@ -122,6 +141,20 @@ const userSchema = new Schema(
 
     isEmailVerified: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
+
+    /*
+     * পরিচয় যাচাইয়ের অবস্থা — আসল রেকর্ড `Verification` কালেকশনে,
+     * এটা তার প্রতিচ্ছবি।
+     *
+     * নকল করে রাখা হয় বলে হেডারে ব্যাজ দেখাতে প্রতি পাতায় আলাদা
+     * রিকোয়েস্ট করতে হয় না; `/api/user/me` তেই চলে আসে।
+     */
+    verificationStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+      index: true,
+    },
 
     /* ── নিরাপত্তা ── */
     failedLoginAttempts: { type: Number, default: 0, select: false },
@@ -169,6 +202,9 @@ userSchema.methods.toSafeJSON = function toSafeJSON() {
     dateOfBirth: this.dateOfBirth,
     isEmailVerified: this.isEmailVerified,
     isPhoneVerified: this.isPhoneVerified,
+    affiliateStatus: this.affiliateStatus,
+    affiliateNote: this.affiliateNote,
+    verificationStatus: this.verificationStatus,
     pendingRegisterBonus: this.pendingRegisterBonus,
     createdAt: this.createdAt,
   };

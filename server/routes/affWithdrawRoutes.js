@@ -16,6 +16,7 @@ import {
   requireWrite,
 } from "../middleware/protectAdmin.js";
 import { successResponse, errorResponse } from "../utils/response.js";
+import { verificationGate } from "./verificationRoutes.js";
 import { num, money } from "../utils/depositCalc.js";
 
 const router = express.Router();
@@ -138,6 +139,24 @@ router.get("/methods/public", async (req, res) => {
  * একসাথে সব সমস্যা দেখালে কোনটা আগে ঠিক করতে হবে বোঝা যেত না।
  */
 const checkEligibility = async (user) => {
+  /*
+   * পরিচয় যাচাই সবার আগে।
+   *
+   * অ্যাডমিন অ্যাফিলিয়েটের জন্য আলাদা সুইচ রাখেন (তাঁরা ডিপোজিট
+   * করেন না, তাই শুধু উইথড্র)। এটা না মিটলে খেলোয়াড়ের সংখ্যা বা
+   * কমিশন মেলানো নিয়ে কথা বলার মানে নেই।
+   */
+  const gate = await verificationGate(user._id, "withdraw", "aff-user");
+
+  if (!gate.ok) {
+    return {
+      eligible: false,
+      reason: "verification",
+      verificationStatus: gate.status,
+      balance: money(user.balance),
+    };
+  }
+
   const setting = await AffWithdrawSetting.current();
 
   const needed = num(setting.requiredActiveReferrals);
@@ -212,6 +231,7 @@ router.post("/", protectUser, onlyAffiliate, async (req, res) => {
 
     if (!eligibility.eligible) {
       const messages = {
+        verification: "Please complete identity verification first",
         referrals: `You need ${eligibility.remainingReferrals} more active player(s)`,
         unsettled: "Your commission has to be settled by an admin first",
         pending: "You already have a withdraw waiting for review",

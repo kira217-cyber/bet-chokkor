@@ -293,6 +293,8 @@ router.post("/register", authLimiter, async (req, res) => {
     const user = await User.create({
       userId,
       role: roleOf(site),
+      // অ্যাফিলিয়েট অ্যাডমিনের অনুমোদনের অপেক্ষায় থাকেন
+      affiliateStatus: site === "affiliate" ? "pending" : "approved",
       password: await bcrypt.hash(password, BCRYPT_ROUNDS),
       countryCode,
       phone,
@@ -306,6 +308,33 @@ router.post("/register", authLimiter, async (req, res) => {
 
     if (referrer) {
       referrer.referralCount = Number(referrer.referralCount || 0) + 1;
+
+      /*
+       * অ্যাফিলিয়েটের রেফার কমিশন — একজন খেলোয়াড় এলেই একবার।
+       *
+       * এটা শতাংশ নয়, মাথাপিছু নির্দিষ্ট টাকা (Bajiman এও তাই), তাই
+       * হারটা সরাসরি জমার ঘরে যোগ হয়। আগে শুধু `referralCount`
+       * বাড়ত, ফলে অ্যাডমিনের বসানো "Refer commission" হারটা কোথাও
+       * কাজেই লাগত না।
+       *
+       * শুধু অনুমোদিত অ্যাফিলিয়েটের বেলায় — খেলোয়াড় খেলোয়াড়কে
+       * রেফার করলে সেটা আলাদা রেফারেল প্রোগ্রামের হিসাব।
+       */
+      if (
+        referrer.role === "aff-user" &&
+        referrer.affiliateStatus === "approved" &&
+        referrer.isActive
+      ) {
+        const perHead = Math.max(0, Number(referrer.referCommission) || 0);
+
+        if (perHead > 0) {
+          referrer.referCommissionBalance =
+            Math.round(
+              (Number(referrer.referCommissionBalance || 0) + perHead) * 100,
+            ) / 100;
+        }
+      }
+
       await referrer.save();
     }
 
@@ -320,6 +349,22 @@ router.post("/register", authLimiter, async (req, res) => {
       site === "affiliate" ? null : await grantRegisterBonus(user);
 
     clearOtp({ flow: "register", countryCode, phone });
+
+    /*
+     * অ্যাফিলিয়েট সাথে সাথে ঢুকতে পারেন না — টোকেনই দেওয়া হয় না।
+     *
+     * অ্যাডমিন কমিশনের হার বসিয়ে অনুমোদন দেওয়ার আগে ঢুকতে দিলে
+     * ড্যাশবোর্ডে সব শূন্য দেখাত, আর তিনি খেলোয়াড় আনতে শুরু করে
+     * দিতেন — অথচ হার শূন্য বলে কোনো কমিশনই জমত না।
+     */
+    if (site === "affiliate") {
+      return successResponse(
+        res,
+        "Your application is under review",
+        { pending: true, user: user.toSafeJSON() },
+        201,
+      );
+    }
 
     user.lastLoginAt = new Date();
     await user.save();
@@ -399,6 +444,26 @@ router.post("/login", authLimiter, async (req, res) => {
      */
     if (user.role !== roleOf(site)) {
       return errorResponse(res, "Username or password is not correct", 401, "badLogin");
+    }
+
+    /*
+     * অনুমোদন না হওয়া পর্যন্ত অ্যাফিলিয়েট ঢুকতে পারেন না।
+     *
+     * পাসওয়ার্ড মেলার পরেই এই কথাটা বলা হয় — তাই কোন ইউজারনেমটা
+     * আছে সেটা বাইরে থেকে যাচাই করা যায় না, অথচ যিনি সত্যিই
+     * আবেদন করেছেন তিনি জানেন কেন আটকাচ্ছে।
+     */
+    if (user.role === "aff-user" && user.affiliateStatus !== "approved") {
+      const rejected = user.affiliateStatus === "rejected";
+
+      return errorResponse(
+        res,
+        rejected
+          ? text(user.affiliateNote) || "Your application was not accepted"
+          : "Your application is still under review",
+        403,
+        rejected ? "affiliateRejected" : "affiliatePending",
+      );
     }
 
     // লগইনে OTP চালু থাকলে যাচাই হয়ে থাকতে হবে

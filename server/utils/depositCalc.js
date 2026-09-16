@@ -80,7 +80,14 @@ export const getAffiliateDepositCommission = async ({ user, amount }) => {
 
   const affiliator = await User.findById(user.referredBy);
 
-  if (!affiliator || affiliator.role !== "aff-user") return emptyCommission(amount);
+  // অনুমোদন না থাকলে কমিশন জমে না — বাতিল হওয়া অ্যাফিলিয়েটও নয়
+  if (
+    !affiliator ||
+    affiliator.role !== "aff-user" ||
+    affiliator.affiliateStatus !== "approved"
+  ) {
+    return emptyCommission(amount);
+  }
 
   const percent = num(affiliator.depositCommission);
 

@@ -14,6 +14,14 @@ const verificationSettingSchema = new mongoose.Schema(
     requireForDeposit: { type: Boolean, default: false },
     requireForWithdraw: { type: Boolean, default: false },
 
+    /*
+     * অ্যাফিলিয়েটের জন্য শুধু উইথড্র।
+     *
+     * তাঁরা ডিপোজিট করেন না, কমিশন তোলেন — তাই ডিপোজিটের সুইচটা
+     * এখানে রাখার কোনো মানে নেই।
+     */
+    affiliateRequireForWithdraw: { type: Boolean, default: false },
+
     /** ব্যবহারকারীকে দেখানোর কথা — কেন লাগছে, কী দিতে হবে */
     note: {
       bn: {

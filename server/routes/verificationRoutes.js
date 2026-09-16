@@ -33,17 +33,25 @@ const removeUpload = (url) => {
 
 const fileUrl = (file) => (file ? `/uploads/${file.filename}` : "");
 
+/** OTP এর সুইচ দুই সাইটে আলাদা, তাই ভূমিকা দেখে বেছে নেওয়া */
+const siteOf = (user) => (user?.role === "aff-user" ? "affiliate" : "client");
+
 /**
  * যাচাই লাগবে কিনা, আর হয়ে থাকলে কী অবস্থায়।
  *
  * ডিপোজিট ও উইথড্রের রুট দুটোই এটা ডাকে, তাই শর্তটা এক জায়গাতেই
  * লেখা — দুই জায়গায় আলাদা লিখলে একটা বদলে অন্যটা পিছিয়ে থাকত।
  */
-export const verificationGate = async (userId, action) => {
+export const verificationGate = async (userId, action, role = "user") => {
   const setting = await VerificationSetting.current();
 
+  // অ্যাফিলিয়েটের নিজের সুইচ — তাঁদের শুধু উইথড্রেই লাগে
   const needed =
-    action === "deposit" ? setting.requireForDeposit : setting.requireForWithdraw;
+    role === "aff-user"
+      ? setting.affiliateRequireForWithdraw
+      : action === "deposit"
+        ? setting.requireForDeposit
+        : setting.requireForWithdraw;
 
   if (!needed) return { ok: true };
 
@@ -80,9 +88,10 @@ router.get("/my", protectUser, async (req, res) => {
       setting: {
         requireForDeposit: setting.requireForDeposit,
         requireForWithdraw: setting.requireForWithdraw,
+        affiliateRequireForWithdraw: setting.affiliateRequireForWithdraw,
         note: setting.note,
       },
-      otpRequired: await isOtpRequired("client", "profileVerify"),
+      otpRequired: await isOtpRequired(siteOf(req.user), "profileVerify"),
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -129,9 +138,15 @@ router.post(
         return errorResponse(res, "Pick a document type", 400, "missingFields");
       }
 
-      // OTP চালু থাকলে নম্বরটা আগে যাচাই হতে হবে — কাগজপত্রের সাথে
-      // ফোনটাও যে তাঁরই, সেটা নিশ্চিত হয়
-      if (await isOtpRequired("client", "profileVerify")) {
+      /*
+       * OTP চালু থাকলে নম্বরটা আগে যাচাই হতে হবে — কাগজপত্রের সাথে
+       * ফোনটাও যে তাঁরই, সেটা নিশ্চিত হয়।
+       *
+       * সাইটটা ভূমিকা দেখে বাছা হয়। আগে `"client"` বসানো ছিল, তাই
+       * অ্যাডমিন অ্যাফিলিয়েটের জন্য OTP বন্ধ রাখলেও তাঁরা ক্লায়েন্টের
+       * সুইচে আটকে যেতেন।
+       */
+      if (await isOtpRequired(siteOf(req.user), "profileVerify")) {
         const okOtp = isVerified({
           flow: "profileVerify",
           countryCode: req.user.countryCode,
@@ -176,6 +191,8 @@ router.post(
       }
 
       row.userIdText = req.user.userId;
+      // ভূমিকা আবেদনের সাথেই — অ্যাডমিনের দুটো আলাদা তালিকা এটা দেখেই চলে
+      row.role = req.user.role === "aff-user" ? "aff-user" : "user";
       row.fullName = fullName;
       row.documentType = documentType;
       row.documentNumber = documentNumber;
@@ -190,6 +207,12 @@ router.post(
       row.submittedAt = new Date();
 
       await row.save();
+
+      // ব্যবহারকারীর ঘরেও একই অবস্থা — হেডারের ব্যাজ এটা দেখেই চলে
+      await User.updateOne(
+        { _id: req.user._id },
+        { $set: { verificationStatus: "pending" } },
+      );
 
       clearOtp({
         flow: "profileVerify",
@@ -215,7 +238,11 @@ router.get("/admin", protectAdmin, async (req, res) => {
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
 
-    const filter = {};
+    // ভূমিকা ধরে আলাদা তালিকা — অ্যাডমিনে খেলোয়াড় ও অ্যাফিলিয়েটের
+    // পাতা দুটো আলাদা, একই তালিকায় মিশিয়ে দিলে খুঁজে পাওয়া কঠিন হতো
+    const role = req.query.role === "aff-user" ? "aff-user" : "user";
+    const filter = { role };
+
     const status = text(req.query.status);
 
     if (["pending", "approved", "rejected"].includes(status)) {
@@ -242,7 +269,10 @@ router.get("/admin", protectAdmin, async (req, res) => {
         .limit(limit)
         .lean(),
       Verification.countDocuments(filter),
-      Verification.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
+      Verification.aggregate([
+        { $match: { role } },
+        { $group: { _id: "$status", n: { $sum: 1 } } },
+      ]),
     ]);
 
     return successResponse(res, "Verifications loaded", {
@@ -287,6 +317,11 @@ const review = (nextStatus) => async (req, res) => {
     if (!row) {
       return errorResponse(res, "Already reviewed or not found", 409);
     }
+
+    await User.updateOne(
+      { _id: row.user?._id || row.user },
+      { $set: { verificationStatus: nextStatus } },
+    );
 
     return successResponse(res, `Verification ${nextStatus}`, {
       verification: row,
@@ -334,6 +369,12 @@ router.put(
 
       if (req.body?.requireForDeposit !== undefined) {
         setting.requireForDeposit = Boolean(req.body.requireForDeposit);
+      }
+
+      if (req.body?.affiliateRequireForWithdraw !== undefined) {
+        setting.affiliateRequireForWithdraw = Boolean(
+          req.body.affiliateRequireForWithdraw,
+        );
       }
 
       if (req.body?.requireForWithdraw !== undefined) {

@@ -29,7 +29,7 @@ const isId = (value) => mongoose.Types.ObjectId.isValid(String(value));
 const checkEligibility = async (userId) => {
   // পরিচয় যাচাই সবার আগে — টার্নওভার বা ঝুলে থাকা আবেদনের কথা বলার
   // আগে এটাই বলা উচিত, কারণ এটা না হলে বাকিগুলো মিটিয়েও লাভ নেই
-  const gate = await verificationGate(userId, "withdraw");
+  const gate = await verificationGate(userId, "withdraw", "user");
 
   if (!gate.ok) {
     return {

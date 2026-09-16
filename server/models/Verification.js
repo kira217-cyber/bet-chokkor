@@ -25,6 +25,20 @@ const verificationSchema = new Schema(
     },
     userIdText: { type: String, default: "", trim: true, index: true },
 
+    /*
+     * খেলোয়াড় না অ্যাফিলিয়েট — আবেদনের সাথেই তুলে রাখা।
+     *
+     * `user` populate করে ভূমিকা দেখা যেত, কিন্তু তাতে ভূমিকা ধরে
+     * ফিল্টার বা গোনা যেত না; অ্যাডমিনের দুটো আলাদা পাতার জন্য
+     * সেটাই দরকার।
+     */
+    role: {
+      type: String,
+      enum: ["user", "aff-user"],
+      default: "user",
+      index: true,
+    },
+
     fullName: { type: String, required: true, trim: true, maxlength: 120 },
     dateOfBirth: { type: Date, default: null },
 
@@ -57,7 +71,7 @@ const verificationSchema = new Schema(
   { timestamps: true },
 );
 
-verificationSchema.index({ status: 1, createdAt: -1 });
+verificationSchema.index({ role: 1, status: 1, createdAt: -1 });
 
 const Verification =
   mongoose.models.Verification ||
