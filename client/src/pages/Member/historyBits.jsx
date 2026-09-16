@@ -24,7 +24,7 @@ export const StatusPill = ({ status, label, icon }) => {
         color: tone,
         backgroundColor: `color-mix(in srgb, ${tone}, transparent 85%)`,
         borderRadius: "var(--radius-70)",
-        fontSize: "var(--fs-small)",
+        fontSize: "var(--fs-normal)",
         gap: "calc(var(--u) * 1.067)",
         padding: "calc(var(--u) * 0.8) calc(var(--u) * 2.4)",
       }}
@@ -46,7 +46,7 @@ export const CardHead = ({ title, lines = [], right }) => (
     <div className="min-w-0">
       <p
         className="truncate font-bold text-[var(--neutral100)]"
-        style={{ fontSize: "var(--fs-larger)" }}
+        style={{ fontSize: "var(--fs-body)" }}
       >
         {title}
       </p>
@@ -56,7 +56,7 @@ export const CardHead = ({ title, lines = [], right }) => (
           key={index}
           className="break-all text-[var(--text-muted)]"
           style={{
-            fontSize: "var(--fs-small)",
+            fontSize: "var(--fs-normal)",
             marginTop: "calc(var(--u) * 0.8)",
           }}
         >
@@ -80,7 +80,7 @@ export const StatBox = ({ icon, label, value, tone }) => (
   >
     <div
       className="flex items-center text-[var(--text-muted)]"
-      style={{ fontSize: "var(--fs-small)", gap: "calc(var(--u) * 1.067)" }}
+      style={{ fontSize: "var(--fs-normal)", gap: "calc(var(--u) * 1.067)" }}
     >
       {icon}
       <span className="truncate">{label}</span>
@@ -90,7 +90,7 @@ export const StatBox = ({ icon, label, value, tone }) => (
       className="truncate font-bold"
       style={{
         color: tone || "var(--text-primary)",
-        fontSize: "var(--fs-normal)",
+        fontSize: "var(--fs-larger)",
         marginTop: "calc(var(--u) * 0.8)",
       }}
     >
@@ -116,7 +116,7 @@ export const CardFoot = ({ children }) => (
   <p
     className="text-[var(--text-muted)]"
     style={{
-      fontSize: "var(--fs-small)",
+      fontSize: "var(--fs-normal)",
       marginTop: "calc(var(--u) * 2.667)",
     }}
   >
@@ -148,7 +148,7 @@ export const Tabs = ({ tabs, value, onChange, size = "normal" }) => (
                 : "var(--neutral800)",
               color: active ? "var(--neutral1000)" : "var(--text-secondary)",
               borderRadius: "var(--radius-70)",
-              fontSize: size === "small" ? "var(--fs-small)" : "var(--fs-normal)",
+              fontSize: size === "small" ? "var(--fs-normal)" : "var(--fs-larger)",
               gap: "calc(var(--u) * 1.6)",
               padding:
                 size === "small"
@@ -189,7 +189,7 @@ export const SummaryHead = ({ icon, title, total, totalLabel, onRefresh, busy })
       <div className="min-w-0">
         <p
           className="truncate font-bold text-[var(--neutral100)]"
-          style={{ fontSize: "var(--fs-larger)" }}
+          style={{ fontSize: "var(--fs-body)" }}
         >
           {title}
         </p>
@@ -197,7 +197,7 @@ export const SummaryHead = ({ icon, title, total, totalLabel, onRefresh, busy })
         <p
           className="text-[var(--text-muted)]"
           style={{
-            fontSize: "var(--fs-small)",
+            fontSize: "var(--fs-normal)",
             marginTop: "calc(var(--u) * 0.533)",
           }}
         >
@@ -234,7 +234,7 @@ export const Pager = ({ page, totalPages, total, labels, onChange, busy }) => {
       className="flex flex-1 cursor-pointer items-center justify-center bg-[var(--neutral800)] text-[var(--text-secondary)] transition-colors hover:text-[var(--neutral100)] disabled:cursor-not-allowed disabled:opacity-40"
       style={{
         borderRadius: "var(--radius-10)",
-        fontSize: "var(--fs-normal)",
+        fontSize: "var(--fs-larger)",
         gap: "calc(var(--u) * 1.067)",
         height: "calc(var(--u) * 10.133)",
       }}
@@ -248,7 +248,7 @@ export const Pager = ({ page, totalPages, total, labels, onChange, busy }) => {
       <div
         className="flex items-center justify-between text-[var(--text-muted)]"
         style={{
-          fontSize: "var(--fs-small)",
+          fontSize: "var(--fs-normal)",
           marginBottom: "calc(var(--u) * 2.133)",
         }}
       >

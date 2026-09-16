@@ -27,9 +27,13 @@ export const buildBuckets = (row, providers, openLabel) => {
     ? row.providerProgress
     : [];
 
-  const nameOf = (code) =>
-    providers.find((item) => String(item.providerCode).toUpperCase() === code)
-      ?.providerName || code;
+  const findProvider = (code) =>
+    providers.find((item) => String(item.providerCode).toUpperCase() === code);
+
+  const nameOf = (code) => findProvider(code)?.providerName || code;
+
+  // লোগোটা নামের পাশে বসে — কোড দেখে প্রোভাইডার চেনার চেয়ে ছবিটা চেনা সহজ
+  const logoOf = (code) => findProvider(code)?.providerIconUrl || "";
 
   const buckets = eligible.map((item) => {
     const code = String(item?.providerCode || "").toUpperCase();
@@ -44,6 +48,7 @@ export const buildBuckets = (row, providers, openLabel) => {
     return {
       key: code,
       name: nameOf(code),
+      logo: logoOf(code),
       quota,
       done: round2(Math.min(quota, Number(entry?.progress || 0))),
     };
@@ -66,6 +71,7 @@ export const buildBuckets = (row, providers, openLabel) => {
     buckets.push({
       key: "__open__",
       name: openLabel,
+      logo: "",
       quota: openQuota,
       done: round2(Math.min(openQuota, openDone)),
     });

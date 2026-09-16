@@ -233,3 +233,220 @@ export const MilestoneStrip = ({ period, milestones, inviteLabel }) => (
     </div>
   </div>
 );
+
+/**
+ * "কিভাবে আরো প্রাইজ পাবেন?" — তিন ধাপের ফ্লোচার্ট।
+ *
+ * মূল সাইট (referral-program/info) থেকে নেওয়া: বড় সোনালি সংখ্যা, পাশে
+ * ধাপের ছবি, নিচে ছোট বর্ণনা। ছোট পর্দায় এক কলাম, বড় পর্দায় তিন।
+ */
+export const PrizeSteps = ({ title, steps }) => (
+  <div
+    className="bg-[var(--neutral900)]"
+    style={{
+      borderRadius: "var(--radius-10)",
+      padding: "calc(var(--u) * 4.267)",
+    }}
+  >
+    <h3
+      className="font-bold text-[var(--neutral100)]"
+      style={{
+        fontSize: "calc(var(--u) * 5.333)",
+        marginBottom: "calc(var(--u) * 4.267)",
+      }}
+    >
+      {title}
+    </h3>
+
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {steps.map((step, index) => (
+        <div
+          key={step.title}
+          className="relative flex flex-col overflow-hidden bg-[var(--neutral800)]"
+          style={{
+            borderRadius: "var(--radius-5)",
+            padding: "calc(var(--u) * 3.733)",
+            minHeight: "calc(var(--u) * 40)",
+          }}
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span
+              className="font-black leading-none"
+              style={{ color: "#ffdf1a", fontSize: "calc(var(--u) * 16)" }}
+            >
+              {index + 1}
+            </span>
+
+            {step.img ? (
+              <img
+                src={step.img}
+                alt=""
+                className="h-[64px] w-[64px] shrink-0 object-contain"
+                draggable="false"
+              />
+            ) : null}
+          </div>
+
+          <p
+            className="mt-auto font-bold"
+            style={{ color: "#ffdf1a", fontSize: "var(--fs-body)" }}
+          >
+            {step.title}
+          </p>
+          <p
+            className="text-[var(--text-secondary)]"
+            style={{ fontSize: "var(--fs-normal)", marginTop: "calc(var(--u) * 1.067)" }}
+          >
+            {step.text}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/**
+ * ডার্ক প্যানেল — referral-program/info পাতার মতো।
+ *
+ * ওই পাতায় বাক্সগুলো সোনালি নয়, গাঢ় (#292926 এর কাছাকাছি) বর্ডার
+ * সহ। শিরোনামের আগে সোনালি দাগ, ডানে ঐচ্ছিক বোতাম।
+ */
+export const DarkPanel = ({ title, action, children }) => (
+  <div
+    style={{
+      background: "var(--neutral900)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: "var(--radius-10)",
+      padding: "calc(var(--u) * 4.267)",
+    }}
+  >
+    {title ? (
+      <div
+        className="flex flex-wrap items-center justify-between gap-3"
+        style={{ marginBottom: "calc(var(--u) * 3.2)" }}
+      >
+        <span
+          className="font-bold text-[var(--neutral100)]"
+          style={{ fontSize: "var(--fs-h4)" }}
+        >
+          {title}
+        </span>
+
+        {action}
+      </div>
+    ) : null}
+
+    {children}
+  </div>
+);
+
+/**
+ * ক্যাশ রিওয়ার্ড রেশিও — একটা ব্যান্ডের তিনটে লেভেল, পাশে তীর দিয়ে
+ * ব্যান্ড বদলানো যায়।
+ *
+ * মূল সাইটে উপরে তিনটে রেঞ্জের মাথা (টার্নওভার/ডিপোজিট/জয়-পরাজয়), আর
+ * নিচে লেভেল ১/২/৩ এর শতাংশ। ব্যান্ড একটার বেশি থাকলে তীর দেখা যায়।
+ */
+export const CashRatio = ({
+  bands = [],
+  maxTier = 3,
+  index,
+  onPrev,
+  onNext,
+  labels,
+}) => {
+  const band = bands[index] || {};
+  const tierOf = (n) =>
+    (band.tiers || []).find((item) => item.tier === n)?.percent;
+
+  return (
+    <div>
+      <div
+        className="flex flex-wrap items-center justify-between gap-3"
+        style={{ marginBottom: "calc(var(--u) * 3.2)" }}
+      >
+        <span
+          className="font-bold text-[var(--neutral100)]"
+          style={{ fontSize: "var(--fs-body)" }}
+        >
+          {labels.title}
+        </span>
+
+        {bands.length > 1 ? (
+          <div className="flex items-center" style={{ gap: "calc(var(--u) * 1.6)" }}>
+            <button
+              type="button"
+              onClick={onPrev}
+              aria-label={labels.prev}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--neutral800)] text-[var(--text-secondary)] transition-colors hover:text-[var(--neutral100)]"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={onNext}
+              aria-label={labels.next}
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--neutral800)] text-[var(--text-secondary)] transition-colors hover:text-[var(--neutral100)]"
+            >
+              ›
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* রেঞ্জের মাথা */}
+      <div
+        className="flex flex-wrap gap-x-6 gap-y-1"
+        style={{ marginBottom: "calc(var(--u) * 3.2)" }}
+      >
+        {[
+          [labels.turnoverRange, band.requireTurnover],
+          [labels.depositRange, 0],
+          [labels.winLossRange, 0],
+        ].map(([name, value]) => (
+          <span
+            key={name}
+            className="text-[var(--text-muted)]"
+            style={{ fontSize: "var(--fs-normal)" }}
+          >
+            {name}{" "}
+            <b style={{ color: "#ffdf1a" }}>
+              {labels.over} {value}
+            </b>
+          </span>
+        ))}
+      </div>
+
+      {/* লেভেল */}
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {Array.from({ length: maxTier }).map((_, i) => {
+          const pct = tierOf(i + 1);
+
+          return (
+            <div
+              key={i}
+              className="flex items-center justify-between bg-[var(--neutral800)]"
+              style={{
+                borderRadius: "var(--radius-5)",
+                padding: "calc(var(--u) * 3.2) calc(var(--u) * 3.733)",
+              }}
+            >
+              <span
+                className="text-[var(--text-secondary)]"
+                style={{ fontSize: "var(--fs-larger)" }}
+              >
+                {labels.level} {i + 1}
+              </span>
+              <span
+                className="font-bold"
+                style={{ color: "#ffdf1a", fontSize: "var(--fs-larger)" }}
+              >
+                {pct != null ? `${pct}%` : "—"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};

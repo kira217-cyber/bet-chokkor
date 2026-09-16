@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { ChevronRight, Copy, UserRound } from "lucide-react";
+import { BadgeCheck, ChevronRight, Copy, UserRound } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
@@ -20,6 +20,23 @@ import { buildProfileMenu } from "./profileMenuItems";
  * বাইরে ক্লিক বা Esc এ বন্ধ হয়, নইলে মেনু খোলা রেখে পাতা ঘোরালে ভুল
  * জায়গায় ক্লিক লেগে যেত।
  */
+/**
+ * যাচাই হয়ে গেলে নামের পাশে টিক।
+ *
+ * অবস্থাটা `/api/user/me` তেই আসে (User এ মিরর করা), তাই আলাদা
+ * রিকোয়েস্ট লাগে না। শুধু অনুমোদিত হলেই দেখানো হয় — অপেক্ষায় থাকা
+ * আবেদনে টিক দিলে মানুষ ভাবতেন কাজ শেষ।
+ */
+const VerifiedTick = ({ size = 14, title }) => (
+  <span
+    title={title}
+    aria-label={title}
+    className="flex shrink-0 items-center text-[var(--status-success)]"
+  >
+    <BadgeCheck size={size} />
+  </span>
+);
+
 const ProfileMenu = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -27,6 +44,8 @@ const ProfileMenu = () => {
   const { showAlert, showConfirm } = useAlert();
 
   const user = useSelector(selectUser);
+
+  const verified = user?.verificationStatus === "approved";
 
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -158,6 +177,8 @@ const ProfileMenu = () => {
       >
         <UserRound size={15} />
         {t("profileMenu")}
+
+        {verified ? <VerifiedTick title={t("verifiedBadge")} /> : null}
       </button>
 
       {open ? (
@@ -216,6 +237,10 @@ const ProfileMenu = () => {
                   >
                     {user?.userId || "—"}
                   </span>
+
+                  {verified ? (
+                    <VerifiedTick size={15} title={t("verifiedBadge")} />
+                  ) : null}
 
                   <button
                     type="button"

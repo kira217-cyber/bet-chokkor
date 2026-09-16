@@ -5,18 +5,21 @@ import { ChevronLeft } from "lucide-react";
 /**
  * member পেজগুলোর খোলস — ব্যাক বাটন, টাইটেল আর কেন্দ্রীভূত কলাম।
  *
+ * `maxWidth` দিয়ে কলামটা চওড়া করা যায় — ইতিহাসের পাতাগুলোয় সারি
+ * অনেক, ৬১৮px এ ল্যাপটপের দুপাশ ফাঁকা পড়ে থাকত।
+ *
  * মূল সাইট থেকে মাপা: ডেস্কটপে কলাম ৬১৮px কেন্দ্রীভূত, ব্যাক বাটন
  * ৯.০৬৭u বর্গ (bg neutral800, radius --radius-10), টাইটেল ৫.৩৩৩u/৬০০।
  * মোবাইলে কলামটা পুরো চওড়া, দুপাশে ৪.২৬৭u ফাঁক।
  */
-const MemberPage = ({ title, onBack, children, footer }) => {
+const MemberPage = ({ title, onBack, children, footer, maxWidth = "618px" }) => {
   const navigate = useNavigate();
 
   return (
     <div
       className="mx-auto flex w-full flex-col"
       style={{
-        maxWidth: "618px",
+        maxWidth,
         paddingInline: "calc(var(--u) * 4.267)",
         paddingBottom: "calc(var(--u) * 6.4)",
       }}

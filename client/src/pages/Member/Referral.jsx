@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, Copy, Gift, Loader2, Share2, Users } from "lucide-react";
 
 import {
   BigNumber,
+  CashRatio,
+  DarkPanel,
   DarkStat,
   GoldPanel,
   MilestoneStrip,
+  PrizeSteps,
 } from "./referralBits";
 import { formatDate, money } from "./historyFormat";
 import { useLanguage } from "../../Context/LanguageProvider";
@@ -75,12 +78,25 @@ const Referral = () => {
 
   const user = useSelector(selectUser);
 
-  const [tab, setTab] = useState("details");
+  /*
+   * কোন ট্যাব খুলবে সেটা URL এ (?tab=info) থাকতে পারে — সাইডবারের
+   * "রেফারেল প্রোগ্রাম" সরাসরি তথ্য পাতায় নিয়ে আসে। না থাকলে নিজের
+   * ড্যাশবোর্ড (details) খোলে।
+   */
+  const [params] = useSearchParams();
+  const initialTab = ["info", "details", "rewards"].includes(params.get("tab"))
+    ? params.get("tab")
+    : "details";
+
+  const [tab, setTab] = useState(initialTab);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState("");
   const [reload, setReload] = useState(0);
+
+  // ক্যাশ রেশিওর কোন ব্যান্ডটা এখন দেখাচ্ছে (তীর দিয়ে বদলায়)
+  const [bandIndex, setBandIndex] = useState(0);
 
   const [rewards, setRewards] = useState([]);
   const [downline, setDownline] = useState([]);
@@ -514,107 +530,91 @@ const Referral = () => {
           {/* ── তথ্য ── */}
           {tab === "info" ? (
             <>
-              <GoldPanel title={t("refHowItWorks")}>
-                <p style={{ color: "var(--neutral1000)", fontSize: "14px" }}>
-                  {tv(setting.rules) || t("refHowItWorksText")}
-                </p>
-              </GoldPanel>
-
-              <GoldPanel title={t("refCommissionTable")}>
-                <div
-                  className="bg-[var(--neutral800)]"
-                  style={{ borderRadius: "3px", padding: "calc(var(--u) * 3.2)" }}
-                >
-                  <div className="overflow-x-auto [scrollbar-width:thin]">
-                    <table className="w-full min-w-[300px] border-collapse text-left">
-                      <thead>
-                        <tr>
-                          <th
-                            className="text-[var(--text-muted)]"
-                            style={{
-                              fontSize: "12px",
-                              paddingBottom: "calc(var(--u) * 2.133)",
-                            }}
-                          >
-                            {t("refTurnoverFrom")}
-                          </th>
-
-                          {Array.from({ length: setting.maxTier || 3 }).map(
-                            (_, index) => (
-                              <th
-                                key={index}
-                                className="text-right text-[var(--text-muted)]"
-                                style={{
-                                  fontSize: "12px",
-                                  paddingBottom: "calc(var(--u) * 2.133)",
-                                }}
-                              >
-                                {t("refTier")} {index + 1}
-                              </th>
-                            ),
-                          )}
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {(setting.commissionBands || []).map((band) => (
-                          <tr key={band.requireTurnover}>
-                            <td
-                              className="text-[var(--text-primary)]"
-                              style={{
-                                fontSize: "14px",
-                                paddingBlock: "calc(var(--u) * 1.6)",
-                              }}
-                            >
-                              {money(band.requireTurnover)}
-                            </td>
-
-                            {Array.from({ length: setting.maxTier || 3 }).map(
-                              (_, index) => {
-                                const tier = band.tiers?.find(
-                                  (item) => item.tier === index + 1,
-                                );
-
-                                return (
-                                  <td
-                                    key={index}
-                                    className="text-right font-semibold"
-                                    style={{
-                                      color: "#ffdf1a",
-                                      fontSize: "14px",
-                                      paddingBlock: "calc(var(--u) * 1.6)",
-                                    }}
-                                  >
-                                    {tier ? `${tier.percent}%` : "—"}
-                                  </td>
-                                );
-                              },
-                            )}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
+              {/* রেফারেল প্রোগ্রাম কি? */}
+              <DarkPanel
+                title={t("refWhatIsTitle")}
+                action={
+                  <a
+                    href="/help"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="flex h-10 items-center rounded-[10px] border border-white/[0.12] px-5 font-semibold text-[var(--neutral100)] transition-colors hover:bg-white/[0.05]"
+                    style={{ fontSize: "var(--fs-normal)" }}
+                  >
+                    {t("refRulesBtn")}
+                  </a>
+                }
+              >
                 <p
-                  style={{
-                    color: "var(--neutral1000)",
-                    fontSize: "12px",
-                    marginTop: "calc(var(--u) * 3.2)",
-                  }}
+                  className="text-[var(--text-secondary)]"
+                  style={{ fontSize: "var(--fs-larger)", lineHeight: 1.7 }}
                 >
-                  {t("refTierNote")}
+                  {tv(setting.rules) || t("refWhatIsText")}
                 </p>
-              </GoldPanel>
+              </DarkPanel>
 
-              <GoldPanel title={t("refMilestones")}>
+              {/* ক্যাশ রিওয়ার্ড রেশিও */}
+              <DarkPanel>
+                <CashRatio
+                  bands={setting.commissionBands || []}
+                  maxTier={setting.maxTier || 3}
+                  index={Math.min(
+                    bandIndex,
+                    Math.max(0, (setting.commissionBands || []).length - 1),
+                  )}
+                  onPrev={() =>
+                    setBandIndex((prev) => Math.max(0, prev - 1))
+                  }
+                  onNext={() =>
+                    setBandIndex((prev) =>
+                      Math.min(
+                        (setting.commissionBands || []).length - 1,
+                        prev + 1,
+                      ),
+                    )
+                  }
+                  labels={{
+                    title: t("refCashRatio"),
+                    turnoverRange: t("refTurnoverRange"),
+                    depositRange: t("refDepositRange"),
+                    winLossRange: t("refWinLossRange"),
+                    over: t("refOver"),
+                    level: t("refLevel"),
+                    prev: t("labelPrev"),
+                    next: t("next"),
+                  }}
+                />
+              </DarkPanel>
+
+              <PrizeSteps
+                title={t("refMorePrizeTitle")}
+                steps={[
+                  {
+                    img: "/assets/referral/referral-program-flowch-1.webp",
+                    title: t("refStep1Title"),
+                    text: t("refStep1Text"),
+                  },
+                  {
+                    img: "/assets/referral/referral-program-flowch-2.webp",
+                    title: t("refStep2Title"),
+                    text: t("refStep2Text"),
+                  },
+                  {
+                    img: "/assets/referral/referral-program-flowch-3.webp",
+                    title: t("refStep3Title"),
+                    text: t("refStep3Text"),
+                  },
+                ]}
+              />
+
+              {/* মাইলফলক বোনাস — কতজন আনলে কত */}
+              <DarkPanel title={t("refMilestones")}>
                 <MilestoneStrip
                   period={periodLabel}
                   milestones={achievement.milestones || []}
                   inviteLabel={t("refInvite")}
                 />
-              </GoldPanel>
+              </DarkPanel>
             </>
           ) : null}
 

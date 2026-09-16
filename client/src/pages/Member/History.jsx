@@ -208,7 +208,7 @@ const History = () => {
   const ActiveIcon = active.Icon;
 
   return (
-    <MemberPage title={t(longLabel(tab))}>
+    <MemberPage title={t(longLabel(tab))} maxWidth="1000px">
       <div className="flex flex-col" style={{ gap: "calc(var(--u) * 3.2)" }}>
         <Tabs tabs={tabs} value={tab} onChange={changeTab} />
 
@@ -256,7 +256,17 @@ const History = () => {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col" style={{ gap: "calc(var(--u) * 2.133)" }}>
+          /*
+           * ছোট পর্দায় এক কলাম, ল্যাপটপ থেকে দুই।
+           *
+           * কার্ডগুলো শুধু চওড়া করে টানলে ভিতরের লেখা দুপাশে ছিটকে
+           * যেত; পাশাপাশি দুটো বসালে জায়গাটা কাজে লাগে আর এক পর্দায়
+           * বেশি সারি দেখা যায়।
+           */
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2"
+            style={{ gap: "calc(var(--u) * 2.133)" }}
+          >
             {result.rows.map((row) => (
               <div
                 key={row._id}

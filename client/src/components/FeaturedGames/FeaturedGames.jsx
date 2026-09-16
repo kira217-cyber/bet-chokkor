@@ -17,6 +17,9 @@ const FeaturedGames = () => {
       items={games}
       aspect="114.27 / 152"
       slidesPerView={[3, 7.65]}
+      /* ইভেন্টের থেকে আলাদা সময় আর দেরিতে শুরু — দুটো একসাথে নড়ে না */
+      autoplayDelay={5500}
+      autoplayStartDelay={2000}
       renderItem={(item) => (
         <button
           type="button"

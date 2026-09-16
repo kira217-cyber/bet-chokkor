@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useSelector } from "react-redux";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, Mail, MessageCircle, Send, X } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
+import { fetchContacts } from "../../features/contact/contactApi";
 import {
   selectSideNavLinks,
   selectSliders,
@@ -25,6 +26,37 @@ import { selectGameCategories } from "../../features/globalGame/globalGameSelect
  *
  * খোলা অবস্থায় ক্যাটাগরিগুলো accordion — ভেতরে ভেন্ডরের তালিকা।
  */
+/**
+ * কোন মাধ্যম কেমন দেখাবে।
+ *
+ * নামগুলো অনুবাদ করা হয় না — Email, Telegram, WhatsApp দুই ভাষাতেই
+ * এভাবেই চেনা।
+ */
+/**
+ * বাইরের লিংকের ঠিকানা।
+ *
+ * অ্যাফিলিয়েট প্যানেল আলাদা অ্যাপ, তাই ঠিকানাটা `.env` এ — লোকালে
+ * ৫১৭৪, লাইভে নিজের ডোমেইন। বাকিগুলো আপাতত সাইটের ভিতরেই।
+ */
+const externalUrl = (item) => {
+  if (item.key === "affiliate") {
+    return String(import.meta.env.VITE_AFFILIATE_URL || "").trim() || item.path;
+  }
+
+  if (item.key === "help") {
+    // হেল্প পেজ আলাদা সাইট (Help-VIP) — লোকালে ৫১৮০, লাইভে নিজের ডোমেইন
+    return String(import.meta.env.VITE_HELP_URL || "").trim() || item.path;
+  }
+
+  return item.path;
+};
+
+const CONTACT_LOOK = {
+  email: { label: "Email", Icon: Mail, color: "var(--status-info)" },
+  telegram: { label: "Telegram", Icon: Send, color: "#2AABEE" },
+  whatsapp: { label: "WhatsApp", Icon: MessageCircle, color: "#25D366" },
+};
+
 const Sidebar = ({ open, setOpen, desktopOpen }) => {
   const { t, tv } = useLanguage();
 
@@ -33,6 +65,8 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
   const sliders = useSelector(selectSliders);
 
   const [openCategory, setOpenCategory] = useState(null);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contacts, setContacts] = useState([]);
   const [promoOpen, setPromoOpen] = useState(true);
 
   // প্রমোশন ব্যানার নিজে থেকে স্লাইড করে, শেষ হলে আবার শুরু থেকে
@@ -53,6 +87,24 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
 
     return () => clearInterval(timer);
   }, [promoOpen]);
+
+  /*
+   * যোগাযোগের মাধ্যমগুলো অ্যাডমিন ঠিক করে দেন, তাই সার্ভার থেকে আসে।
+   *
+   * একটাও চালু না থাকলে সারিটাই দেখানো হয় না — খুলে ফাঁকা তালিকা
+   * দেখানোর চেয়ে না থাকাই পরিষ্কার।
+   */
+  useEffect(() => {
+    let alive = true;
+
+    fetchContacts()
+      .then((list) => alive && setContacts(list))
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const label = (item) => tv(item.name);
 
@@ -155,16 +207,35 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
   };
 
   /** বন্ধ রেলের আইকন-শুধু আইটেম */
-  const railItem = (item, to, iconSrc) => (
-    <Link
-      key={item.key}
-      to={to}
-      title={label(item)}
-      className={`${rowClass} justify-center`}
-    >
-      {icon(iconSrc)}
-    </Link>
-  );
+  const railItem = (item, to, iconSrc) => {
+    // বাইরের সাইট (অ্যাফিলিয়েট, হেল্প) — ছোট রেলেও নতুন ট্যাবে ডোমেইনে
+    // যায়, নইলে ভিতরের রাউটারে /help খুঁজে ৪০৪ হতো
+    if (item.external) {
+      return (
+        <a
+          key={item.key}
+          href={externalUrl(item)}
+          target="_blank"
+          rel="noreferrer noopener"
+          title={label(item)}
+          className={`${rowClass} justify-center`}
+        >
+          {icon(iconSrc)}
+        </a>
+      );
+    }
+
+    return (
+      <Link
+        key={item.key}
+        to={to}
+        title={label(item)}
+        className={`${rowClass} justify-center`}
+      >
+        {icon(iconSrc)}
+      </Link>
+    );
+  };
 
   const liveSupport = (expanded) => (
     <button
@@ -257,11 +328,114 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
     </div>
   );
 
+  /** যোগাযোগের সারি — ক্যাটাগরির মতোই খোলা-বন্ধ হয় */
+  const contactAccordion = (item) => (
+    <div
+      key={item.key}
+      className="side-collapse shrink-0 overflow-hidden"
+      style={{
+        borderRadius: "var(--radius-10)",
+        background: contactOpen ? "var(--neutral900)" : "transparent",
+      }}
+    >
+      <button
+        type="button"
+        onClick={() => setContactOpen((prev) => !prev)}
+        className={`${rowClass} w-full cursor-pointer justify-between gap-3`}
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          {icon(item.icon)}
+          {title(label(item))}
+        </span>
+
+        <span
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--neutral700)] text-[var(--text-secondary)]"
+          aria-hidden="true"
+        >
+          <ChevronDown
+            size={16}
+            className={`transition-transform duration-300 ${
+              contactOpen ? "rotate-180" : ""
+            }`}
+          />
+        </span>
+      </button>
+
+      <div
+        className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${
+          contactOpen ? "max-h-[320px]" : "max-h-0"
+        }`}
+      >
+        <ul
+          className="flex flex-col"
+          style={{
+            gap: "calc(var(--u) * 2.133)",
+            padding:
+              "calc(var(--u) * 2.133) calc(var(--u) * 4.267) calc(var(--u) * 4.267)",
+          }}
+        >
+          {contacts.map((row) => {
+            const look = CONTACT_LOOK[row.key];
+
+            if (!look) return null;
+
+            const { Icon } = look;
+
+            return (
+              <li key={row.key}>
+                <a
+                  href={row.url}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex h-[52px] items-center gap-3 bg-[var(--neutral800)] px-4 font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--neutral700)] hover:text-[var(--neutral100)]"
+                  style={{
+                    fontSize: "var(--fs-larger)",
+                    borderRadius: "var(--radius-10)",
+                  }}
+                >
+                  <span
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]"
+                    style={{ color: look.color }}
+                  >
+                    <Icon size={15} />
+                  </span>
+                  {look.label}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+
   const linkGroup = (group, expanded, onNavigate) =>
     sideNavLinks
       .filter((item) => item.group === group)
+      // একটাও মাধ্যম চালু না থাকলে "যোগাযোগ করুন" সারিটাই থাকে না
+      .filter((item) => item.key !== "contact" || contacts.length > 0)
       .map((item) =>
-        expanded ? (
+        item.key === "contact" && expanded ? (
+          contactAccordion(item)
+        ) : expanded && item.external ? (
+          /*
+           * বাইরের সাইট — অ্যাফিলিয়েট প্যানেল, হেল্প পেজ।
+           *
+           * আগে সাধারণ `Link` ছিল, তাই `/affiliate` নিজের রাউটারেই
+           * খুঁজত আর ৪০৪ এ যেত। এখন সত্যিকারের ঠিকানায় যায়।
+           */
+          <a
+            key={item.key}
+            href={externalUrl(item)}
+            target="_blank"
+            rel="noreferrer noopener"
+            onClick={onNavigate}
+            className={`${rowClass} gap-3`}
+          >
+            {icon(item.icon)}
+            {title(label(item))}
+          </a>
+        ) : expanded ? (
           <Link
             key={item.key}
             to={item.path}

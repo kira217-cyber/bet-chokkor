@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useDispatch } from "react-redux";
-import { ChevronDown, Gift } from "lucide-react";
+import { ChevronDown, Gift, Lock } from "lucide-react";
 
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
-import FormField from "../../components/FormField/FormField";
+import FormField, { PasswordInput } from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
 import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
@@ -50,12 +50,13 @@ const Register = () => {
   const { showAlert } = useAlert();
   const [params] = useSearchParams();
 
+  // লিংক দিয়ে আসা কোড — বদলানো বা মোছা যাবে না
+  const lockedReferral = Boolean((params.get("ref") || "").trim());
+
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     currency: "BDT",
     phone: "",
-    fullName: "",
-    email: "",
     username: "",
     password: "",
     confirmPassword: "",
@@ -110,7 +111,7 @@ const Register = () => {
   // ধাপ অনুযায়ী কোন কোন ঘর পূরণ হলে পরের ধাপে যাওয়া যাবে
   const stepValid = [
     isPhoneOk(form.phone),
-    form.fullName.trim() && form.username.trim().length >= 4,
+    form.username.trim().length >= 4,
     form.password.trim().length >= 6 && form.password === form.confirmPassword,
   ];
 
@@ -151,19 +152,24 @@ const Register = () => {
         countryCode: "+880",
         phone: form.phone.trim(),
         currency: form.currency,
-        firstName: form.fullName.trim(),
-        email: form.email.trim(),
         referralCode: form.referralCode.trim(),
       });
 
       dispatch(setCredentials({ user: data.user, token: data.token }));
 
-      // বোনাস পেলে সেটাই মূল খবর — মূল সাইটের মতো মডালে জানানো হয়
+      /*
+       * বোনাস পেলে সেটাই মূল খবর — মূল সাইটের মতো মডালে জানানো হয়।
+       *
+       * সার্ভার ঘরটার নাম `amount`; আগে `creditedAmount` পড়া হতো বলে
+       * টাকা ঠিকই জমত কিন্তু মডালে "undefined" লেখা উঠত।
+       */
+      const bonusAmount = Number(data.bonus?.amount || 0);
+
       await showAlert({
         type: "success",
         title: t("registerDone"),
-        message: data.bonus
-          ? `${t("registerBonusNote")}: ${data.bonus.creditedAmount}`
+        message: bonusAmount
+          ? `${t("registerBonusNote")}: ${form.currency} ${bonusAmount.toFixed(2)}`
           : "",
       });
 
@@ -416,20 +422,24 @@ const Register = () => {
 
         {step === 1 && (
           <>
-            <FormField label={t("fullName")}>
-              {textInput("fullName", t("fullNamePlaceholder"))}
-            </FormField>
-
-            <FormField label={t("email")}>
-              {textInput("email", t("emailPlaceholder"), "email")}
-            </FormField>
-
             <FormField label={t("username")}>
               {textInput("username", t("usernamePlaceholder"))}
             </FormField>
 
-            {/* রেফারেল লিংক দিয়ে এলে কোডটা আগে থেকেই বসা থাকে */}
-            <FormField label={t("referralCode")}>
+            {/*
+              * রেফারেল লিংক দিয়ে এলে কোডটা বসানো থাকে আর বদলানো যায় না।
+              *
+              * খোলা রাখলে কেউ মুছে ফেলতে পারতেন — তখন যে অ্যাফিলিয়েট
+              * তাঁকে এনেছেন তিনি আর কোনো কমিশনই পেতেন না। হাতে টাইপ করে
+              * এলে ঘরটা আগের মতোই খোলা থাকে, কারণ ওটা ঐচ্ছিক।
+              */}
+            <FormField
+              label={
+                lockedReferral
+                  ? t("referralCode")
+                  : `${t("referralCode")} (${t("optional")})`
+              }
+            >
               <div
                 className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
                 style={inputBoxStyle}
@@ -437,6 +447,7 @@ const Register = () => {
                 <input
                   type="text"
                   value={form.referralCode}
+                  readOnly={lockedReferral}
                   onChange={(event) =>
                     setForm((prev) => ({
                       ...prev,
@@ -445,9 +456,36 @@ const Register = () => {
                   }
                   placeholder={t("referralCodePlaceholder")}
                   className={inputClass}
-                  style={inputStyle}
+                  style={{
+                    ...inputStyle,
+                    ...(lockedReferral
+                      ? { color: "var(--text-secondary)", cursor: "default" }
+                      : {}),
+                  }}
                 />
+
+                {lockedReferral ? (
+                  <span
+                    className="flex shrink-0 items-center text-[var(--primary500)]"
+                    style={{ paddingInlineEnd: "calc(var(--u) * 4.267)" }}
+                    title={t("referralLockedNote")}
+                  >
+                    <Lock size={14} />
+                  </span>
+                ) : null}
               </div>
+
+              {lockedReferral ? (
+                <p
+                  className="text-[var(--text-disabled)]"
+                  style={{
+                    fontSize: "var(--fs-normal)",
+                    marginTop: "calc(var(--u) * 1.067)",
+                  }}
+                >
+                  {t("referralLockedNote")}
+                </p>
+              ) : null}
             </FormField>
           </>
         )}
@@ -455,7 +493,14 @@ const Register = () => {
         {step === 2 && (
           <>
             <FormField label={t("password")}>
-              {textInput("password", t("passwordPlaceholder"), "password")}
+              <PasswordInput
+                value={form.password}
+                onChange={update("password")}
+                placeholder={t("passwordPlaceholder")}
+                autoComplete="new-password"
+                showLabel={t("show")}
+                hideLabel={t("hide")}
+              />
             </FormField>
 
             <FormField
@@ -466,7 +511,14 @@ const Register = () => {
                   : ""
               }
             >
-              {textInput("confirmPassword", t("confirmPasswordPlaceholder"), "password")}
+              <PasswordInput
+                value={form.confirmPassword}
+                onChange={update("confirmPassword")}
+                placeholder={t("confirmPasswordPlaceholder")}
+                autoComplete="new-password"
+                showLabel={t("show")}
+                hideLabel={t("hide")}
+              />
             </FormField>
           </>
         )}

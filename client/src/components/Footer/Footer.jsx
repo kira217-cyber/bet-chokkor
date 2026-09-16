@@ -104,20 +104,35 @@ const Footer = () => {
                       isOpen ? "max-h-96" : "max-h-0"
                     }`}
                   >
-                    {group.items.map((item) => (
-                      <li key={item.path}>
-                        <Link
-                          to={item.path}
-                          className="block text-[var(--text-muted)] transition-colors hover:text-[var(--primary500)]"
-                          style={{
-                            paddingBlock: "calc(var(--u) * 2.133)",
-                            fontSize: "var(--fs-normal)",
-                          }}
-                        >
-                          {t(item.name)}
-                        </Link>
-                      </li>
-                    ))}
+                    {group.items.map((item) => {
+                      const linkClass =
+                        "block text-[var(--text-muted)] transition-colors hover:text-[var(--primary500)]";
+                      const linkStyle = {
+                        paddingBlock: "calc(var(--u) * 2.133)",
+                        fontSize: "var(--fs-normal)",
+                      };
+
+                      return (
+                        <li key={item.path}>
+                          {item.external ? (
+                            /* হেল্প পেজ আলাদা সাইট — নতুন ট্যাবে ডোমেইনে */
+                            <a
+                              href={item.href || item.path}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className={linkClass}
+                              style={linkStyle}
+                            >
+                              {t(item.name)}
+                            </a>
+                          ) : (
+                            <Link to={item.path} className={linkClass} style={linkStyle}>
+                              {t(item.name)}
+                            </Link>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               );

@@ -16,6 +16,9 @@ const EventSlider = () => {
       items={events}
       aspect="358.81 / 172.02"
       slidesPerView={[1, 3.15]}
+      /* ইভেন্ট আগে নড়ে, ফিচার্ড গেমস পরে — একসাথে নড়লে চোখে ধাক্কা লাগে */
+      autoplayDelay={4000}
+      autoplayStartDelay={0}
       renderItem={(item) => (
         <Link to="/promotion" className="block h-full">
           <img

@@ -72,9 +72,9 @@ export const bottomNavItemsAuth = [
 // সাইডবারে দুটো আলাদা গ্রুপ — মাঝে বিভাজক রেখা (মূল সাইটের মতো)
 export const sideNavLinks = [
   { key: "vip", group: "main", name: { bn: "ভিআইপি ক্লাব", en: "VIP Club" }, icon: "/assets/icons/utility/icon-crown.svg", path: "/vip" },
-  { key: "referral", group: "main", name: { bn: "রেফারেল প্রোগ্রাম", en: "Referral Program" }, icon: "/assets/icons/utility/icon-group.svg", path: "/referral" },
+  { key: "referral", group: "main", name: { bn: "রেফারেল প্রোগ্রাম", en: "Referral Program" }, icon: "/assets/icons/utility/icon-group.svg", path: "/member/referral?tab=info" },
   { key: "affiliate", group: "main", name: { bn: "অ্যাফিলিয়েট", en: "Affiliate" }, icon: "/assets/icons/utility/icon-affiliate.svg", path: "/affiliate", external: true },
-  { key: "download", group: "main", name: { bn: "অ্যাপ ডাউনলোড", en: "App Download" }, icon: "/assets/icons/utility/icon-download.svg", path: "/download" },
+  { key: "download", group: "main", name: { bn: "অ্যাপ ডাউনলোড", en: "App Download" }, icon: "/assets/icons/utility/icon-download.svg", path: "/app-download" },
   { key: "contact", group: "support", name: { bn: "যোগাযোগ করুন", en: "Contact Us" }, icon: "/assets/icons/utility/icon-phone.svg", path: "/contact" },
   { key: "help", group: "support", name: { bn: "হেল্প পেজ", en: "Help Page" }, icon: "/assets/icons/utility/icon-open-book.svg", path: "/help", external: true },
 ];
@@ -99,14 +99,21 @@ export const footerSetting = {
       title: { bn: "ফিচারসমূহ", en: "Features" },
       items: [
         { name: { bn: "প্রমোশন", en: "Promotion" }, path: "/promotion" },
-        { name: { bn: "সুপারিশ", en: "Referral" }, path: "/referral" },
-        { name: { bn: "অ্যাপ ডাউনলোড", en: "App Download" }, path: "/download" },
+        { name: { bn: "সুপারিশ", en: "Referral" }, path: "/member/referral?tab=info" },
+        { name: { bn: "অ্যাপ ডাউনলোড", en: "App Download" }, path: "/app-download" },
       ],
     },
     {
       key: "help",
       title: { bn: "হেল্প", en: "Help" },
-      items: [{ name: { bn: "হেল্প পেজ", en: "Help Page" }, path: "/help" }],
+      items: [
+        {
+          name: { bn: "হেল্প পেজ", en: "Help Page" },
+          path: "/help",
+          external: true,
+          href: import.meta.env.VITE_HELP_URL || "/help",
+        },
+      ],
     },
   ],
 

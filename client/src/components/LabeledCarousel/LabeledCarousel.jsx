@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import "swiper/css";
@@ -32,10 +33,27 @@ const NavButton = ({ label, icon, onClick }) => (
   </button>
 );
 
-const LabeledCarousel = ({ title, items, renderItem, slidesPerView, aspect }) => {
+const LabeledCarousel = ({
+  title,
+  items,
+  renderItem,
+  slidesPerView,
+  aspect,
+  autoplayDelay = 0,
+  autoplayStartDelay = 0,
+}) => {
   const swiperRef = useRef(null);
 
   if (!Array.isArray(items) || items.length === 0) return null;
+
+  /*
+   * ছবিগুলো নিজে থেকেই ঘুরবে, শেষ হলে আবার শুরু থেকে।
+   *
+   * পর্দায় যতগুলো দেখা যায় তার চেয়ে বেশি স্লাইড না থাকলে ঘোরানোর
+   * কিছুই নেই — তখন অটোপ্লে বন্ধ, নইলে swiper একই ছবি নিয়ে লাফাত।
+   */
+  const perView = Math.ceil(slidesPerView[1]);
+  const canLoop = autoplayDelay > 0 && items.length > perView;
 
   const slideNext = () => swiperRef.current?.slideNext();
   const slidePrev = () => swiperRef.current?.slidePrev();
@@ -90,7 +108,30 @@ const LabeledCarousel = ({ title, items, renderItem, slidesPerView, aspect }) =>
       <Swiper
         onSwiper={(swiper) => {
           swiperRef.current = swiper;
+
+          /*
+           * দুটো সেকশন যেন একসাথে না নড়ে।
+           *
+           * শুধু আলাদা `delay` দিলে মাঝেমধ্যে তাল মিলে যেত; তাই শুরুটাও
+           * পিছিয়ে দেওয়া হয় — একটা আগে নড়ে, অন্যটা একটু পরে।
+           */
+          if (canLoop && autoplayStartDelay > 0) {
+            swiper.autoplay?.stop();
+            setTimeout(() => swiper.autoplay?.start(), autoplayStartDelay);
+          }
         }}
+        modules={canLoop ? [Autoplay] : []}
+        loop={canLoop}
+        autoplay={
+          canLoop
+            ? {
+                delay: autoplayDelay,
+                disableOnInteraction: false,
+                // মাউস রাখলে থেমে যায় — পড়ার সময় ছবি সরে গেলে বিরক্তিকর
+                pauseOnMouseEnter: true,
+              }
+            : false
+        }
         spaceBetween={8}
         slidesPerView={slidesPerView[0]}
         breakpoints={{ 1024: { slidesPerView: slidesPerView[1] } }}

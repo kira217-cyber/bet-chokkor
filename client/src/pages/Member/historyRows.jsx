@@ -255,7 +255,7 @@ export const BetRow = ({ row, t, providerName, resultLabel }) => {
         className="bg-[var(--neutral900)]"
         style={{
           borderRadius: "var(--radius-5)",
-          fontSize: "var(--fs-small)",
+          fontSize: "var(--fs-normal)",
           marginTop: "calc(var(--u) * 2.133)",
           padding: "calc(var(--u) * 2.133)",
         }}
@@ -349,7 +349,7 @@ export const TurnoverRow = ({ row, t, providers, sourceLabel }) => {
       <div style={{ marginTop: "calc(var(--u) * 2.667)" }}>
         <div
           className="flex items-baseline justify-between text-[var(--text-muted)]"
-          style={{ fontSize: "var(--fs-small)" }}
+          style={{ fontSize: "var(--fs-normal)" }}
         >
           <span>{t("labelProgress")}</span>
           <span className="font-semibold text-[var(--primary500)]">
@@ -371,7 +371,7 @@ export const TurnoverRow = ({ row, t, providers, sourceLabel }) => {
           <p
             className="text-[var(--text-muted)]"
             style={{
-              fontSize: "var(--fs-small)",
+              fontSize: "var(--fs-normal)",
               marginBottom: "calc(var(--u) * 1.6)",
             }}
           >
@@ -380,17 +380,38 @@ export const TurnoverRow = ({ row, t, providers, sourceLabel }) => {
 
           {buckets.map((bucket) => (
             <div key={bucket.key} style={{ marginBottom: "calc(var(--u) * 1.6)" }}>
-              <div className="flex items-baseline justify-between gap-3">
+              <div className="flex items-center justify-between gap-3">
                 <span
-                  className="truncate text-[var(--text-secondary)]"
-                  style={{ fontSize: "var(--fs-small)" }}
+                  className="flex min-w-0 items-center text-[var(--text-secondary)]"
+                  style={{
+                    fontSize: "var(--fs-normal)",
+                    gap: "calc(var(--u) * 1.6)",
+                  }}
                 >
-                  {bucket.name}
+                  {bucket.logo ? (
+                    <img
+                      src={bucket.logo}
+                      alt=""
+                      loading="lazy"
+                      className="shrink-0 object-contain"
+                      style={{
+                        height: "calc(var(--u) * 5.333)",
+                        width: "calc(var(--u) * 5.333)",
+                      }}
+                      draggable="false"
+                      /* ছবি না এলে ঘরটা ফাঁকা দেখানোর চেয়ে সরিয়ে দেওয়াই ভালো */
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : null}
+
+                  <span className="truncate">{bucket.name}</span>
                 </span>
 
                 <span
                   className="shrink-0 font-semibold text-[var(--text-primary)]"
-                  style={{ fontSize: "var(--fs-small)" }}
+                  style={{ fontSize: "var(--fs-normal)" }}
                 >
                   {money(bucket.done)} / {money(bucket.quota)}
                 </span>

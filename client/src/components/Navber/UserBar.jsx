@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Eye, EyeOff, Plus, RefreshCw } from "lucide-react";
+import { BanknoteArrowDown, Eye, EyeOff, Plus, RefreshCw } from "lucide-react";
 
 import { api } from "../../api/axios";
 import { useLanguage } from "../../Context/LanguageProvider";
@@ -81,9 +81,17 @@ const UserBar = () => {
         </button>
       </div>
 
+      {/*
+        * উইথড্র — মোবাইলেও।
+        *
+        * আগে `lg:flex` ছিল, তাই ফোনে বোতামটাই থাকত না; টাকা তুলতে হলে
+        * প্রোফাইল হয়ে ঘুরে যেতে হতো। ডিপোজিটের মতোই ছোট পর্দায় শুধু
+        * আইকন, বড় পর্দায় পুরো লেখা — জায়গা কম বলে।
+        */}
       <Link
         to="/member/wallet/withdraw"
-        className="auth-btn auth-btn--secondary hidden shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110 lg:flex"
+        aria-label={t("withdrawTitle")}
+        className="auth-btn auth-btn--secondary flex shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
         style={{
           height: "calc(var(--u) * 9.067)",
           borderRadius: "var(--radius-10)",
@@ -91,7 +99,8 @@ const UserBar = () => {
           paddingInline: "calc(var(--u) * 2.667)",
         }}
       >
-        {t("withdrawTitle")}
+        <BanknoteArrowDown size={16} className="lg:hidden" />
+        <span className="hidden lg:inline">{t("withdrawTitle")}</span>
       </Link>
 
       <Link

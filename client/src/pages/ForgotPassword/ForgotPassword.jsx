@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ChevronLeft } from "lucide-react";
 
-import FormField from "../../components/FormField/FormField";
+import FormField, { PasswordInput } from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
 import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
@@ -204,20 +204,14 @@ const ForgotPassword = () => {
               <FormAlert>{error}</FormAlert>
 
               <FormField label={t("newPassword")}>
-                <div
-                  className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
-                  style={inputBoxStyle}
-                >
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder={t("newPasswordPlaceholder")}
-                    className={inputClass}
-                    style={inputStyle}
-                  />
-                </div>
+                <PasswordInput
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder={t("newPasswordPlaceholder")}
+                  autoComplete="new-password"
+                  showLabel={t("show")}
+                  hideLabel={t("hide")}
+                />
               </FormField>
 
               <FormField
@@ -226,20 +220,14 @@ const ForgotPassword = () => {
                   confirm && confirm !== password ? t("passwordMismatch") : ""
                 }
               >
-                <div
-                  className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
-                  style={inputBoxStyle}
-                >
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    value={confirm}
-                    onChange={(event) => setConfirm(event.target.value)}
-                    placeholder={t("confirmPasswordPlaceholder")}
-                    className={inputClass}
-                    style={inputStyle}
-                  />
-                </div>
+                <PasswordInput
+                  value={confirm}
+                  onChange={(event) => setConfirm(event.target.value)}
+                  placeholder={t("confirmPasswordPlaceholder")}
+                  autoComplete="new-password"
+                  showLabel={t("show")}
+                  hideLabel={t("hide")}
+                />
               </FormField>
 
               <button

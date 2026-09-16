@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Banknote, Loader2, Plus, Trash2 } from "lucide-react";
+import { BadgeCheck, Banknote, Loader2, Plus, Trash2 } from "lucide-react";
 
 import MemberPage from "../Deposit/MemberPage";
 import FormField from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
+import AmountPicker from "../../components/AmountPicker/AmountPicker";
 import OtpStep from "../../components/OtpStep/OtpStep";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
@@ -308,11 +309,76 @@ const Withdraw = () => {
         </div>
       ) : blocked ? (
         <div className="flex flex-col" style={{ gap: "calc(var(--u) * 3.2)" }}>
-          <FormAlert type="warning">
-            {eligibility.reason === "pendingWithdraw"
-              ? `${t("pendingWithdrawTitle")} — ${t("pendingWithdrawText")}`
-              : `${t("turnoverLeftTitle")} — ${t("turnoverLeftText")} ${eligibility.remaining}`}
-          </FormAlert>
+          {/*
+            * পরিচয় যাচাই আটকালে আলাদা কার্ড — শুধু "পারবেন না" বললে
+            * কোথায় গিয়ে কী করতে হবে বোঝা যেত না, তাই সরাসরি যাওয়ার
+            * বোতামও থাকে।
+            */}
+          {eligibility.reason === "verification" ? (
+            <div
+              className="flex flex-col items-center text-center"
+              style={{
+                borderRadius: "var(--radius-10)",
+                background: "var(--neutral900)",
+                padding: "calc(var(--u) * 6.4) calc(var(--u) * 4.267)",
+                gap: "calc(var(--u) * 3.2)",
+              }}
+            >
+              <span
+                className="flex items-center justify-center rounded-full"
+                style={{
+                  height: "calc(var(--u) * 18.133)",
+                  width: "calc(var(--u) * 18.133)",
+                  background:
+                    "color-mix(in srgb, var(--status-pending), transparent 88%)",
+                  color: "var(--status-pending)",
+                }}
+              >
+                <BadgeCheck size={34} />
+              </span>
+
+              <p
+                className="font-bold text-[var(--neutral100)]"
+                style={{ fontSize: "var(--fs-body)" }}
+              >
+                {eligibility.verificationStatus === "pending"
+                  ? t("verifyPendingTitle")
+                  : t("withdrawNeedVerifyTitle")}
+              </p>
+
+              <p
+                className="leading-relaxed text-[var(--text-secondary)]"
+                style={{ fontSize: "var(--fs-larger)" }}
+              >
+                {eligibility.verificationStatus === "pending"
+                  ? t("verifyPendingText")
+                  : t("withdrawNeedVerifyText")}
+              </p>
+
+              {eligibility.verificationStatus !== "pending" ? (
+                <button
+                  type="button"
+                  onClick={() => navigate("/member/verification")}
+                  className="flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] hover:brightness-105"
+                  style={{
+                    height: "calc(var(--u) * 11.2)",
+                    borderRadius: "var(--radius-10)",
+                    fontSize: "var(--fs-larger)",
+                    backgroundColor: "var(--primary500)",
+                    color: "var(--neutral900)",
+                  }}
+                >
+                  {t("goToVerification")}
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <FormAlert type="warning">
+              {eligibility.reason === "pendingWithdraw"
+                ? `${t("pendingWithdrawTitle")} — ${t("pendingWithdrawText")}`
+                : `${t("turnoverLeftTitle")} — ${t("turnoverLeftText")} ${eligibility.remaining}`}
+            </FormAlert>
+          )}
 
           {/* চলতি শর্তগুলোর অগ্রগতি */}
           {(eligibility.turnovers || []).map((item, index) => (
@@ -635,28 +701,15 @@ const Withdraw = () => {
                 : ""
             }
           >
-            <div
-              className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
-              style={{
-                height: "calc(var(--u) * 13.333)",
-                borderRadius: "var(--radius-10)",
-              }}
-            >
-              <input
-                type="text"
-                inputMode="numeric"
-                value={amount}
-                onChange={(event) =>
-                  setAmount(event.target.value.replace(/[^\d.]/g, ""))
-                }
-                placeholder={t("amountPlaceholder")}
-                className="h-full w-full bg-transparent text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
-                style={{
-                  fontSize: "var(--fs-larger)",
-                  paddingInline: "calc(var(--u) * 4.267)",
-                }}
-              />
-            </div>
+            <AmountPicker
+              value={amount}
+              onChange={setAmount}
+              placeholder={t("amountPlaceholder")}
+              currency={user?.currency || "BDT"}
+              min={min}
+              /* ব্যালেন্সের বেশি অঙ্কের বোতাম দেখিয়ে লাভ নেই */
+              max={Math.min(max || balance, balance)}
+            />
           </FormField>
 
           <div

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { Copy } from "lucide-react";
 
 import MemberPage from "./MemberPage";
 import FormField from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
+import AmountPicker from "../../components/AmountPicker/AmountPicker";
+import { selectUser } from "../../features/auth/authSelectors";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
 import { authError } from "../../features/auth/authApi";
@@ -54,6 +57,7 @@ const Line = ({ label, value, strong }) => (
  * পর যেন কিছু অবাক করা না থাকে।
  */
 const DepositForm = ({ method, channel, promo, contact, onBack }) => {
+  const user = useSelector(selectUser);
   const { t, tv } = useLanguage();
   const navigate = useNavigate();
   const { showAlert } = useAlert();
@@ -202,22 +206,14 @@ const DepositForm = ({ method, channel, promo, contact, onBack }) => {
               : ""
           }
         >
-          <div
-            className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
-            style={boxStyle}
-          >
-            <input
-              type="text"
-              inputMode="numeric"
-              value={amount}
-              onChange={(event) =>
-                setAmount(event.target.value.replace(/[^\d.]/g, ""))
-              }
-              placeholder={t("amountPlaceholder")}
-              className={inputClass}
-              style={inputStyle}
-            />
-          </div>
+          <AmountPicker
+            value={amount}
+            onChange={setAmount}
+            placeholder={t("amountPlaceholder")}
+            currency={user?.currency || "BDT"}
+            min={min}
+            max={max}
+          />
         </FormField>
 
         {/* ── অ্যাডমিনের চাওয়া তথ্য ── */}
