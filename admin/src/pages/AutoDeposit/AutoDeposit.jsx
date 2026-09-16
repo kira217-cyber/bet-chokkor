@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import SecretInput from "../../components/SecretInput/SecretInput";
 import ProviderPicker from "../../components/ProviderPicker/ProviderPicker";
 
 const fetchSetting = async () => {
@@ -246,14 +247,12 @@ const AutoDeposit = () => {
               <label className="ad-label" htmlFor="ad-token">
                 Business token
               </label>
-              <input
+              <SecretInput
                 id="ad-token"
-                type="password"
                 autoComplete="off"
                 placeholder={hasToken ? "Leave blank to keep the current one" : "Paste the token"}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                className="ad-input"
               />
               <p className="mt-1 text-[12px] text-[var(--text-disabled)]">
                 Stored write-only — it is never sent back to this page.

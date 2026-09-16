@@ -22,6 +22,13 @@ const TABS = [
   { key: "inactive", label: "Disabled" },
 ];
 
+/* অ্যাফিলিয়েটের বাড়তি ফিল্টার — কারা এখনো অনুমোদনের অপেক্ষায় */
+const AFFILIATE_TABS = [
+  ...TABS,
+  { key: "pending", label: "Pending" },
+  { key: "rejected", label: "Rejected" },
+];
+
 /**
  * প্লেয়ার ও অ্যাফিলিয়েটের তালিকা — `kind` দিয়ে কোনটা ঠিক হয়।
  *
@@ -100,11 +107,19 @@ const UserList = ({ kind, title, subtitle }) => {
         </button>
       </div>
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+      <div
+        className={`mb-4 grid gap-3 ${
+          isAffiliate ? "sm:grid-cols-4" : "sm:grid-cols-3"
+        }`}
+      >
         {[
           ["Total", stats.total, "var(--primary500)"],
           ["Active", stats.active, "var(--status-success)"],
           ["Disabled", stats.inactive, "var(--status-danger)"],
+          // অপেক্ষায় থাকা আবেদন চোখে না পড়লে কেউ দিনের পর দিন আটকে থাকতেন
+          ...(isAffiliate
+            ? [["Waiting review", stats.pending, "var(--status-pending)"]]
+            : []),
         ].map(([label, value, color]) => (
           <div key={label} className="ad-card py-4">
             <p className="text-[13px] text-[var(--text-muted)]">{label}</p>
@@ -117,7 +132,7 @@ const UserList = ({ kind, title, subtitle }) => {
 
       <div className="ad-card mb-4 flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap gap-2">
-          {TABS.map((item) => (
+          {(isAffiliate ? AFFILIATE_TABS : TABS).map((item) => (
             <button
               key={item.key}
               type="button"

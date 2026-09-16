@@ -18,8 +18,12 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const imageUrl = (url) =>
   !url ? "" : url.startsWith("http") ? url : `${API_URL}${url}`;
 
-const fetchRows = async (status, q, page) => {
-  const params = new URLSearchParams({ page: String(page), limit: "20" });
+const fetchRows = async (status, q, page, role) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: "20",
+    role,
+  });
 
   if (status !== "all") params.set("status", status);
   if (q) params.set("q", q);
@@ -60,7 +64,10 @@ const DOC_LABEL = {
  * কিনা। শুরুতে দুটোই বন্ধ — চালু করার দিনই পুরোনো সব ব্যবহারকারী যেন
  * আটকে না যান।
  */
-const Verification = () => {
+const Verification = ({ kind = "users" }) => {
+  const affiliate = kind === "affiliates";
+  const role = affiliate ? "aff-user" : "user";
+
   const [tab, setTab] = useState("pending");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -86,7 +93,7 @@ const Verification = () => {
     let alive = true;
 
     const timer = setTimeout(() => {
-      fetchRows(tab, search, page)
+      fetchRows(tab, search, page, role)
         .then((data) => {
           if (!alive) return;
 
@@ -104,12 +111,12 @@ const Verification = () => {
       alive = false;
       clearTimeout(timer);
     };
-  }, [tab, search, page]);
+  }, [tab, search, page, role]);
 
   const load = async () => {
     try {
       setLoading(true);
-      const data = await fetchRows(tab, search, page);
+      const data = await fetchRows(tab, search, page, role);
 
       setRows(data.rows || []);
       setMeta(data.meta || {});
@@ -167,10 +174,11 @@ const Verification = () => {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="ad-title text-[26px] lg:text-[30px]">
-            Identity Verification
+            {affiliate ? "Affiliate Verification" : "Identity Verification"}
           </h1>
           <p className="mt-1 text-[14px] text-[var(--text-muted)]">
-            Check the documents players send in, then approve or reject.
+            Check the documents {affiliate ? "affiliates" : "players"} send in,
+            then approve or reject.
           </p>
         </div>
 
@@ -198,15 +206,19 @@ const Verification = () => {
             </h2>
 
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-              Both are off to begin with — turning one on immediately blocks
-              every player who has not been verified yet.
+              {affiliate
+                ? "Affiliates do not deposit — they take commission out, so only the withdraw gate applies. Turning it on immediately blocks every affiliate who has not been verified yet."
+                : "Both are off to begin with — turning one on immediately blocks every player who has not been verified yet."}
             </p>
 
             <div className="mt-4 flex flex-wrap gap-3">
-              {[
-                ["requireForDeposit", "Before deposit"],
-                ["requireForWithdraw", "Before withdraw"],
-              ].map(([key, label]) => {
+              {(affiliate
+                ? [["affiliateRequireForWithdraw", "Before withdraw"]]
+                : [
+                    ["requireForDeposit", "Before deposit"],
+                    ["requireForWithdraw", "Before withdraw"],
+                  ]
+              ).map(([key, label]) => {
                 const on = Boolean(setting?.[key]);
 
                 return (

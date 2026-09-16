@@ -9,6 +9,40 @@ const money = (value) => Number(value || 0).toFixed(2);
  * পার্থক্য শুধু কমিশনের কলামগুলো, তাই `showCommission` দিয়ে সেটুকু
  * বাড়ানো-কমানো হয়; দুবার একই টেবিল লেখার দরকার পড়ে না।
  */
+/**
+ * অবস্থার চিপ।
+ *
+ * অ্যাফিলিয়েটের আবেদন এখনো অনুমোদিত না হলে সেটাই দেখানো হয়, `isActive`
+ * নয় — নতুন অ্যাকাউন্টে `isActive` সত্যি থাকে, ফলে অপেক্ষায় থাকা
+ * আবেদনও "Active" দেখাত আর অ্যাডমিন ভাবতেন কাজ শেষ।
+ */
+const StatusChip = ({ row }) => {
+  const pendingReview =
+    row.role === "aff-user" &&
+    row.affiliateStatus &&
+    row.affiliateStatus !== "approved";
+
+  const look = !pendingReview
+    ? row.isActive !== false
+      ? { label: "Active", color: "var(--status-success)" }
+      : { label: "Disabled", color: "var(--status-danger)" }
+    : row.affiliateStatus === "rejected"
+      ? { label: "Rejected", color: "var(--status-danger)" }
+      : { label: "Pending", color: "var(--status-pending)" };
+
+  return (
+    <span
+      className="rounded-full px-2 py-[2px] text-[11px] font-bold"
+      style={{
+        background: `color-mix(in srgb, ${look.color}, transparent 88%)`,
+        color: look.color,
+      }}
+    >
+      {look.label}
+    </span>
+  );
+};
+
 const UserTable = ({ rows, loading, showCommission, onOpen }) => {
   if (loading) {
     return (
@@ -124,21 +158,7 @@ const UserTable = ({ rows, loading, showCommission, onOpen }) => {
                 </td>
 
                 <td className="px-4 py-3">
-                  <span
-                    className="rounded-full px-2 py-[2px] text-[11px] font-bold"
-                    style={{
-                      background:
-                        row.isActive !== false
-                          ? "color-mix(in srgb, var(--status-success), transparent 88%)"
-                          : "color-mix(in srgb, var(--status-danger), transparent 88%)",
-                      color:
-                        row.isActive !== false
-                          ? "var(--status-success)"
-                          : "var(--status-danger)",
-                    }}
-                  >
-                    {row.isActive !== false ? "Active" : "Disabled"}
-                  </span>
+                  <StatusChip row={row} />
                 </td>
 
                 <td className="px-4 py-3 text-right">

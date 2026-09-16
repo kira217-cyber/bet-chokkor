@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import SecretInput from "../../components/SecretInput/SecretInput";
 
 const fetchSetting = async () => {
   const { data } = await api.get("/api/otp-setting");
@@ -231,14 +232,13 @@ const OtpSetting = () => {
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <input
+            <SecretInput
               id="otp-key"
-              type="password"
               autoComplete="off"
               placeholder="Paste the o-sms API key"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              className="ad-input flex-1"
+              className="flex-1"
             />
 
             <button

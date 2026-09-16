@@ -25,6 +25,8 @@ import {
   Banknote,
   Handshake,
   Landmark,
+  Phone,
+  Smartphone,
   ChevronDown,
   User,
   Menu,
@@ -61,6 +63,8 @@ const ICONS = {
   Banknote,
   Handshake,
   Landmark,
+  Phone,
+  Smartphone,
   User,
 };
 

@@ -5,6 +5,9 @@ import {
   ArrowLeft,
   BadgeCheck,
   BanknoteArrowDown,
+  CircleCheck,
+  CircleX,
+  Clock,
   Dices,
   Eye,
   EyeOff,
@@ -245,6 +248,47 @@ const UserDetails = ({ kind }) => {
     }
   };
 
+  /**
+   * অ্যাফিলিয়েটের আবেদন — অনুমোদন বা বাতিল।
+   *
+   * অনুমোদনের সময় ফর্মে বসানো কমিশনের হারগুলোও একসাথে পাঠানো হয়,
+   * তাই আলাদা করে আগে সেভ করতে হয় না। চারটে হারই শূন্য থাকলে সার্ভার
+   * অনুমোদন আটকে দেয় — নইলে হার ছাড়াই অনুমোদন হয়ে যেত।
+   */
+  const handleReview = async (status) => {
+    let note = "";
+
+    if (status === "rejected") {
+      note = window.prompt("Why is it rejected? The affiliate sees this.") || "";
+
+      if (!note.trim()) return;
+    }
+
+    try {
+      setBusy(status);
+
+      await api.patch(`/api/admin/manage/${id}/affiliate-status`, {
+        status,
+        note: note.trim(),
+        ...(status === "approved"
+          ? {
+              referCommission: Number(draft.referCommission) || 0,
+              depositCommission: Number(draft.depositCommission) || 0,
+              gameWinCommission: Number(draft.gameWinCommission) || 0,
+              gameLossCommission: Number(draft.gameLossCommission) || 0,
+            }
+          : {}),
+      });
+
+      toast.success(status === "approved" ? "Affiliate approved" : "Affiliate rejected");
+      await load(true);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Could not save");
+    } finally {
+      setBusy("");
+    }
+  };
+
   const handleRole = async () => {
     const next = isAffiliate ? "user" : "aff-user";
 
@@ -302,6 +346,9 @@ const UserDetails = ({ kind }) => {
     Number(user.gameLossCommissionBalance || 0) -
     Number(user.gameWinCommissionBalance || 0);
 
+  const reviewPending =
+    isAffiliate && user.affiliateStatus && user.affiliateStatus !== "approved";
+
   const stats = [
     { label: "Main balance", value: `${money(user.balance)} ${user.currency}`, Icon: Wallet },
     ...(isAffiliate
@@ -310,8 +357,20 @@ const UserDetails = ({ kind }) => {
     { label: "Referrals", value: user.referralCount || 0, Icon: UsersIcon },
     {
       label: "Status",
-      value: user.isActive !== false ? "Active" : "Disabled",
-      Icon: user.isActive !== false ? UserCheck : UserX,
+      /*
+       * আবেদন অনুমোদিত না হলে সেটাই দেখানো হয়।
+       *
+       * নতুন অ্যাকাউন্টে `isActive` সত্যি থাকে, তাই অপেক্ষায় থাকা
+       * আবেদনও "Active" দেখাত — অ্যাডমিন ভাবতেন কাজ শেষ।
+       */
+      value: reviewPending
+        ? user.affiliateStatus === "rejected"
+          ? "Rejected"
+          : "Pending review"
+        : user.isActive !== false
+          ? "Active"
+          : "Disabled",
+      Icon: reviewPending || user.isActive === false ? UserX : UserCheck,
     },
   ];
 
@@ -388,6 +447,95 @@ const UserDetails = ({ kind }) => {
           );
         })}
       </div>
+
+      {/* ── আবেদনের অবস্থা ── */}
+      {isAffiliate && user?.affiliateStatus !== "approved" ? (
+        <div
+          className="ad-card mt-4"
+          style={{
+            borderColor:
+              user?.affiliateStatus === "rejected"
+                ? "color-mix(in srgb, var(--status-danger), transparent 60%)"
+                : "color-mix(in srgb, var(--status-pending), transparent 60%)",
+          }}
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px]"
+                style={{
+                  background:
+                    user?.affiliateStatus === "rejected"
+                      ? "color-mix(in srgb, var(--status-danger), transparent 88%)"
+                      : "color-mix(in srgb, var(--status-pending), transparent 88%)",
+                  color:
+                    user?.affiliateStatus === "rejected"
+                      ? "var(--status-danger)"
+                      : "var(--status-pending)",
+                }}
+              >
+                {user?.affiliateStatus === "rejected" ? (
+                  <CircleX size={20} />
+                ) : (
+                  <Clock size={20} />
+                )}
+              </span>
+
+              <div>
+                <p className="text-[16px] font-extrabold text-[var(--neutral100)]">
+                  {user?.affiliateStatus === "rejected"
+                    ? "Application rejected"
+                    : "Waiting for your review"}
+                </p>
+
+                <p className="mt-1 max-w-[520px] text-[13px] text-[var(--text-muted)]">
+                  They cannot log in yet. Set the commission rates below, then
+                  approve — approving with every rate at zero is refused, because
+                  they would bring players in and earn nothing.
+                </p>
+
+                {user?.affiliateNote ? (
+                  <p className="mt-2 text-[13px] text-[var(--text-secondary)]">
+                    Note: {user.affiliateNote}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={Boolean(busy)}
+                onClick={() => handleReview("approved")}
+                className="ad-btn ad-btn--primary ad-btn--sm"
+              >
+                {busy === "approved" ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <CircleCheck size={15} />
+                )}
+                Approve
+              </button>
+
+              {user?.affiliateStatus === "pending" ? (
+                <button
+                  type="button"
+                  disabled={Boolean(busy)}
+                  onClick={() => handleReview("rejected")}
+                  className="ad-btn ad-btn--danger ad-btn--sm"
+                >
+                  {busy === "rejected" ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <CircleX size={15} />
+                  )}
+                  Reject
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <form onSubmit={handleSave}>
         <Section title="Editable user information">

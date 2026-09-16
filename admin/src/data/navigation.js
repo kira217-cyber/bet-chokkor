@@ -44,6 +44,8 @@ export const navItems = [
     ],
   },
 
+  { key: "contact-links", path: "/contact-links", label: "Contact Links", icon: "Phone", motherOnly: true },
+  { key: "app-download", path: "/app-download", label: "App Download", icon: "Smartphone", motherOnly: true },
   { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
 
   { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
@@ -167,6 +169,14 @@ export const navItems = [
   },
 
   {
+    key: "affiliate-verification",
+    path: "/affiliate-verification",
+    label: "Affiliate Verification",
+    icon: "UserRoundCheck",
+    perm: "affiliate-verification",
+  },
+
+  {
     key: "game",
     label: "Game",
     icon: "Gamepad2",
@@ -202,6 +212,11 @@ export const allPermissions = [
   { key: "users", label: "Users", path: "/users" },
   { key: "game-history", label: "Game History", path: "/game-history" },
   { key: "verification", label: "Verification", path: "/verification" },
+  {
+    key: "affiliate-verification",
+    label: "Affiliate Verification",
+    path: "/affiliate-verification",
+  },
   {
     key: "withdraw-requests",
     label: "Withdraw Requests",

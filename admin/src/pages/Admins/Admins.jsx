@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { api } from "../../api/axios";
+import SecretInput from "../../components/SecretInput/SecretInput";
 import { allPermissions, roleLabels } from "../../data/navigation";
 import { selectAdmin } from "../../features/auth/authSelectors";
 
@@ -448,8 +449,7 @@ const Admins = () => {
 
                       <div>
                         <label className="ad-label">New password</label>
-                        <input
-                          type="password"
+                        <SecretInput
                           value={edit.newPassword}
                           onChange={(event) =>
                             setEdit((prev) => ({
@@ -458,7 +458,7 @@ const Admins = () => {
                             }))
                           }
                           placeholder="Leave empty to keep current"
-                          className="ad-input !bg-[var(--neutral900)]"
+                          className="!bg-[var(--neutral900)]"
                         />
                       </div>
 

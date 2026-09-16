@@ -7,11 +7,14 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Profile from "../pages/Profile/Profile";
 import Admins from "../pages/Admins/Admins";
 import Verification from "../pages/Verification/Verification";
+import AffiliateVerification from "../pages/Verification/AffiliateVerification";
 import Referral from "../pages/Referral/Referral";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
 import GameLaunchKey from "../pages/GameLaunchKey/GameLaunchKey";
 import GameHistory from "../pages/GameHistory/GameHistory";
 import Maintenance from "../pages/Maintenance/Maintenance";
+import ContactLinks from "../pages/ContactLinks/ContactLinks";
+import AppDownload from "../pages/AppDownload/AppDownload";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
 import Users from "../pages/Users/Users";
 import Affiliates from "../pages/Users/Affiliates";
@@ -51,6 +54,22 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <Admins />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "contact-links",
+        element: (
+          <PrivateRoute motherOnly>
+            <ContactLinks />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "app-download",
+        element: (
+          <PrivateRoute motherOnly>
+            <AppDownload />
           </PrivateRoute>
         ),
       },
@@ -144,6 +163,10 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "verification", element: <Verification /> },
+      {
+        path: "affiliate-verification",
+        element: <AffiliateVerification />,
+      },
       {
         path: "referral",
         element: (
