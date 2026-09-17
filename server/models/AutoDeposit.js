@@ -98,7 +98,21 @@ const autoDepositSchema = new Schema(
     },
 
     transactionId: { type: String, default: "", trim: true },
+    /** কোন মাধ্যমে টাকা এসেছে — গেটওয়ে webhook এর `bank` ফিল্ড
+        (bkash / nagad / rocket / upay / bank / crypto) */
     bank: { type: String, default: "", trim: true },
+
+    /** গেটওয়ের পেমেন্ট সেশন কোড ও প্রমাণের লিংক — webhook থেকে */
+    sessionCode: { type: String, default: "", trim: true },
+    footprint: { type: String, default: "", trim: true },
+
+    /** Bank/Crypto ম্যানুয়ালি অ্যাডমিন নিশ্চিত করলে কে করেছে */
+    reviewedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Admin",
+      default: null,
+    },
+    reviewNote: { type: String, default: "", trim: true },
 
     paidAt: { type: Date, default: null },
 

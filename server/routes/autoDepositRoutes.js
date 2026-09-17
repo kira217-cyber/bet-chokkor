@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 
+import upload from "../config/multer.js";
 import AutoDepositToken from "../models/AutoDepositToken.js";
 import AutoDeposit from "../models/AutoDeposit.js";
 import TurnOver from "../models/TurnOver.js";
@@ -39,6 +40,25 @@ const cleanProviders = (list) => {
       percent: Math.min(100, Math.max(0, num(item?.percent ?? 100))),
     }))
     .filter((item) => item.providerCode);
+};
+
+/** অ্যাডমিন থেকে পাঠানো পেমেন্ট মাধ্যমের তালিকা পরিষ্কার করা */
+const cleanMethods = (list) => {
+  if (!Array.isArray(list)) return null;
+
+  return list
+    .map((item, index) => ({
+      ...(item?._id ? { _id: item._id } : {}),
+      code: text(item?.code).toLowerCase(),
+      name: langText(item?.name),
+      logoUrl: text(item?.logoUrl),
+      active: item?.active !== false,
+      manual: Boolean(item?.manual),
+      order: Math.max(0, num(item?.order ?? index)),
+      minAmount: Math.max(0, num(item?.minAmount)),
+      maxAmount: Math.max(0, num(item?.maxAmount)),
+    }))
+    .filter((item) => item.code);
 };
 
 /** বেছে নেওয়া বোনাস থেকে টাকার হিসাব */
@@ -100,6 +120,19 @@ router.get("/status", async (req, res) => {
       active: ready,
       minAmount: setting.minAmount,
       maxAmount: setting.maxAmount,
+      methods: ready
+        ? (setting.methods || [])
+            .filter((method) => method.active !== false)
+            .sort((a, b) => num(a.order) - num(b.order))
+            .map((method) => ({
+              code: method.code,
+              name: method.name,
+              logoUrl: method.logoUrl,
+              manual: method.manual,
+              minAmount: method.minAmount,
+              maxAmount: method.maxAmount,
+            }))
+        : [],
       bonuses: ready
         ? (setting.bonuses || [])
             .filter((bonus) => bonus.isActive !== false)
@@ -327,6 +360,9 @@ router.put(
         setting.maxAmount = Math.max(0, num(body.maxAmount));
       }
 
+      const methods = cleanMethods(body.methods);
+      if (methods) setting.methods = methods;
+
       if (Array.isArray(body.bonuses)) {
         const bonuses = body.bonuses.map((item, index) => ({
           ...(item?._id ? { _id: item._id } : {}),
@@ -362,6 +398,28 @@ router.put(
     } catch (error) {
       return errorResponse(res, error.message, 500);
     }
+  },
+);
+
+/**
+ * মাধ্যমের লোগো আপলোড।
+ *
+ * মাধ্যমগুলো একটা সেটিং ডকুমেন্টের ভিতরে অ্যারে হিসেবে থাকে, তাই ছবিটা
+ * আলাদা করে আপলোড করে ফেরত আসা `/uploads/...` পথটা মাধ্যমের logoUrl এ
+ * বসিয়ে পুরো সেটিং সেভ করা হয় — ম্যানুয়াল ডিপোজিট মেথডের মতোই।
+ */
+router.post(
+  "/upload-logo",
+  protectAdmin,
+  requireMother,
+  requireWrite,
+  upload.single("logo"),
+  (req, res) => {
+    if (!req.file) return errorResponse(res, "Choose an image", 400);
+
+    return successResponse(res, "Logo uploaded", {
+      logoUrl: `/uploads/${req.file.filename}`,
+    });
   },
 );
 
@@ -405,96 +463,206 @@ router.get("/deposits/admin", protectAdmin, async (req, res) => {
 });
 
 /**
- * গেটওয়ের নিশ্চিতকরণ।
+ * একটা PAID ডিপোজিট থেকে টাকা যোগ, অ্যাফিলিয়েট কমিশন ও টার্নওভার বসানো।
  *
- * একই নিশ্চিতকরণ একাধিকবার আসতে পারে, তাই `balanceAdded: false` শর্তে
- * atomic দখল নিয়েই তবে টাকা যোগ হয় — দ্বিতীয়বার এলে কিছুই ঘটে না।
+ * `balanceAdded: false` শর্তে atomic দখল নিয়েই টাকা যোগ হয়, তাই একই
+ * ডিপোজিট দুবার confirm হলেও (webhook + ম্যানুয়াল, বা webhook দুবার)
+ * টাকা একবারই ঢোকে। webhook আর অ্যাডমিন ম্যানুয়াল confirm — দুই জায়গা
+ * থেকেই এটা ব্যবহার হয়।
+ */
+const creditDeposit = async (invoiceNumber, patch = {}) => {
+  const deposit = await AutoDeposit.findOneAndUpdate(
+    { invoiceNumber, balanceAdded: false },
+    {
+      $set: {
+        status: "PAID",
+        balanceAdded: true,
+        paidAt: new Date(),
+        ...patch,
+      },
+    },
+    { returnDocument: "after" },
+  );
+
+  // আগেই জমা হয়ে গেছে — কিছু করার নেই
+  if (!deposit) return null;
+
+  const user = await User.findById(deposit.user);
+
+  if (user) {
+    user.balance = money(num(user.balance) + num(deposit.calc?.creditedAmount));
+    await user.save();
+  }
+
+  const commission = deposit.calc?.affiliateDepositCommission || {};
+  const commissionAmount = money(commission.commissionAmount);
+
+  if (commissionAmount > 0 && commission.affiliatorId) {
+    await User.updateOne(
+      { _id: commission.affiliatorId },
+      { $inc: { depositCommissionBalance: commissionAmount } },
+    ).catch(() => {});
+  }
+
+  const targetTurnover = money(deposit.calc?.targetTurnover);
+
+  if (targetTurnover > 0) {
+    await TurnOver.findOneAndUpdate(
+      {
+        user: deposit.user,
+        sourceType: "auto-deposit",
+        sourceId: deposit._id,
+      },
+      {
+        user: deposit.user,
+        sourceType: "auto-deposit",
+        sourceId: deposit._id,
+        title: `Auto deposit ${deposit.amount}`,
+        required: targetTurnover,
+        creditedAmount: money(deposit.calc?.creditedAmount),
+        status: "running",
+        eligibleProviders: deposit.selectedBonus?.eligibleProviders || [],
+      },
+      { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+    );
+  }
+
+  return deposit;
+};
+
+/**
+ * গেটওয়ের নিশ্চিতকরণ (OraclePay webhook)।
+ *
+ * ডকুমেন্টেশন অনুযায়ী payload snake_case: `status` (COMPLETED / PENDING /
+ * REJECTED), `invoice_number`, `transaction_id`, `session_code`, `bank`,
+ * `footprint`। webhook এ কোনো টোকেন/সিগনেচার আসে না, তাই নিরাপত্তা হয়:
+ * invoice_number টা আমাদের তৈরি একটা ডিপোজিটের সাথে মেলে কিনা + অঙ্ক
+ * মেলে কিনা দেখে। অজানা invoice বা অঙ্ক না মিললে বাতিল।
+ *
+ * COMPLETED → টাকা ঢোকে। PENDING (Bank/Crypto) → রেকর্ড হয়ে ঝুলে থাকে,
+ * অ্যাডমিন যাচাই করে confirm করে। REJECTED → FAILED।
  */
 router.post("/webhook", async (req, res) => {
   try {
-    const setting = await AutoDepositToken.current();
+    const invoiceNumber = text(req.body?.invoice_number);
+    const status = text(req.body?.status).toUpperCase();
 
-    const token = text(req.headers["x-auth-token"] || req.body?.token);
-
-    if (!setting.businessToken || token !== setting.businessToken) {
-      return errorResponse(res, "Invalid token", 401);
+    if (!invoiceNumber) {
+      return errorResponse(res, "invoice_number is required", 400);
     }
 
-    const invoiceNumber = text(req.body?.invoiceNumber);
-    const paid = text(req.body?.status).toUpperCase() === "PAID";
+    const existing = await AutoDeposit.findOne({ invoiceNumber });
 
-    if (!invoiceNumber) return errorResponse(res, "invoiceNumber is required", 400);
+    // অজানা ইনভয়েস — আমাদের তৈরি নয়, ফেলে দেওয়া হয়
+    if (!existing) return errorResponse(res, "Unknown invoice", 404);
 
-    if (!paid) {
+    // অঙ্ক মেলানো — জালিয়াতি ঠেকাতে
+    const webhookAmount = money(num(req.body?.amount));
+    if (webhookAmount > 0 && webhookAmount !== money(existing.amount)) {
+      return errorResponse(res, "Amount mismatch", 400);
+    }
+
+    const info = {
+      transactionId: text(req.body?.transaction_id),
+      bank: text(req.body?.bank),
+      sessionCode: text(req.body?.session_code),
+      footprint: text(req.body?.footprint),
+    };
+
+    if (status === "REJECTED") {
       await AutoDeposit.updateOne(
         { invoiceNumber, status: "PENDING" },
-        { $set: { status: "FAILED" } },
+        { $set: { status: "FAILED", ...info } },
       );
 
       return successResponse(res, "Marked failed");
     }
 
-    const deposit = await AutoDeposit.findOneAndUpdate(
-      { invoiceNumber, balanceAdded: false },
-      {
-        $set: {
-          status: "PAID",
-          balanceAdded: true,
-          paidAt: new Date(),
-          transactionId: text(req.body?.transactionId),
-          bank: text(req.body?.bank),
-        },
-      },
-      { returnDocument: "after" },
-    );
-
-    // আগেই জমা হয়ে গেছে — দ্বিতীয় নিশ্চিতকরণে কিছু করার নেই
-    if (!deposit) return successResponse(res, "Already handled");
-
-    const user = await User.findById(deposit.user);
-
-    if (user) {
-      user.balance = money(num(user.balance) + num(deposit.calc?.creditedAmount));
-      await user.save();
-    }
-
-    const commission = deposit.calc?.affiliateDepositCommission || {};
-    const commissionAmount = money(commission.commissionAmount);
-
-    if (commissionAmount > 0 && commission.affiliatorId) {
-      await User.updateOne(
-        { _id: commission.affiliatorId },
-        { $inc: { depositCommissionBalance: commissionAmount } },
-      ).catch(() => {});
-    }
-
-    const targetTurnover = money(deposit.calc?.targetTurnover);
-
-    if (targetTurnover > 0) {
-      await TurnOver.findOneAndUpdate(
-        {
-          user: deposit.user,
-          sourceType: "auto-deposit",
-          sourceId: deposit._id,
-        },
-        {
-          user: deposit.user,
-          sourceType: "auto-deposit",
-          sourceId: deposit._id,
-          title: `Auto deposit ${deposit.amount}`,
-          required: targetTurnover,
-          creditedAmount: money(deposit.calc?.creditedAmount),
-          status: "running",
-          eligibleProviders: deposit.selectedBonus?.eligibleProviders || [],
-        },
-        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true },
+    if (status === "PENDING") {
+      // Bank/Crypto — টাকা এখনো ঢুকবে না, শুধু তথ্য বসিয়ে রাখা হয়
+      await AutoDeposit.updateOne(
+        { invoiceNumber, status: "PENDING" },
+        { $set: info },
       );
+
+      return successResponse(res, "Pending recorded");
     }
+
+    if (status !== "COMPLETED") {
+      return errorResponse(res, "Unknown status", 400);
+    }
+
+    const deposit = await creditDeposit(invoiceNumber, info);
+
+    if (!deposit) return successResponse(res, "Already handled");
 
     return successResponse(res, "Deposit credited");
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
 });
+
+/**
+ * Bank/Crypto ম্যানুয়াল ডিপোজিট — অ্যাডমিন যাচাই করে নিশ্চিত বা বাতিল করে।
+ *
+ * এই মাধ্যমগুলো webhook এ PENDING হয়ে আসে; টাকা সত্যিই এসেছে কিনা
+ * অ্যাডমিন প্রমাণ (footprint) দেখে confirm করলে তবেই ব্যালেন্সে যোগ হয়।
+ */
+router.post(
+  "/deposits/:id/confirm",
+  protectAdmin,
+  requireWrite,
+  async (req, res) => {
+    try {
+      const deposit = await AutoDeposit.findById(req.params.id);
+
+      if (!deposit) return errorResponse(res, "Deposit not found", 404);
+
+      if (deposit.status !== "PENDING") {
+        return errorResponse(res, "Only a pending deposit can be confirmed", 400);
+      }
+
+      const credited = await creditDeposit(deposit.invoiceNumber, {
+        reviewedBy: req.admin?._id || null,
+        reviewNote: text(req.body?.note),
+      });
+
+      if (!credited) return errorResponse(res, "Already handled", 400);
+
+      return successResponse(res, "Deposit confirmed and credited");
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+router.post(
+  "/deposits/:id/reject",
+  protectAdmin,
+  requireWrite,
+  async (req, res) => {
+    try {
+      const deposit = await AutoDeposit.findOneAndUpdate(
+        { _id: req.params.id, status: "PENDING" },
+        {
+          $set: {
+            status: "FAILED",
+            reviewedBy: req.admin?._id || null,
+            reviewNote: text(req.body?.note),
+          },
+        },
+        { returnDocument: "after" },
+      );
+
+      if (!deposit) {
+        return errorResponse(res, "Only a pending deposit can be rejected", 400);
+      }
+
+      return successResponse(res, "Deposit rejected");
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
 
 export default router;

@@ -48,6 +48,50 @@ const BonusSchema = new Schema(
 );
 
 /**
+ * একটা পেমেন্ট মাধ্যম — bKash, Nagad, Rocket, Upay, Bank Transfer, Crypto।
+ *
+ * গেটওয়ে গ্রাহককে নিজের পাতায় মাধ্যম বাছতে দেয়; আমরা এখান থেকে ঠিক
+ * করি কোন মাধ্যমগুলো চালু আছে, কী নামে ও লোগোয় দেখাবে, আর সীমা কত।
+ * `manual` মাধ্যম (Bank/Crypto) সাথে সাথে টাকা ঢোকায় না — webhook এ
+ * PENDING হয়ে আসে, অ্যাডমিন যাচাই করে নিশ্চিত করে।
+ */
+const MethodSchema = new Schema(
+  {
+    code: { type: String, required: true, trim: true, lowercase: true },
+    name: { type: LangTextSchema, default: () => ({}) },
+    logoUrl: { type: String, default: "", trim: true },
+
+    active: { type: Boolean, default: true },
+    manual: { type: Boolean, default: false },
+    order: { type: Number, default: 0, min: 0 },
+
+    minAmount: { type: Number, default: 0, min: 0 },
+    maxAmount: { type: Number, default: 0, min: 0 },
+  },
+  { _id: true },
+);
+
+/** নতুন সেটিং তৈরি হলে যে ছয়টা মাধ্যম ডিফল্টে থাকে */
+const DEFAULT_METHODS = [
+  { code: "bkash", name: { bn: "বিকাশ", en: "bKash" }, order: 1 },
+  { code: "nagad", name: { bn: "নগদ", en: "Nagad" }, order: 2 },
+  { code: "rocket", name: { bn: "রকেট", en: "Rocket" }, order: 3 },
+  { code: "upay", name: { bn: "উপায়", en: "Upay" }, order: 4 },
+  {
+    code: "bank",
+    name: { bn: "ব্যাংক ট্রান্সফার", en: "Bank Transfer" },
+    order: 5,
+    manual: true,
+  },
+  {
+    code: "crypto",
+    name: { bn: "ক্রিপ্টো", en: "Crypto" },
+    order: 6,
+    manual: true,
+  },
+];
+
+/**
  * অটো ডিপোজিটের গেটওয়ে সেটিং — সবসময় একটাই ডকুমেন্ট।
  *
  * টোকেনটা অ্যাডমিন প্যানেল থেকে বসে, কোডে বা .env এ নয়, তাই টোকেন
@@ -63,6 +107,8 @@ const autoDepositTokenSchema = new Schema(
     minAmount: { type: Number, default: 100, min: 1 },
     maxAmount: { type: Number, default: 500000, min: 0 },
 
+    methods: { type: [MethodSchema], default: () => DEFAULT_METHODS },
+
     bonuses: { type: [BonusSchema], default: [] },
 
     lastError: { type: String, default: "", trim: true },
@@ -76,7 +122,16 @@ autoDepositTokenSchema.statics.current = async function current() {
     .sort({ createdAt: 1 })
     .select("+businessToken");
 
-  if (existing) return existing;
+  if (existing) {
+    // আগের সেটিংয়ে মাধ্যম না থাকলে ছয়টা ডিফল্ট বসিয়ে দিই — নইলে
+    // নতুন মেথড-ম্যানেজমেন্ট অংশটা ফাঁকা দেখাত
+    if (!existing.methods || existing.methods.length === 0) {
+      existing.methods = DEFAULT_METHODS;
+      await existing.save();
+    }
+
+    return existing;
+  }
 
   return this.create({});
 };
@@ -91,6 +146,7 @@ autoDepositTokenSchema.methods.toSafeJSON = function toSafeJSON() {
     active: this.active,
     minAmount: this.minAmount,
     maxAmount: this.maxAmount,
+    methods: this.methods,
     bonuses: this.bonuses,
     lastError: this.lastError,
     updatedAt: this.updatedAt,
