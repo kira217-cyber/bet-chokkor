@@ -21,7 +21,12 @@ import {
  * লিংকে নিয়ে যাবে না।
  */
 export const buildProfileMenu = (t) => [
-  { key: "notification", label: t("notification"), Icon: Bell, soon: true },
+  {
+    key: "notification",
+    label: t("notification"),
+    Icon: Bell,
+    to: "/member/inbox/notification",
+  },
   {
     key: "personal",
     label: t("menuPersonalInfo"),

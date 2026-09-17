@@ -237,17 +237,82 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
     );
   };
 
-  const liveSupport = (expanded) => (
-    <button
-      type="button"
-      className={`${rowClass} cursor-pointer ${
-        expanded ? "w-fit gap-3" : "justify-center"
-      }`}
-    >
-      {icon("/assets/icons/utility/icon-livechat.svg")}
-      {expanded && title(t("liveSupport"))}
-    </button>
-  );
+  /*
+   * যোগাযোগ কার্ড — Telegram ও WhatsApp।
+   *
+   * ঠিকানা অ্যাডমিন দেন (একই কন্টাক্ট সেটিং), তাই যেটা চালু আছে সেটাই
+   * দেখায় — বন্ধ থাকলে কার্ডটাই আসে না। খোলা অবস্থায় দুটো কার্ড এক
+   * সারিতে পাশাপাশি; সরু rail এ শুধু আইকন উপর-নিচে।
+   */
+  const CONTACT_CARD_KEYS = ["telegram", "whatsapp"];
+
+  const contactCard = (key, expanded) => {
+    const row = contacts.find((c) => c.key === key);
+    const look = CONTACT_LOOK[key];
+
+    if (!row || !look) return null;
+
+    const { Icon } = look;
+
+    // সরু rail এ গেম আইকনের মতোই শুধু আইকন — বৃত্ত ছাড়া, ব্র্যান্ড রঙে
+    if (!expanded) {
+      return (
+        <a
+          key={key}
+          href={row.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          title={look.label}
+          className={`${rowClass} cursor-pointer justify-center`}
+        >
+          <Icon size={20} style={{ color: look.color }} />
+        </a>
+      );
+    }
+
+    // খোলা অবস্থায় কার্ড — বৃত্তে আইকন + নাম
+    return (
+      <a
+        key={key}
+        href={row.url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className={`${rowClass} w-full cursor-pointer justify-center gap-2`}
+      >
+        <span
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]"
+          style={{ color: look.color }}
+        >
+          <Icon size={15} />
+        </span>
+        {title(look.label)}
+      </a>
+    );
+  };
+
+  const contactSection = (expanded) => {
+    const cards = CONTACT_CARD_KEYS.map((key) => contactCard(key, expanded)).filter(
+      Boolean,
+    );
+
+    if (cards.length === 0) return null;
+
+    // খোলা অবস্থায় side-collapse বাইরের ১৬px মার্জিন ধরে, ভিতরের কার্ডের
+    // নিজস্ব margin ০ হয়ে যায় (accordion এর মতোই) — নইলে দুই কার্ডের
+    // মার্জিন যোগ হয়ে সাইডবার ছাড়িয়ে যেত
+    return (
+      <div
+        className={expanded ? "side-collapse grid grid-cols-2" : "flex flex-col"}
+        style={{
+          gap: expanded
+            ? "calc(var(--u) * 1.6)"
+            : "calc(var(--u) * 2.133)",
+        }}
+      >
+        {cards}
+      </div>
+    );
+  };
 
   const promotions = (onNavigate) => (
     <div
@@ -453,7 +518,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
   const nav = (expanded, onNavigate) => (
     <nav className="flex flex-1 flex-col overflow-y-auto">
       <div className="side-section side-section--first flex shrink-0 flex-col">
-        {liveSupport(expanded)}
+        {contactSection(expanded)}
       </div>
 
       <span className="side-divider h-px shrink-0 bg-[var(--neutral700)]" />

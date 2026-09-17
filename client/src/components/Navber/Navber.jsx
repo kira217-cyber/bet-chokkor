@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import { Link } from "react-router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { useLanguage } from "../../Context/LanguageProvider";
 import {
@@ -10,6 +10,8 @@ import {
 } from "../../features/global/globalSelectors";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
 import { selectIsAuth } from "../../features/auth/authSelectors";
+import { fetchUnreadCount } from "../../features/notification/notificationApi";
+import { setUnread } from "../../features/notification/notificationSlice";
 import LanguageMenu from "../LanguageMenu/LanguageMenu";
 import UserBar from "./UserBar";
 import ProfileMenu from "./ProfileMenu";
@@ -27,6 +29,7 @@ const QUICK_LINK_KEYS = ["slot", "casino"];
  */
 const Navber = ({ setDesktopOpen }) => {
   const { t, tv } = useLanguage();
+  const dispatch = useDispatch();
 
   const [langOpen, setLangOpen] = useState(false);
 
@@ -34,6 +37,18 @@ const Navber = ({ setDesktopOpen }) => {
   const loaded = useSelector(selectGlobalLoaded);
   const categories = useSelector(selectGameCategories);
   const isAuth = useSelector(selectIsAuth);
+
+  // লগইন থাকলে না-পড়া নোটিফিকেশনের সংখ্যা এনে ব্যাজে বসানো
+  useEffect(() => {
+    if (!isAuth) {
+      dispatch(setUnread(0));
+      return;
+    }
+
+    fetchUnreadCount()
+      .then((count) => dispatch(setUnread(count)))
+      .catch(() => {});
+  }, [isAuth, dispatch]);
 
   const quickLinks = QUICK_LINK_KEYS.map((key) =>
     categories.find((item) => item.key === key),

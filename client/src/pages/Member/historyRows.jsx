@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BadgeCheck,
   Banknote,
@@ -21,6 +21,7 @@ import {
   StatGrid,
   StatusPill,
 } from "./historyBits";
+import ImageLightbox from "../../components/ImageLightbox/ImageLightbox";
 import { buildBuckets } from "./turnoverBuckets";
 import { formatDate, money } from "./historyFormat";
 
@@ -191,6 +192,104 @@ export const WithdrawRow = ({ row, t, tv, statusLabel }) => {
       <CardFoot>
         {t("labelDate")}: {formatDate(row.createdAt)}
       </CardFoot>
+    </>
+  );
+};
+
+/* ── অটো উইথড্র ── */
+export const AutoWithdrawRow = ({ row, t, statusLabel }) => {
+  const proofs = Array.isArray(row.proofImages) ? row.proofImages : [];
+  const [zoom, setZoom] = useState("");
+
+  return (
+    <>
+      <CardHead
+        title={t("tabAutoWithdraw")}
+        lines={[
+          row.accountNumber ? `${t("labelWallet")}: ${row.accountNumber}` : "",
+          row.status === "REJECTED" && row.reason
+            ? `${t("labelReason")}: ${row.reason}`
+            : "",
+        ]}
+        right={<StatusPill status={row.status} label={statusLabel(row.status)} />}
+      />
+
+      <StatGrid>
+        <StatBox
+          icon={<Banknote size={ICON} />}
+          label={t("labelAmount")}
+          value={money(row.amount)}
+          tone="var(--status-danger)"
+        />
+        <StatBox
+          icon={<Landmark size={ICON} />}
+          label={t("labelMethod")}
+          value={(row.paymentMethod || "—").toUpperCase()}
+        />
+        <StatBox
+          icon={<Coins size={ICON} />}
+          label={t("labelFee")}
+          value={row.feeAmount ? money(row.feeAmount) : "—"}
+        />
+        <StatBox
+          icon={<Wallet size={ICON} />}
+          label={t("labelBalanceAfter")}
+          value={money(row.balanceAfter)}
+          tone="var(--primary500)"
+        />
+      </StatGrid>
+
+      {/* ── প্রমাণ ছবি — ক্লিক করলে বড় হয় ── */}
+      {proofs.length > 0 && (
+        <div style={{ marginTop: "calc(var(--u) * 3.2)" }}>
+          <p
+            className="text-[var(--text-muted)]"
+            style={{
+              fontSize: "var(--fs-small)",
+              marginBottom: "calc(var(--u) * 1.6)",
+            }}
+          >
+            {t("labelProof")}
+          </p>
+
+          <div
+            className="flex flex-wrap"
+            style={{ gap: "calc(var(--u) * 2.133)" }}
+          >
+            {proofs.map((url) => (
+              <button
+                key={url}
+                type="button"
+                onClick={() => setZoom(url)}
+                className="cursor-pointer overflow-hidden transition-[filter] hover:brightness-110"
+                style={{
+                  height: "calc(var(--u) * 16)",
+                  width: "calc(var(--u) * 16)",
+                  borderRadius: "var(--radius-10)",
+                  border: "1px solid var(--neutral700)",
+                }}
+              >
+                <img
+                  src={url}
+                  alt={t("labelProof")}
+                  className="h-full w-full object-cover"
+                  draggable="false"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <CardFoot>
+        {t("labelDate")}: {formatDate(row.createdAt)}
+      </CardFoot>
+
+      <ImageLightbox
+        src={zoom}
+        alt={t("labelProof")}
+        onClose={() => setZoom("")}
+      />
     </>
   );
 };

@@ -9,6 +9,7 @@ import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
 import { selectUser } from "../../features/auth/authSelectors";
 import { logout, updateUser } from "../../features/auth/authSlice";
+import { selectUnread } from "../../features/notification/notificationSlice";
 import { fetchMyDeposits } from "../../features/deposit/depositApi";
 import { buildProfileMenu } from "../../components/Navber/profileMenuItems";
 
@@ -58,6 +59,7 @@ const Profile = () => {
   const { showAlert, showConfirm } = useAlert();
 
   const user = useSelector(selectUser);
+  const unread = useSelector(selectUnread);
 
   const [deposits, setDeposits] = useState([]);
   const [turnovers, setTurnovers] = useState([]);
@@ -161,6 +163,21 @@ const Profile = () => {
                 <>
                   <RowIcon size={16} className="shrink-0 text-[var(--primary500)]" />
                   <span className="flex-1 text-left">{item.label}</span>
+                  {item.key === "notification" && unread > 0 ? (
+                    <span
+                      className="flex shrink-0 items-center justify-center rounded-full font-bold text-white"
+                      style={{
+                        minWidth: "calc(var(--u) * 4.8)",
+                        height: "calc(var(--u) * 4.8)",
+                        paddingInline: "calc(var(--u) * 1.333)",
+                        fontSize: "var(--fs-small)",
+                        background: "var(--status-danger, #e5484d)",
+                        lineHeight: 1,
+                      }}
+                    >
+                      {unread > 99 ? "99+" : unread}
+                    </span>
+                  ) : null}
                   <ChevronRight size={14} className="shrink-0 text-[var(--text-disabled)]" />
                 </>
               );

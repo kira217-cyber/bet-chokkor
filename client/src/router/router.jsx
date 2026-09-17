@@ -19,6 +19,7 @@ import ProfileSecurity from "../pages/Member/ProfileSecurity";
 import History from "../pages/Member/History";
 import Verification from "../pages/Member/Verification";
 import Referral from "../pages/Member/Referral";
+import Notification from "../pages/Member/Notification";
 import PlayGame from "../pages/PlayGame/PlayGame";
 
 export const routes = createBrowserRouter([
@@ -103,6 +104,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Referral />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/inbox/notification",
+        element: (
+          <PrivateRoute>
+            <Notification />
           </PrivateRoute>
         ),
       },

@@ -59,6 +59,15 @@ export const fetchWithdrawHistory = async ({ status, page = 1, limit = 10 } = {}
   return shape(data?.data?.requests, data?.data?.meta, page, limit);
 };
 
+/** অটো উইথড্র (OraclePay) */
+export const fetchAutoWithdrawHistory = async ({ status, page = 1, limit = 10 } = {}) => {
+  const { data } = await api.get(
+    `/api/auto-withdraw/history/my${qs({ status, page, limit })}`,
+  );
+
+  return shape(data?.data?.withdrawals, data?.data?.meta, page, limit);
+};
+
 /** খেলার (বেট) ইতিহাস */
 export const fetchGameHistory = async ({ status, page = 1, limit = 10 } = {}) => {
   const { data } = await api.get(

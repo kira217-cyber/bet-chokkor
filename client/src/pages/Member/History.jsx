@@ -8,12 +8,14 @@ import {
   Loader2,
   RotateCcw,
   Wallet,
+  Zap,
 } from "lucide-react";
 
 import MemberPage from "../Deposit/MemberPage";
 import { Pager, SummaryHead, Tabs } from "./historyBits";
 import {
   AutoDepositRow,
+  AutoWithdrawRow,
   BetRow,
   DepositRow,
   TurnoverRow,
@@ -22,6 +24,7 @@ import {
 import { useLanguage } from "../../Context/LanguageProvider";
 import {
   fetchAutoDepositHistory,
+  fetchAutoWithdrawHistory,
   fetchDepositHistory,
   fetchGameHistory,
   fetchProviderCatalog,
@@ -48,6 +51,7 @@ const TAB_LIST = [
   { key: "deposit", Icon: Wallet, short: "tabDeposit" },
   { key: "auto-deposit", Icon: Landmark, short: "tabAutoDeposit" },
   { key: "withdraw", Icon: BanknoteArrowDown, short: "tabWithdraw" },
+  { key: "auto-withdraw", Icon: Zap, short: "tabAutoWithdraw" },
   { key: "bet", Icon: Gamepad2, short: "tabBet" },
   { key: "turnover", Icon: RotateCcw, short: "tabTurnover" },
 ];
@@ -58,6 +62,7 @@ const LOADERS = {
   deposit: fetchDepositHistory,
   "auto-deposit": fetchAutoDepositHistory,
   withdraw: fetchWithdrawHistory,
+  "auto-withdraw": fetchAutoWithdrawHistory,
   bet: fetchGameHistory,
   turnover: fetchTurnoverHistory,
 };
@@ -68,6 +73,7 @@ const FILTERS = {
   // অটো ডিপোজিটের স্ট্যাটাস বড় হাতের, বাকিদের ছোট হাতের
   "auto-deposit": ["", "PENDING", "PAID", "FAILED"],
   withdraw: ["", "pending", "approved", "rejected"],
+  "auto-withdraw": ["", "PENDING", "PROCESSING", "COMPLETED", "REJECTED"],
   bet: ["", "win", "loss", "push"],
   turnover: ["", "running", "completed"],
 };
@@ -135,6 +141,9 @@ const History = () => {
       PENDING: t("statusPending"),
       PAID: t("statusPaid"),
       FAILED: t("statusFailed"),
+      PROCESSING: t("statusProcessing"),
+      COMPLETED: t("statusCompleted"),
+      REJECTED: t("statusRejected"),
       running: t("statusRunning"),
       completed: t("statusCompleted"),
       win: t("resultWin"),
@@ -182,6 +191,7 @@ const History = () => {
     if (tab === "deposit") return <DepositRow {...shared} />;
     if (tab === "auto-deposit") return <AutoDepositRow {...shared} />;
     if (tab === "withdraw") return <WithdrawRow {...shared} />;
+    if (tab === "auto-withdraw") return <AutoWithdrawRow {...shared} />;
 
     if (tab === "bet") {
       return (

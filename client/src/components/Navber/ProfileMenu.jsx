@@ -7,7 +7,26 @@ import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
 import { selectUser } from "../../features/auth/authSelectors";
 import { logout } from "../../features/auth/authSlice";
+import { selectUnread } from "../../features/notification/notificationSlice";
 import { buildProfileMenu } from "./profileMenuItems";
+
+/** না-পড়া নোটিফিকেশনের লাল ব্যাজ — ৯৯ এর বেশি হলে ৯৯+ */
+const UnreadBadge = ({ count }) =>
+  count > 0 ? (
+    <span
+      className="flex shrink-0 items-center justify-center rounded-full font-bold text-white"
+      style={{
+        minWidth: "calc(var(--u) * 4.8)",
+        height: "calc(var(--u) * 4.8)",
+        paddingInline: "calc(var(--u) * 1.333)",
+        fontSize: "var(--fs-small)",
+        background: "var(--status-danger, #e5484d)",
+        lineHeight: 1,
+      }}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  ) : null;
 
 /**
  * হেডারের "প্রোফাইল" ড্রপডাউন।
@@ -44,6 +63,7 @@ const ProfileMenu = () => {
   const { showAlert, showConfirm } = useAlert();
 
   const user = useSelector(selectUser);
+  const unread = useSelector(selectUnread);
 
   const verified = user?.verificationStatus === "approved";
 
@@ -179,6 +199,9 @@ const ProfileMenu = () => {
         {t("profileMenu")}
 
         {verified ? <VerifiedTick title={t("verifiedBadge")} /> : null}
+
+        {/* না-পড়া নোটিফিকেশন থাকলে প্রোফাইলেই লাল ব্যাজ — খুলতে হয় না */}
+        <UnreadBadge count={unread} />
       </button>
 
       {open ? (
@@ -285,6 +308,9 @@ const ProfileMenu = () => {
                     className="shrink-0 text-[var(--text-muted)]"
                   />
                   <span className="flex-1 text-left">{item.label}</span>
+                  {item.key === "notification" ? (
+                    <UnreadBadge count={unread} />
+                  ) : null}
                   <ChevronRight
                     size={15}
                     className="shrink-0 text-[var(--text-disabled)]"
