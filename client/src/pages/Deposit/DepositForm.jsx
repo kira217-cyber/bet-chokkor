@@ -130,7 +130,11 @@ const DepositForm = ({ method, channel, promo, contact, onBack }) => {
   };
 
   return (
-    <MemberPage title={tv(method.methodName) || method.methodId} onBack={onBack}>
+    <MemberPage
+      title={tv(method.methodName) || method.methodId}
+      onBack={onBack}
+      maxWidth="820px"
+    >
       <form
         className="flex flex-col"
         style={{ gap: "calc(var(--u) * 4.267)" }}
@@ -152,11 +156,7 @@ const DepositForm = ({ method, channel, promo, contact, onBack }) => {
               <img
                 src={imageUrl(method.logoUrl)}
                 alt=""
-                className="shrink-0 object-contain"
-                style={{
-                  height: "calc(var(--u) * 12.8)",
-                  width: "calc(var(--u) * 12.8)",
-                }}
+                className="dep-logo shrink-0 object-contain"
                 draggable="false"
               />
             )}
@@ -283,11 +283,9 @@ const DepositForm = ({ method, channel, promo, contact, onBack }) => {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
+          className="dep-btn flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
           style={{
-            height: "calc(var(--u) * 13.333)",
             borderRadius: "var(--radius-10)",
-            fontSize: "var(--fs-larger)",
             backgroundColor: canSubmit
               ? "var(--primary500)"
               : "color-mix(in srgb, var(--primary500), black 40%)",

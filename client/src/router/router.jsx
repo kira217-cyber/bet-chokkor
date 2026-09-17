@@ -12,6 +12,7 @@ import Deposit from "../pages/Deposit/Deposit";
 import ManualDeposit from "../pages/Deposit/ManualDeposit";
 import AutoDeposit from "../pages/Deposit/AutoDeposit";
 import Withdraw from "../pages/Withdraw/Withdraw";
+import WithdrawHome from "../pages/Withdraw/WithdrawHome";
 import Profile from "../pages/Member/Profile";
 import ProfileInfo from "../pages/Member/ProfileInfo";
 import ProfileSecurity from "../pages/Member/ProfileSecurity";
@@ -53,7 +54,23 @@ export const routes = createBrowserRouter([
         path: "member/wallet/withdraw",
         element: (
           <PrivateRoute>
+            <WithdrawHome />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/wallet/withdraw/manual",
+        element: (
+          <PrivateRoute>
             <Withdraw />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/wallet/withdraw/auto",
+        element: (
+          <PrivateRoute>
+            <Withdraw mode="auto" />
           </PrivateRoute>
         ),
       },

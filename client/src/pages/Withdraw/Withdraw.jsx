@@ -17,12 +17,39 @@ import { selectUser } from "../../features/auth/authSelectors";
 import { updateUser } from "../../features/auth/authSlice";
 import {
   addWallet,
+  fetchAutoWithdrawEligibility,
+  fetchAutoWithdrawStatus,
   fetchEligibility,
   fetchWallets,
   fetchWithdrawMethods,
   removeWallet,
+  submitAutoWithdraw,
   submitWithdraw,
 } from "../../features/withdraw/withdrawApi";
+
+/**
+ * ম্যানুয়াল ও অটো — দুই মোডে মেথডের আকার আলাদা, তাই এক রূপে আনা হয়।
+ * manual: { _id, methodId, name, logoUrl, minimumWithdrawAmount, ... }
+ * auto:   { code, name, logoUrl, minAmount, maxAmount }
+ */
+const normalizeMethods = (list, isAuto, fallbackMin, fallbackMax) =>
+  (list || []).map((item) =>
+    isAuto
+      ? {
+          id: item.code,
+          name: item.name,
+          logoUrl: item.logoUrl,
+          min: Number(item.minAmount) || Number(fallbackMin) || 0,
+          max: Number(item.maxAmount) || Number(fallbackMax) || 0,
+        }
+      : {
+          id: item.methodId,
+          name: item.name,
+          logoUrl: item.logoUrl,
+          min: Number(item.minimumWithdrawAmount) || 0,
+          max: Number(item.maximumWithdrawAmount) || 0,
+        },
+  );
 
 const num = (value) => Number(value) || 0;
 
@@ -49,7 +76,9 @@ const SectionLabel = ({ children }) => (
  * কতটুকু হয়েছে সেটা দেখানো হয়, কারণ ফর্ম ভরে জমা দেওয়ার পর "পারবেন
  * না" শোনাটা বিরক্তিকর।
  */
-const Withdraw = () => {
+const Withdraw = ({ mode = "manual" }) => {
+  const isAuto = mode === "auto";
+
   const { t, tv } = useLanguage();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -104,11 +133,37 @@ const Withdraw = () => {
     }
   };
 
-  const load = async () => {
-    const [list, walletData, elig] = await Promise.all([
+  // মোড অনুযায়ী মেথড ও যোগ্যতা আনা — দুটোই এক রূপে ফেরে
+  const loadMethodsAndElig = async () => {
+    if (isAuto) {
+      const [status, elig] = await Promise.all([
+        fetchAutoWithdrawStatus(),
+        fetchAutoWithdrawEligibility(),
+      ]);
+
+      return {
+        methods: normalizeMethods(
+          status.methods,
+          true,
+          status.minAmount,
+          status.maxAmount,
+        ),
+        eligibility: elig,
+      };
+    }
+
+    const [list, elig] = await Promise.all([
       fetchWithdrawMethods(),
-      fetchWallets(),
       fetchEligibility(),
+    ]);
+
+    return { methods: normalizeMethods(list, false), eligibility: elig };
+  };
+
+  const load = async () => {
+    const [{ methods: list, eligibility: elig }, walletData] = await Promise.all([
+      loadMethodsAndElig(),
+      fetchWallets(),
     ]);
 
     setMethods(list);
@@ -119,7 +174,7 @@ const Withdraw = () => {
     });
     setEligibility(elig);
 
-    if (!methodId && list.length) setMethodId(list[0].methodId);
+    if (!methodId && list.length) setMethodId(list[0].id);
 
     if (!walletId && walletData.wallets.length) {
       const preferred =
@@ -133,12 +188,11 @@ const Withdraw = () => {
     let alive = true;
 
     Promise.all([
-      fetchWithdrawMethods(),
+      loadMethodsAndElig(),
       fetchWallets(),
-      fetchEligibility(),
       api.get("/api/user/me").catch(() => null),
     ])
-      .then(([list, walletData, elig, me]) => {
+      .then(([{ methods: list, eligibility: elig }, walletData, me]) => {
         if (!alive) return;
 
         setMethods(list);
@@ -149,7 +203,7 @@ const Withdraw = () => {
         });
         setEligibility(elig);
 
-        if (list.length) setMethodId(list[0].methodId);
+        if (list.length) setMethodId(list[0].id);
 
         if (walletData.wallets.length) {
           const preferred =
@@ -169,13 +223,14 @@ const Withdraw = () => {
     return () => {
       alive = false;
     };
-  }, [dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, isAuto]);
 
-  const method = methods.find((item) => item.methodId === methodId) || null;
+  const method = methods.find((item) => item.id === methodId) || null;
 
   const balance = num(user?.balance);
-  const min = num(method?.minimumWithdrawAmount);
-  const max = num(method?.maximumWithdrawAmount);
+  const min = num(method?.min);
+  const max = num(method?.max);
 
   const value = num(amount);
 
@@ -245,14 +300,30 @@ const Withdraw = () => {
       setBusy("submit");
       setError("");
 
-      await submitWithdraw({ methodId, walletId, amount: value });
+      if (isAuto) {
+        // অটো — গেটওয়েতে সরাসরি; প্রাপক নম্বর বাছাই করা ওয়ালেট থেকে
+        const wallet = wallets.find((item) => item._id === walletId);
+        const accountNumber = wallet ? `0${wallet.walletNumber}` : "";
+
+        const data = await submitAutoWithdraw({
+          paymentMethod: methodId,
+          accountNumber,
+          amount: value,
+        });
+
+        if (data?.balance !== undefined) {
+          dispatch(updateUser({ ...user, balance: data.balance }));
+        }
+      } else {
+        await submitWithdraw({ methodId, walletId, amount: value });
+      }
 
       setOtpFor(null);
 
       await showAlert({
         type: "success",
         title: t("withdrawDone"),
-        message: t("withdrawDoneText"),
+        message: isAuto ? t("autoWithdrawDoneText") : t("withdrawDoneText"),
       });
 
       navigate("/member/profile", { replace: true });
@@ -280,10 +351,11 @@ const Withdraw = () => {
 
   /* ── এখনো তোলা যাবে না ── */
   const blocked = eligibility && !eligibility.eligible;
+  const pageTitle = isAuto ? t("autoWithdraw") : t("withdrawTitle");
 
   if (otpFor) {
     return (
-      <MemberPage title={t("withdrawTitle")} onBack={() => setOtpFor(null)}>
+      <MemberPage title={pageTitle} onBack={() => setOtpFor(null)}>
         <OtpStep
           flow="withdraw"
           userId={user?.userId}
@@ -295,7 +367,11 @@ const Withdraw = () => {
   }
 
   return (
-    <MemberPage title={t("withdrawTitle")} onBack={() => navigate("/")}>
+    <MemberPage
+      title={pageTitle}
+      maxWidth="820px"
+      onBack={() => navigate("/member/wallet/withdraw")}
+    >
       {loading ? (
         <div
           className="flex items-center justify-center text-[var(--text-muted)]"
@@ -437,7 +513,9 @@ const Withdraw = () => {
           </button>
         </div>
       ) : methods.length === 0 ? (
-        <FormAlert type="info">{t("noWithdrawMethod")}</FormAlert>
+        <FormAlert type="info">
+          {isAuto ? t("autoWithdrawOffNow") : t("noWithdrawMethod")}
+        </FormAlert>
       ) : (
         <form
           className="flex flex-col"
@@ -457,18 +535,16 @@ const Withdraw = () => {
             }}
           >
             {methods.map((item) => {
-              const active = item.methodId === methodId;
+              const active = item.id === methodId;
 
               return (
                 <button
-                  key={item._id}
+                  key={item.id}
                   type="button"
-                  onClick={() => setMethodId(item.methodId)}
-                  className="flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
+                  onClick={() => setMethodId(item.id)}
+                  className="dep-card flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
                   style={{
-                    height: "calc(var(--u) * 24)",
                     borderRadius: "var(--radius-10)",
-                    gap: "calc(var(--u) * 2.133)",
                     border: `1px solid ${
                       active ? "var(--primary500)" : "transparent"
                     }`,
@@ -478,31 +554,17 @@ const Withdraw = () => {
                     <img
                       src={imageUrl(item.logoUrl)}
                       alt=""
-                      className="object-contain"
-                      style={{
-                        height: "calc(var(--u) * 12.8)",
-                        width: "calc(var(--u) * 12.8)",
-                      }}
+                      className="dep-logo object-contain"
                       draggable="false"
                     />
                   ) : (
-                    <span
-                      className="flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]"
-                      style={{
-                        height: "calc(var(--u) * 12.8)",
-                        width: "calc(var(--u) * 12.8)",
-                        fontSize: "var(--fs-larger)",
-                      }}
-                    >
-                      {(tv(item.name) || item.methodId).slice(0, 2).toUpperCase()}
+                    <span className="dep-logo dep-label flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]">
+                      {(tv(item.name) || item.id).slice(0, 2).toUpperCase()}
                     </span>
                   )}
 
-                  <span
-                    className="px-1 text-center leading-tight text-[var(--text-primary)]"
-                    style={{ fontSize: "var(--fs-larger)" }}
-                  >
-                    {tv(item.name) || item.methodId}
+                  <span className="dep-label px-1 text-center leading-tight text-[var(--text-primary)]">
+                    {tv(item.name) || item.id}
                   </span>
                 </button>
               );
@@ -519,9 +581,8 @@ const Withdraw = () => {
               return (
                 <div
                   key={wallet._id}
-                  className="flex w-full items-center bg-[var(--neutral800)] transition-colors"
+                  className="dep-row flex w-full items-center bg-[var(--neutral800)] transition-colors"
                   style={{
-                    height: "calc(var(--u) * 14.667)",
                     borderRadius: "var(--radius-10)",
                     paddingInline: "calc(var(--u) * 4.267)",
                     border: `1px solid ${
@@ -734,12 +795,10 @@ const Withdraw = () => {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
+            className="dep-btn flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
             style={{
               marginTop: "calc(var(--u) * 6.4)",
-              height: "calc(var(--u) * 13.333)",
               borderRadius: "var(--radius-10)",
-              fontSize: "var(--fs-larger)",
               gap: "calc(var(--u) * 2.133)",
               backgroundColor: canSubmit
                 ? "var(--primary500)"

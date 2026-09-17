@@ -140,6 +140,29 @@ export const locale = {
     bn: "অটো ডিপোজিট এখন বন্ধ আছে",
     en: "Auto deposit is off right now",
   },
+  manualWithdraw: { bn: "ম্যানুয়াল উইথড্র", en: "Manual Withdraw" },
+  manualWithdrawHint: {
+    bn: "নিজের নম্বর দিন, অ্যাডমিন অনুমোদন করবে",
+    en: "Give your number, an admin approves it",
+  },
+  autoWithdraw: { bn: "অটো উইথড্র", en: "Auto Withdraw" },
+  autoWithdrawHint: {
+    bn: "সরাসরি আপনার ওয়ালেটে, নিজে থেকেই",
+    en: "Straight to your wallet, automatically",
+  },
+  autoWithdrawOffNow: {
+    bn: "অটো উইথড্র এখন বন্ধ আছে",
+    en: "Auto withdraw is off right now",
+  },
+  walletNumberLabel: { bn: "ওয়ালেট নম্বর", en: "Wallet number" },
+  walletNumberPlaceholder: {
+    bn: "যে নম্বরে টাকা পাবেন",
+    en: "The number to receive money",
+  },
+  autoWithdrawDoneText: {
+    bn: "আপনার উইথড্র প্রক্রিয়াধীন — শীঘ্রই আপনার ওয়ালেটে পৌঁছাবে।",
+    en: "Your withdrawal is processing — it will reach your wallet soon.",
+  },
   upToPercent: { bn: "{n}% পর্যন্ত", en: "Up to {n}%" },
   selectPromotion: { bn: "প্রমোশন সিলেক্ট করুন", en: "Select a promotion" },
   promotionLabel: { bn: "প্রমোশন", en: "Promotion" },

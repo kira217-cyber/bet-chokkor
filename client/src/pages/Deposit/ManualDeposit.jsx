@@ -11,9 +11,8 @@ import { imageUrl } from "../../features/deposit/imageUrl";
 
 const SectionLabel = ({ children }) => (
   <p
-    className="text-[var(--text-secondary)]"
+    className="dep-section text-[var(--text-secondary)]"
     style={{
-      fontSize: "var(--fs-larger)",
       marginTop: "calc(var(--u) * 4.267)",
       marginBottom: "calc(var(--u) * 2.133)",
     }}
@@ -99,6 +98,7 @@ const ManualDeposit = () => {
     <MemberPage
       title={t("manualDeposit")}
       onBack={() => navigate("/member/wallet/deposit")}
+      maxWidth="820px"
     >
       {loading ? (
         <div
@@ -133,11 +133,9 @@ const ManualDeposit = () => {
                   key={item._id}
                   type="button"
                   onClick={() => pickMethod(item)}
-                  className="flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
+                  className="dep-card flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
                   style={{
-                    height: "calc(var(--u) * 24)",
                     borderRadius: "var(--radius-10)",
-                    gap: "calc(var(--u) * 2.133)",
                     border: `1px solid ${
                       active ? "var(--primary500)" : "transparent"
                     }`,
@@ -147,21 +145,12 @@ const ManualDeposit = () => {
                     <img
                       src={imageUrl(item.logoUrl)}
                       alt=""
-                      className="object-contain"
-                      style={{
-                        height: "calc(var(--u) * 12.8)",
-                        width: "calc(var(--u) * 12.8)",
-                      }}
+                      className="dep-logo object-contain"
                       draggable="false"
                     />
                   ) : (
                     <span
-                      className="flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]"
-                      style={{
-                        height: "calc(var(--u) * 12.8)",
-                        width: "calc(var(--u) * 12.8)",
-                        fontSize: "var(--fs-larger)",
-                      }}
+                      className="dep-logo dep-label flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]"
                     >
                       {(tv(item.methodName) || item.methodId)
                         .slice(0, 2)
@@ -169,10 +158,7 @@ const ManualDeposit = () => {
                     </span>
                   )}
 
-                  <span
-                    className="px-1 text-center leading-tight text-[var(--text-primary)]"
-                    style={{ fontSize: "var(--fs-larger)" }}
-                  >
+                  <span className="dep-label px-1 text-center leading-tight text-[var(--text-primary)]">
                     {tv(item.methodName) || item.methodId}
                   </span>
                 </button>
@@ -186,8 +172,8 @@ const ManualDeposit = () => {
               <SectionLabel>{t("selectPromotion")}</SectionLabel>
 
               <div
-                className="flex w-full items-center justify-between bg-[var(--neutral800)]"
-                style={{ ...boxStyle, height: "calc(var(--u) * 16)" }}
+                className="dep-row flex w-full items-center justify-between bg-[var(--neutral800)]"
+                style={boxStyle}
               >
                 <span
                   className="flex items-center font-semibold text-[var(--neutral100)]"
@@ -244,10 +230,9 @@ const ManualDeposit = () => {
                       key={item.id}
                       type="button"
                       onClick={() => setChannelId(item.id)}
-                      className="flex w-full cursor-pointer items-center justify-between bg-[var(--neutral800)] transition-colors"
+                      className="dep-row flex w-full cursor-pointer items-center justify-between bg-[var(--neutral800)] transition-colors"
                       style={{
                         ...boxStyle,
-                        height: "calc(var(--u) * 14.667)",
                         border: `1px solid ${
                           active ? "var(--primary500)" : "transparent"
                         }`,
@@ -297,8 +282,8 @@ const ManualDeposit = () => {
               <SectionLabel>{t("depositChannel")}</SectionLabel>
 
               <div
-                className="relative flex w-full items-center bg-[var(--neutral900)]"
-                style={{ ...boxStyle, height: "calc(var(--u) * 13.867)" }}
+                className="dep-row relative flex w-full items-center bg-[var(--neutral900)]"
+                style={boxStyle}
               >
                 <select
                   value={contact?.id || ""}
@@ -326,12 +311,10 @@ const ManualDeposit = () => {
             type="button"
             disabled={!canContinue}
             onClick={() => setShowForm(true)}
-            className="flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
+            className="dep-btn flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
             style={{
               marginTop: "calc(var(--u) * 6.4)",
-              height: "calc(var(--u) * 13.333)",
               borderRadius: "var(--radius-10)",
-              fontSize: "var(--fs-larger)",
               backgroundColor: canContinue
                 ? "var(--primary500)"
                 : "color-mix(in srgb, var(--primary500), black 40%)",

@@ -1,18 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useSelector } from "react-redux";
 import { Gift, Loader2, Zap } from "lucide-react";
 
 import MemberPage from "./MemberPage";
 import FormField from "../../components/FormField/FormField";
 import FormAlert from "../../components/FormAlert/FormAlert";
+import AmountPicker from "../../components/AmountPicker/AmountPicker";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { authError } from "../../features/auth/authApi";
+import { imageUrl } from "../../features/deposit/imageUrl";
+import { selectUser } from "../../features/auth/authSelectors";
 import {
   fetchAutoStatus,
   startAutoDeposit,
 } from "../../features/deposit/depositApi";
 
 const num = (value) => Number(value) || 0;
+
+const SectionLabel = ({ children }) => (
+  <p
+    className="dep-section text-[var(--text-secondary)]"
+    style={{
+      marginTop: "calc(var(--u) * 4.267)",
+      marginBottom: "calc(var(--u) * 2.133)",
+    }}
+  >
+    {children}
+  </p>
+);
 
 const Line = ({ label, value, strong }) => (
   <div
@@ -42,19 +58,21 @@ const Line = ({ label, value, strong }) => (
 /**
  * অটো ডিপোজিট।
  *
- * এখানে চ্যানেল বা নম্বর নেই — গেটওয়ে নিজেই টাকা নেয় আর নিশ্চিত করে।
- * বোনাস আর অঙ্ক বেছে দিলে সার্ভার গেটওয়ে থেকে পেমেন্ট পাতার ঠিকানা
- * এনে দেয়, সেখানেই পাঠিয়ে দেওয়া হয়।
+ * ডিজাইন ম্যানুয়াল ডিপোজিটের মতোই — একই বড় মেথড কার্ড, একই অঙ্ক
+ * পিকার। শুধু এখানে চ্যানেল/নম্বর নেই; মেথড ও অঙ্ক বেছে দিলে সার্ভার
+ * গেটওয়ে থেকে পেমেন্ট পাতার ঠিকানা এনে দেয়, সেখানেই পাঠানো হয়।
  */
 const AutoDeposit = () => {
   const { t, tv } = useLanguage();
   const navigate = useNavigate();
+  const user = useSelector(selectUser);
 
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const [methodCode, setMethodCode] = useState("");
   const [bonusId, setBonusId] = useState("");
   const [amount, setAmount] = useState("");
 
@@ -62,7 +80,12 @@ const AutoDeposit = () => {
     let alive = true;
 
     fetchAutoStatus()
-      .then((data) => alive && setStatus(data))
+      .then((data) => {
+        if (!alive) return;
+
+        setStatus(data);
+        if (data?.methods?.length) setMethodCode(data.methods[0].code);
+      })
       .catch(() => {})
       .finally(() => alive && setLoading(false));
 
@@ -71,6 +94,7 @@ const AutoDeposit = () => {
     };
   }, []);
 
+  const methods = status?.methods || [];
   const bonuses = status?.bonuses || [];
   const bonus = bonuses.find((item) => item._id === bonusId) || null;
 
@@ -86,7 +110,12 @@ const AutoDeposit = () => {
   const min = num(status?.minAmount);
   const max = num(status?.maxAmount);
 
-  const amountOk = base > 0 && (min <= 0 || base >= min) && (max <= 0 || base <= max);
+  const amountOk =
+    base > 0 && (min <= 0 || base >= min) && (max <= 0 || base <= max);
+
+  // মেথড থাকলে একটা বাছাই লাগবে — ম্যানুয়ালের মতোই
+  const methodOk = methods.length === 0 || Boolean(methodCode);
+  const canSubmit = amountOk && methodOk && !busy;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -123,6 +152,7 @@ const AutoDeposit = () => {
     <MemberPage
       title={t("autoDeposit")}
       onBack={() => navigate("/member/wallet/deposit")}
+      maxWidth="820px"
     >
       {loading ? (
         <div
@@ -140,13 +170,69 @@ const AutoDeposit = () => {
       ) : (
         <form
           className="flex flex-col"
-          style={{ gap: "calc(var(--u) * 4.267)" }}
+          style={{ gap: 0 }}
           onSubmit={handleSubmit}
         >
           <FormAlert>{error}</FormAlert>
 
+          {/* ── উপায় ── ম্যানুয়াল ডিপোজিটের মতোই বড় কার্ড */}
+          {methods.length > 0 && (
+            <>
+              <SectionLabel>{t("selectPayment")}</SectionLabel>
+
+              <div
+                className="grid"
+                style={{
+                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                  gap: "calc(var(--u) * 2.133)",
+                }}
+              >
+                {methods.map((item) => {
+                  const active = item.code === methodCode;
+
+                  return (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => setMethodCode(item.code)}
+                      className="dep-card flex cursor-pointer flex-col items-center justify-center bg-[var(--neutral800)] transition-colors"
+                      style={{
+                        borderRadius: "var(--radius-10)",
+                        border: `1px solid ${
+                          active ? "var(--primary500)" : "transparent"
+                        }`,
+                      }}
+                    >
+                      {item.logoUrl ? (
+                        <img
+                          src={imageUrl(item.logoUrl)}
+                          alt=""
+                          className="dep-logo object-contain"
+                          draggable="false"
+                        />
+                      ) : (
+                        <span className="dep-logo dep-label flex items-center justify-center rounded-full bg-[var(--neutral700)] font-bold text-[var(--primary500)]">
+                          {(tv(item.name) || item.code)
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </span>
+                      )}
+
+                      <span className="dep-label px-1 text-center leading-tight text-[var(--text-primary)]">
+                        {tv(item.name) || item.code}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* ── বোনাস ── */}
           {bonuses.length > 0 && (
-            <FormField label={t("selectBonus")}>
+            <>
+              <SectionLabel>{t("selectBonus")}</SectionLabel>
+
               <div
                 className="flex flex-col"
                 style={{ gap: "calc(var(--u) * 2.133)" }}
@@ -159,9 +245,8 @@ const AutoDeposit = () => {
                       key={item._id || "none"}
                       type="button"
                       onClick={() => setBonusId(item._id)}
-                      className="flex w-full cursor-pointer items-center justify-between bg-[var(--neutral800)] transition-colors"
+                      className="dep-row flex w-full cursor-pointer items-center justify-between bg-[var(--neutral800)] transition-colors"
                       style={{
-                        height: "calc(var(--u) * 14.667)",
                         borderRadius: "var(--radius-10)",
                         paddingInline: "calc(var(--u) * 4.267)",
                         border: `1px solid ${
@@ -170,11 +255,8 @@ const AutoDeposit = () => {
                       }}
                     >
                       <span
-                        className="flex items-center font-semibold text-[var(--neutral100)]"
-                        style={{
-                          gap: "calc(var(--u) * 2.133)",
-                          fontSize: "var(--fs-larger)",
-                        }}
+                        className="dep-label flex items-center font-semibold text-[var(--neutral100)]"
+                        style={{ gap: "calc(var(--u) * 2.133)" }}
                       >
                         <Gift
                           size={16}
@@ -214,41 +296,30 @@ const AutoDeposit = () => {
                   );
                 })}
               </div>
-            </FormField>
+            </>
           )}
 
+          {/* ── অঙ্ক ── ম্যানুয়ালের মতোই চিপসহ পিকার */}
+          <SectionLabel>{t("depositAmount")}</SectionLabel>
+
           <FormField
-            label={t("depositAmount")}
             error={base > 0 && !amountOk ? `${t("minMax")}: ${min} / ${max}` : ""}
           >
-            <div
-              className="flex w-full items-center overflow-hidden bg-[var(--form-box-bg)]"
-              style={{
-                height: "calc(var(--u) * 13.333)",
-                borderRadius: "var(--radius-10)",
-              }}
-            >
-              <input
-                type="text"
-                inputMode="numeric"
-                value={amount}
-                onChange={(event) =>
-                  setAmount(event.target.value.replace(/[^\d.]/g, ""))
-                }
-                placeholder={t("amountPlaceholder")}
-                className="h-full w-full bg-transparent text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
-                style={{
-                  fontSize: "var(--fs-larger)",
-                  paddingInline: "calc(var(--u) * 4.267)",
-                }}
-              />
-            </div>
+            <AmountPicker
+              value={amount}
+              onChange={setAmount}
+              placeholder={t("amountPlaceholder")}
+              currency={user?.currency || "BDT"}
+              min={min}
+              max={max}
+            />
           </FormField>
 
           {base > 0 && (
             <div
               className="bg-[var(--neutral900)]"
               style={{
+                marginTop: "calc(var(--u) * 4.267)",
                 borderRadius: "var(--radius-10)",
                 padding: "calc(var(--u) * 3.2) calc(var(--u) * 4.267)",
               }}
@@ -280,17 +351,15 @@ const AutoDeposit = () => {
 
           <button
             type="submit"
-            disabled={!amountOk || busy}
-            className="flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
+            disabled={!canSubmit}
+            className="dep-btn flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] enabled:hover:brightness-105 disabled:cursor-not-allowed"
             style={{
-              height: "calc(var(--u) * 13.333)",
+              marginTop: "calc(var(--u) * 6.4)",
               borderRadius: "var(--radius-10)",
-              fontSize: "var(--fs-larger)",
               gap: "calc(var(--u) * 2.133)",
-              backgroundColor:
-                amountOk && !busy
-                  ? "var(--primary500)"
-                  : "color-mix(in srgb, var(--primary500), black 40%)",
+              backgroundColor: canSubmit
+                ? "var(--primary500)"
+                : "color-mix(in srgb, var(--primary500), black 40%)",
               color: "var(--btn-primary-txt)",
             }}
           >

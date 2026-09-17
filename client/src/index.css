@@ -150,6 +150,26 @@ body {
 .fs-small { font-size: var(--fs-small); }
 .fs-mini { font-size: var(--fs-mini); }
 
+/* ── ম্যানুয়াল ডিপোজিট — ডেস্কটপে বড় ও ইউজার-ফ্রেন্ডলি ──
+   মোবাইলে --u=1vw এ ঠিকঠাক, কিন্তু ডেস্কটপে --u=3.75px ফিক্সড বলে
+   ছবি-লেখা ছোট দেখাত। তাই মোবাইলের মাপ অপরিবর্তিত রেখে শুধু ১০২৪px
+   থেকে ছবি, লোগো, লেখা ও সারিগুলো বড় করা হলো — যেন দূর থেকেও পড়া যায়। */
+.dep-card { height: calc(var(--u) * 24); gap: calc(var(--u) * 2.133); }
+.dep-logo { height: calc(var(--u) * 12.8); width: calc(var(--u) * 12.8); }
+.dep-label { font-size: var(--fs-larger); }
+.dep-section { font-size: var(--fs-larger); }
+.dep-row { height: calc(var(--u) * 14.667); }
+.dep-btn { height: calc(var(--u) * 13.333); font-size: var(--fs-larger); }
+
+@media (min-width: 1024px) {
+  .dep-card { height: 150px; gap: 14px; border-radius: 16px; }
+  .dep-logo { height: 76px; width: 76px; }
+  .dep-label { font-size: 18px; }
+  .dep-section { font-size: 17px; }
+  .dep-row { height: 68px; border-radius: 14px; }
+  .dep-btn { height: 60px; font-size: 19px; border-radius: 14px; }
+}
+
 /* ── scrollbar ── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

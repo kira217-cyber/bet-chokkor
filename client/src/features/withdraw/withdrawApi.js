@@ -41,3 +41,20 @@ export const fetchMyWithdraws = async (limit = 20) => {
   const { data } = await api.get(`/api/withdraw-requests/my?limit=${limit}`);
   return data?.data?.requests || [];
 };
+
+/* ── অটো উইথড্র ── */
+
+export const fetchAutoWithdrawStatus = async () => {
+  const { data } = await api.get("/api/auto-withdraw/status");
+  return data?.data || { active: false, methods: [] };
+};
+
+export const fetchAutoWithdrawEligibility = async () => {
+  const { data } = await api.get("/api/auto-withdraw/eligibility");
+  return data?.data || { eligible: false };
+};
+
+export const submitAutoWithdraw = async (payload) => {
+  const { data } = await api.post("/api/auto-withdraw/create", payload);
+  return data?.data || null;
+};
