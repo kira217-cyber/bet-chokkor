@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  Banknote,
   ImageUp,
   Loader2,
-  Plus,
   Power,
   RefreshCw,
   Save,
-  Trash2,
   TriangleAlert,
   X,
-  Zap,
 } from "lucide-react";
 
 import { api } from "../../api/axios";
 import SecretInput from "../../components/SecretInput/SecretInput";
-import ProviderPicker from "../../components/ProviderPicker/ProviderPicker";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -26,7 +23,7 @@ const imageUrl = (url) => {
 };
 
 const fetchSetting = async () => {
-  const { data } = await api.get("/api/auto-deposit/admin");
+  const { data } = await api.get("/api/auto-withdraw/admin");
   return data?.data?.setting || null;
 };
 
@@ -38,36 +35,19 @@ const methodsFrom = (setting) =>
     nameEn: method.name?.en || "",
     logoUrl: method.logoUrl || "",
     active: method.active !== false,
-    manual: Boolean(method.manual),
     order: Number(method.order ?? 0),
     minAmount: String(method.minAmount ?? 0),
     maxAmount: String(method.maxAmount ?? 0),
   }));
 
-const bonusesFrom = (setting) =>
-  (setting?.bonuses || []).map((bonus) => ({
-    _id: bonus._id,
-    titleBn: bonus.title?.bn || "",
-    titleEn: bonus.title?.en || "",
-    bonusType: bonus.bonusType || "fixed",
-    bonusValue: String(bonus.bonusValue ?? 0),
-    turnoverMultiplier: String(bonus.turnoverMultiplier ?? 1),
-    bonusScope: bonus.bonusScope || "all-time",
-    isActive: bonus.isActive !== false,
-    providers: (bonus.eligibleProviders || []).map((item) => ({
-      providerCode: item.providerCode || "",
-      percent: Number(item.percent ?? 100),
-    })),
-  }));
-
 /**
- * অটো ডিপোজিট।
+ * অটো উইথড্র।
  *
- * গেটওয়ে নিজেই টাকা নিশ্চিত করে, তাই ম্যানুয়ালের মতো চ্যানেল নেই —
- * বোনাস বেছে নেওয়ার তালিকাটাই এখানে। টোকেন না থাকলে বা বন্ধ থাকলে
- * ক্লায়েন্টে অটো অংশটা দেখায় না, ম্যানুয়াল দিয়েই কাজ চলে।
+ * গেটওয়ে নিজেই খেলোয়াড়কে টাকা পাঠায় — অ্যাডমিনের হাতে অনুমোদন লাগে
+ * না। এখান থেকে টোকেন, সীমা আর কোন মাধ্যমগুলো চালু তা ঠিক হয়। বন্ধ
+ * থাকলে ক্লায়েন্টে অটো উইথড্র দেখায় না, ম্যানুয়াল দিয়েই কাজ চলে।
  */
-const AutoDeposit = () => {
+const AutoWithdraw = () => {
   const [setting, setSetting] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
@@ -75,8 +55,8 @@ const AutoDeposit = () => {
   const [token, setToken] = useState("");
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
+  const [feePercent, setFeePercent] = useState("");
   const [methods, setMethods] = useState([]);
-  const [bonuses, setBonuses] = useState([]);
 
   const fill = (next) => {
     setSetting(next);
@@ -84,8 +64,8 @@ const AutoDeposit = () => {
     if (next) {
       setMinAmount(String(next.minAmount ?? 0));
       setMaxAmount(String(next.maxAmount ?? 0));
+      setFeePercent(String(next.feePercent ?? 0));
       setMethods(methodsFrom(next));
-      setBonuses(bonusesFrom(next));
     }
   };
 
@@ -118,7 +98,7 @@ const AutoDeposit = () => {
   const save = async (action, payload, after) => {
     try {
       setBusy(action);
-      const { data } = await api.put("/api/auto-deposit/admin", payload);
+      const { data } = await api.put("/api/auto-withdraw/admin", payload);
 
       if (data?.data?.setting) fill(data.data.setting);
       toast.success(data?.message || "Saved");
@@ -130,11 +110,6 @@ const AutoDeposit = () => {
     }
   };
 
-  const setBonus = (index, key, value) =>
-    setBonuses((prev) =>
-      prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
-    );
-
   const setMethod = (index, key, value) =>
     setMethods((prev) =>
       prev.map((row, i) => (i === index ? { ...row, [key]: value } : row)),
@@ -142,8 +117,6 @@ const AutoDeposit = () => {
 
   const [uploading, setUploading] = useState(-1);
 
-  // ছবিটা সাথে সাথেই আপলোড হয়ে /uploads পথ ফেরত দেয়, সেটাই মাধ্যমের
-  // logoUrl এ বসে — পরে "Save gateway" এ পুরো সেটিং সেভ হয়
   const uploadLogo = async (index, file) => {
     if (!file) return;
 
@@ -161,7 +134,7 @@ const AutoDeposit = () => {
       const form = new FormData();
       form.append("logo", file);
 
-      const { data } = await api.post("/api/auto-deposit/upload-logo", form);
+      const { data } = await api.post("/api/auto-withdraw/upload-logo", form);
       const url = data?.data?.logoUrl || "";
 
       if (url) setMethod(index, "logoUrl", url);
@@ -175,49 +148,22 @@ const AutoDeposit = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const bad = bonuses.find(
-      (bonus) =>
-        bonus.providers.reduce(
-          (sum, item) => sum + (Number(item.percent) || 0),
-          0,
-        ) > 100,
-    );
-
-    if (bad) {
-      toast.error(
-        `Bonus "${bad.titleEn || bad.titleBn || "untitled"}" providers add up to more than 100%`,
-      );
-      return;
-    }
-
     save(
       "save",
       {
-        // খালি পাঠালে আগের টোকেনটাই থাকে — নইলে ভুল করে মুছে যেত
         ...(token.trim() ? { businessToken: token.trim() } : {}),
         minAmount: Number(minAmount) || 1,
         maxAmount: Number(maxAmount) || 0,
+        feePercent: Number(feePercent) || 0,
         methods: methods.map((method, index) => ({
           ...(method._id ? { _id: method._id } : {}),
           code: method.code,
           name: { bn: method.nameBn, en: method.nameEn },
           logoUrl: method.logoUrl,
           active: method.active,
-          manual: method.manual,
           order: index,
           minAmount: Number(method.minAmount) || 0,
           maxAmount: Number(method.maxAmount) || 0,
-        })),
-        bonuses: bonuses.map((bonus, index) => ({
-          ...(bonus._id ? { _id: bonus._id } : {}),
-          title: { bn: bonus.titleBn, en: bonus.titleEn },
-          bonusType: bonus.bonusType,
-          bonusValue: Number(bonus.bonusValue) || 0,
-          turnoverMultiplier: Number(bonus.turnoverMultiplier) || 0,
-          bonusScope: bonus.bonusScope,
-          isActive: bonus.isActive,
-          order: index,
-          eligibleProviders: bonus.providers,
         })),
       },
       () => setToken(""),
@@ -231,9 +177,9 @@ const AutoDeposit = () => {
     <div className="mx-auto max-w-[1000px]">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="ad-title text-[26px] lg:text-[30px]">Auto Deposit</h1>
+          <h1 className="ad-title text-[26px] lg:text-[30px]">Auto Withdraw</h1>
           <p className="mt-1 text-[14px] text-[var(--text-muted)]">
-            The gateway that confirms deposits without an admin.
+            The gateway that pays players out without an admin.
           </p>
         </div>
 
@@ -263,7 +209,7 @@ const AutoDeposit = () => {
               color: active ? "var(--status-success)" : "var(--text-muted)",
             }}
           >
-            <Zap size={18} />
+            <Banknote size={18} />
           </span>
 
           <div className="min-w-0 flex-1">
@@ -271,8 +217,8 @@ const AutoDeposit = () => {
               {loading
                 ? "Loading…"
                 : active
-                  ? "Auto deposit is on"
-                  : "Auto deposit is off"}
+                  ? "Auto withdraw is on"
+                  : "Auto withdraw is off"}
             </h2>
 
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
@@ -304,7 +250,7 @@ const AutoDeposit = () => {
             ) : (
               <Power size={15} />
             )}
-            {active ? "Turn auto deposit off" : "Turn auto deposit on"}
+            {active ? "Turn auto withdraw off" : "Turn auto withdraw on"}
           </button>
         </div>
       </div>
@@ -318,13 +264,15 @@ const AutoDeposit = () => {
 
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="sm:col-span-3">
-              <label className="ad-label" htmlFor="ad-token">
+              <label className="ad-label" htmlFor="aw-token">
                 Business token
               </label>
               <SecretInput
-                id="ad-token"
+                id="aw-token"
                 autoComplete="off"
-                placeholder={hasToken ? "Leave blank to keep the current one" : "Paste the token"}
+                placeholder={
+                  hasToken ? "Leave blank to keep the current one" : "Paste the token"
+                }
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
               />
@@ -334,11 +282,11 @@ const AutoDeposit = () => {
             </div>
 
             <div>
-              <label className="ad-label" htmlFor="ad-min">
+              <label className="ad-label" htmlFor="aw-min">
                 Minimum
               </label>
               <input
-                id="ad-min"
+                id="aw-min"
                 type="number"
                 min="1"
                 value={minAmount}
@@ -348,15 +296,30 @@ const AutoDeposit = () => {
             </div>
 
             <div>
-              <label className="ad-label" htmlFor="ad-max">
+              <label className="ad-label" htmlFor="aw-max">
                 Maximum
               </label>
               <input
-                id="ad-max"
+                id="aw-max"
                 type="number"
                 min="0"
                 value={maxAmount}
                 onChange={(e) => setMaxAmount(e.target.value)}
+                className="ad-input"
+              />
+            </div>
+
+            <div>
+              <label className="ad-label" htmlFor="aw-fee">
+                Fee %
+              </label>
+              <input
+                id="aw-fee"
+                type="number"
+                min="0"
+                step="0.1"
+                value={feePercent}
+                onChange={(e) => setFeePercent(e.target.value)}
                 className="ad-input"
               />
             </div>
@@ -370,9 +333,8 @@ const AutoDeposit = () => {
               Payment methods
             </h2>
             <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-              Turn each method on or off, and set its own limits. Bank Transfer
-              & Crypto are manual — they wait for your confirmation before the
-              money is credited.
+              The gateway supports four mobile wallets. Turn each on or off and
+              set its own limits.
             </p>
           </div>
 
@@ -406,34 +368,20 @@ const AutoDeposit = () => {
                         </p>
                         <p className="text-[11px] uppercase text-[var(--text-disabled)]">
                           {method.code}
-                          {method.manual ? " · manual" : " · auto"}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <label className="flex items-center gap-2 text-[13px] text-[var(--text-muted)]">
-                        <input
-                          type="checkbox"
-                          checked={method.manual}
-                          onChange={(e) =>
-                            setMethod(index, "manual", e.target.checked)
-                          }
-                        />
-                        Manual
-                      </label>
-
-                      <label className="flex items-center gap-2 text-[13px] text-[var(--text-muted)]">
-                        <input
-                          type="checkbox"
-                          checked={method.active}
-                          onChange={(e) =>
-                            setMethod(index, "active", e.target.checked)
-                          }
-                        />
-                        On
-                      </label>
-                    </div>
+                    <label className="flex items-center gap-2 text-[13px] text-[var(--text-muted)]">
+                      <input
+                        type="checkbox"
+                        checked={method.active}
+                        onChange={(e) =>
+                          setMethod(index, "active", e.target.checked)
+                        }
+                      />
+                      On
+                    </label>
                   </div>
 
                   <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -507,147 +455,6 @@ const AutoDeposit = () => {
           )}
         </div>
 
-        {/* ── বোনাস ── */}
-        <div className="ad-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[16px] font-extrabold text-[var(--neutral100)]">
-                Bonuses
-              </h2>
-              <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-                What a player can pick when paying through the gateway.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                setBonuses((prev) => [
-                  ...prev,
-                  {
-                    titleBn: "",
-                    titleEn: "",
-                    bonusType: "percent",
-                    bonusValue: "0",
-                    turnoverMultiplier: "1",
-                    bonusScope: "all-time",
-                    isActive: true,
-                    providers: [],
-                  },
-                ])
-              }
-              className="ad-btn ad-btn--ghost ad-btn--sm"
-            >
-              <Plus size={14} />
-              Add bonus
-            </button>
-          </div>
-
-          {bonuses.length === 0 ? (
-            <p className="mt-4 text-[13px] text-[var(--text-disabled)]">
-              No bonus — auto deposits credit the plain amount.
-            </p>
-          ) : (
-            <div className="mt-4 flex flex-col gap-4">
-              {bonuses.map((bonus, index) => (
-                <div
-                  key={bonus._id || index}
-                  className="rounded-[12px] border border-white/[0.06] p-3"
-                >
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      value={bonus.titleBn}
-                      onChange={(e) => setBonus(index, "titleBn", e.target.value)}
-                      placeholder="Title (Bangla)"
-                      className="ad-input"
-                    />
-
-                    <input
-                      value={bonus.titleEn}
-                      onChange={(e) => setBonus(index, "titleEn", e.target.value)}
-                      placeholder="Title (English)"
-                      className="ad-input"
-                    />
-                  </div>
-
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                    <select
-                      value={bonus.bonusType}
-                      onChange={(e) => setBonus(index, "bonusType", e.target.value)}
-                      className="ad-input"
-                    >
-                      <option value="percent">Percent</option>
-                      <option value="fixed">Fixed</option>
-                    </select>
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={bonus.bonusValue}
-                      onChange={(e) => setBonus(index, "bonusValue", e.target.value)}
-                      placeholder="Value"
-                      className="ad-input"
-                    />
-
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={bonus.turnoverMultiplier}
-                      onChange={(e) =>
-                        setBonus(index, "turnoverMultiplier", e.target.value)
-                      }
-                      placeholder="Multiplier"
-                      className="ad-input"
-                    />
-
-                    <select
-                      value={bonus.bonusScope}
-                      onChange={(e) => setBonus(index, "bonusScope", e.target.value)}
-                      className="ad-input"
-                    >
-                      <option value="all-time">Every deposit</option>
-                      <option value="first-deposit">First deposit only</option>
-                    </select>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <label className="flex items-center gap-2 text-[13px] text-[var(--text-muted)]">
-                        <input
-                          type="checkbox"
-                          checked={bonus.isActive}
-                          onChange={(e) =>
-                            setBonus(index, "isActive", e.target.checked)
-                          }
-                        />
-                        On
-                      </label>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setBonuses((prev) => prev.filter((_, i) => i !== index))
-                        }
-                        className="ad-btn ad-btn--danger ad-btn--sm"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 border-t border-white/[0.06] pt-3">
-                    <p className="ad-label">Eligible providers</p>
-
-                    <ProviderPicker
-                      value={bonus.providers}
-                      onChange={(next) => setBonus(index, "providers", next)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         <button
           type="submit"
           disabled={Boolean(busy)}
@@ -663,12 +470,13 @@ const AutoDeposit = () => {
       </form>
 
       <p className="mt-4 text-[12px] text-[var(--text-disabled)]">
-        The gateway confirms a payment by calling back with the token above. A
-        callback whose token does not match is thrown away, and the same
-        callback arriving twice credits the money only once.
+        When a player asks to withdraw through an auto method, the amount is
+        held from their balance and sent to the gateway. The gateway calls back
+        as it processes, completes (with proof) or rejects — a rejection returns
+        the money to the player automatically.
       </p>
     </div>
   );
 };
 
-export default AutoDeposit;
+export default AutoWithdraw;

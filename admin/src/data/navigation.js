@@ -136,6 +136,20 @@ export const navItems = [
         motherOnly: true,
       },
       {
+        key: "auto-withdraw",
+        path: "/auto-withdraw",
+        label: "Auto Withdraw",
+        icon: "Zap",
+        motherOnly: true,
+      },
+      {
+        key: "auto-withdraw-history",
+        path: "/auto-withdraw-history",
+        label: "Auto Withdraw History",
+        icon: "Receipt",
+        perm: "auto-withdraw-history",
+      },
+      {
         key: "aff-withdraw-requests",
         path: "/aff-withdraw-requests",
         label: "Affiliate Withdraws",
@@ -229,6 +243,11 @@ export const allPermissions = [
     key: "auto-deposit-history",
     label: "Auto Deposit History",
     path: "/auto-deposit-history",
+  },
+  {
+    key: "auto-withdraw-history",
+    label: "Auto Withdraw History",
+    path: "/auto-withdraw-history",
   },
   {
     key: "turnover-history",

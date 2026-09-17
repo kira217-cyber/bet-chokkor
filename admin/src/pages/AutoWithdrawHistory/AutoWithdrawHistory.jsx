@@ -1,61 +1,61 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Check, Loader2, Receipt, RefreshCw, Search, X } from "lucide-react";
+import { Banknote, Loader2, RefreshCw, Search, X } from "lucide-react";
 
 import { api } from "../../api/axios";
 import { Pager, UserCell } from "../../components/HistoryBits/HistoryBits";
 
-const fetchDeposits = async (status, q, page) => {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: "20",
-  });
+const fetchWithdrawals = async (status, q, page) => {
+  const params = new URLSearchParams({ page: String(page), limit: "20" });
 
   if (status !== "all") params.set("status", status);
   if (q) params.set("q", q);
 
-  const { data } = await api.get(`/api/auto-deposit/deposits/admin?${params}`);
-  return data?.data || { deposits: [], summary: {} };
+  const { data } = await api.get(`/api/auto-withdraw/withdrawals/admin?${params}`);
+  return data?.data || { withdrawals: [], summary: {} };
 };
 
 const TABS = [
   { key: "PENDING", label: "Pending" },
-  { key: "PAID", label: "Paid" },
-  { key: "FAILED", label: "Failed" },
+  { key: "PROCESSING", label: "Processing" },
+  { key: "COMPLETED", label: "Completed" },
+  { key: "REJECTED", label: "Rejected" },
   { key: "all", label: "All" },
 ];
 
 const STATUS_COLOR = {
   PENDING: "var(--status-pending)",
-  PAID: "var(--status-success)",
-  FAILED: "var(--status-danger)",
+  PROCESSING: "var(--status-pending)",
+  COMPLETED: "var(--status-success)",
+  REJECTED: "var(--status-danger)",
 };
 
 /**
- * অটো ডিপোজিটের ইতিহাস।
+ * অটো উইথড্রয়ের ইতিহাস।
  *
- * এখানে কিছু অনুমোদন করার নেই — গেটওয়েই সিদ্ধান্ত নেয়। PENDING মানে
- * ব্যবহারকারী পেমেন্ট শুরু করেছিলেন কিন্তু গেটওয়ে থেকে নিশ্চিতকরণ
- * আসেনি, তাই টাকাও যায়নি।
+ * গেটওয়ে নিজেই টাকা পাঠায়; PENDING/PROCESSING মানে এখনো চলছে, COMPLETED
+ * এ প্রমাণ ছবি থাকে, REJECTED এ টাকা খেলোয়াড়ের কাছে ফেরত গেছে। কোনো
+ * উইথড্র ঝুলে থাকলে অ্যাডমিন হাতে বাতিল করে টাকা ফেরত দিতে পারে।
  */
-const AutoDepositHistory = () => {
-  const [tab, setTab] = useState("PAID");
+const AutoWithdrawHistory = () => {
+  const [tab, setTab] = useState("PENDING");
   const [search, setSearch] = useState("");
-  const [deposits, setDeposits] = useState([]);
+  const [rows, setRows] = useState([]);
   const [summary, setSummary] = useState({});
   const [meta, setMeta] = useState({});
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState("");
 
   useEffect(() => {
     let alive = true;
 
     const timer = setTimeout(() => {
-      fetchDeposits(tab, search, page)
+      fetchWithdrawals(tab, search, page)
         .then((data) => {
           if (!alive) return;
 
-          setDeposits(data.deposits || []);
+          setRows(data.withdrawals || []);
           setSummary(data.summary || {});
           setMeta(data.meta || {});
         })
@@ -71,14 +71,12 @@ const AutoDepositHistory = () => {
     };
   }, [tab, search, page]);
 
-  const [acting, setActing] = useState("");
-
   const load = async () => {
     try {
       setLoading(true);
-      const data = await fetchDeposits(tab, search, page);
+      const data = await fetchWithdrawals(tab, search, page);
 
-      setDeposits(data.deposits || []);
+      setRows(data.withdrawals || []);
       setSummary(data.summary || {});
       setMeta(data.meta || {});
     } catch (error) {
@@ -88,14 +86,13 @@ const AutoDepositHistory = () => {
     }
   };
 
-  // Bank/Crypto ম্যানুয়াল ডিপোজিট — অ্যাডমিন প্রমাণ দেখে confirm/reject করে
-  const review = async (deposit, action) => {
+  const reject = async (row) => {
     try {
-      setActing(`${action}:${deposit._id}`);
+      setActing(row._id);
       const { data } = await api.post(
-        `/api/auto-deposit/deposits/${deposit._id}/${action}`,
+        `/api/auto-withdraw/withdrawals/${row._id}/reject`,
       );
-      toast.success(data?.message || "Done");
+      toast.success(data?.message || "Rejected");
       await load();
     } catch (error) {
       toast.error(error?.response?.data?.message || "Action failed");
@@ -105,14 +102,14 @@ const AutoDepositHistory = () => {
   };
 
   return (
-    <div className="mx-auto max-w-[1100px]">
+    <div className="mx-auto max-w-[1200px]">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="ad-title text-[26px] lg:text-[30px]">
-            Auto Deposit History
+            Auto Withdraw History
           </h1>
           <p className="mt-1 text-[14px] text-[var(--text-muted)]">
-            Payments that went through the gateway.
+            Payouts that went through the gateway.
           </p>
         </div>
 
@@ -127,8 +124,8 @@ const AutoDepositHistory = () => {
         </button>
       </div>
 
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        {["PENDING", "PAID", "FAILED"].map((key) => (
+      <div className="mb-4 grid gap-3 sm:grid-cols-4">
+        {["PENDING", "PROCESSING", "COMPLETED", "REJECTED"].map((key) => (
           <div key={key} className="ad-card py-4">
             <p className="text-[13px] capitalize text-[var(--text-muted)]">
               {key.toLowerCase()}
@@ -187,28 +184,28 @@ const AutoDepositHistory = () => {
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
-      ) : deposits.length === 0 ? (
+      ) : rows.length === 0 ? (
         <div className="ad-card flex flex-col items-center gap-3 py-10 text-center">
-          <Receipt size={28} className="text-[var(--text-disabled)]" />
+          <Banknote size={28} className="text-[var(--text-disabled)]" />
           <p className="text-[15px] font-semibold text-[var(--neutral100)]">
             Nothing here
           </p>
           <p className="text-[13px] text-[var(--text-muted)]">
-            No auto deposit to show.
+            No auto withdraw to show.
           </p>
         </div>
       ) : (
         <div className="ad-card ad-table-wrap ad-scroll p-0">
-          <table className="w-full min-w-[820px] border-collapse text-left">
+          <table className="w-full min-w-[960px] border-collapse text-left">
             <thead>
               <tr className="border-b border-white/[0.07]">
                 {[
                   "Player",
-                  "Invoice",
                   "Method",
+                  "Wallet",
                   "Amount",
-                  "Bonus",
-                  "Credited",
+                  "Fee",
+                  "Proof",
                   "When",
                   "Status",
                   "Action",
@@ -224,37 +221,58 @@ const AutoDepositHistory = () => {
             </thead>
 
             <tbody>
-              {deposits.map((deposit) => (
+              {rows.map((row) => (
                 <tr
-                  key={deposit._id}
+                  key={row._id}
                   className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]"
                 >
                   <td className="px-4 py-3">
-                    <UserCell user={deposit.user} userId={deposit.userIdText} />
-                  </td>
-
-                  <td className="px-4 py-3 text-[12px] text-[var(--text-muted)]">
-                    {deposit.invoiceNumber}
+                    <UserCell user={row.user} userId={row.userIdText} />
                   </td>
 
                   <td className="px-4 py-3 text-[13px] capitalize text-[var(--neutral100)]">
-                    {deposit.bank || "—"}
-                  </td>
-
-                  <td className="px-4 py-3 text-[14px] text-[var(--neutral100)]">
-                    {deposit.amount}
-                  </td>
-
-                  <td className="px-4 py-3 text-[13px] text-[var(--status-success)]">
-                    {deposit.calc?.bonusAmount || 0}
-                  </td>
-
-                  <td className="px-4 py-3 text-[14px] font-bold text-[var(--primary500)]">
-                    {deposit.calc?.creditedAmount || deposit.amount}
+                    {row.paymentMethod || "—"}
                   </td>
 
                   <td className="px-4 py-3 text-[13px] text-[var(--text-muted)]">
-                    {new Date(deposit.createdAt).toLocaleString()}
+                    {row.accountNumber || "—"}
+                  </td>
+
+                  <td className="px-4 py-3 text-[14px] font-bold text-[var(--neutral100)]">
+                    {row.amount}
+                  </td>
+
+                  <td className="px-4 py-3 text-[13px] text-[var(--text-muted)]">
+                    {row.feeAmount ? `${row.feeAmount} (${row.feePercentage}%)` : "—"}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    {row.proofImages?.length ? (
+                      <div className="flex gap-1">
+                        {row.proofImages.slice(0, 3).map((url) => (
+                          <a
+                            key={url}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                          >
+                            <img
+                              src={url}
+                              alt="proof"
+                              className="h-9 w-9 rounded-md object-cover"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-[12px] text-[var(--text-disabled)]">
+                        —
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3 text-[13px] text-[var(--text-muted)]">
+                    {new Date(row.createdAt).toLocaleString()}
                   </td>
 
                   <td className="px-4 py-3">
@@ -262,45 +280,35 @@ const AutoDepositHistory = () => {
                       className="rounded-full px-2 py-[2px] text-[11px] font-bold"
                       style={{
                         background: `color-mix(in srgb, ${
-                          STATUS_COLOR[deposit.status]
+                          STATUS_COLOR[row.status]
                         }, transparent 88%)`,
-                        color: STATUS_COLOR[deposit.status],
+                        color: STATUS_COLOR[row.status],
                       }}
                     >
-                      {deposit.status}
+                      {row.status}
                     </span>
+                    {row.status === "REJECTED" && row.reason ? (
+                      <p className="mt-1 max-w-[160px] text-[11px] text-[var(--text-disabled)]">
+                        {row.reason}
+                      </p>
+                    ) : null}
                   </td>
 
                   <td className="px-4 py-3">
-                    {deposit.status === "PENDING" ? (
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => review(deposit, "confirm")}
-                          disabled={Boolean(acting)}
-                          className="ad-btn ad-btn--primary ad-btn--sm"
-                          title="Confirm & credit"
-                        >
-                          {acting === `confirm:${deposit._id}` ? (
-                            <Loader2 size={13} className="animate-spin" />
-                          ) : (
-                            <Check size={13} />
-                          )}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => review(deposit, "reject")}
-                          disabled={Boolean(acting)}
-                          className="ad-btn ad-btn--danger ad-btn--sm"
-                          title="Reject"
-                        >
-                          {acting === `reject:${deposit._id}` ? (
-                            <Loader2 size={13} className="animate-spin" />
-                          ) : (
-                            <X size={13} />
-                          )}
-                        </button>
-                      </div>
+                    {["PENDING", "PROCESSING"].includes(row.status) ? (
+                      <button
+                        type="button"
+                        onClick={() => reject(row)}
+                        disabled={Boolean(acting)}
+                        className="ad-btn ad-btn--danger ad-btn--sm"
+                        title="Reject & refund"
+                      >
+                        {acting === row._id ? (
+                          <Loader2 size={13} className="animate-spin" />
+                        ) : (
+                          <X size={13} />
+                        )}
+                      </button>
                     ) : (
                       <span className="text-[12px] text-[var(--text-disabled)]">
                         —
@@ -327,4 +335,4 @@ const AutoDepositHistory = () => {
   );
 };
 
-export default AutoDepositHistory;
+export default AutoWithdrawHistory;

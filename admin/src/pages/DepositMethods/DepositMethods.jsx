@@ -409,7 +409,7 @@ const DepositMethods = () => {
             {/* ── লোগো ── */}
             <div className="rounded-[14px] border border-white/[0.07] p-4">
               <div className="flex flex-wrap items-center gap-4">
-                <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/[0.08] bg-black/30">
+                <span className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/[0.08] bg-black/30 p-1">
                   {logoPreview || draft.logoUrl ? (
                     <img
                       src={logoPreview || imageUrl(draft.logoUrl)}
@@ -417,7 +417,7 @@ const DepositMethods = () => {
                       className="h-full w-full object-contain"
                     />
                   ) : (
-                    <ImagePlus size={20} className="text-[var(--text-disabled)]" />
+                    <ImagePlus size={24} className="text-[var(--text-disabled)]" />
                   )}
                 </span>
 
@@ -608,13 +608,13 @@ const DepositMethods = () => {
                     <img
                       src={imageUrl(method.logoUrl)}
                       alt=""
-                      className="h-10 w-10 shrink-0 rounded-[10px] object-contain"
+                      className="h-16 w-16 shrink-0 rounded-[12px] bg-white/[0.04] object-contain p-1"
                     />
                   )}
 
                   <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-[16px] font-extrabold text-[var(--neutral100)]">
+                    <h3 className="text-[18px] font-extrabold text-[var(--neutral100)]">
                       {method.methodName?.en || method.methodId}
                     </h3>
 
@@ -636,12 +636,12 @@ const DepositMethods = () => {
                   </div>
 
                   {method.methodName?.bn && (
-                    <p className="mt-1 text-[13px] text-[var(--text-secondary)]">
+                    <p className="mt-1 text-[15px] text-[var(--text-secondary)]">
                       {method.methodName.bn}
                     </p>
                   )}
 
-                  <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[13px] text-[var(--text-muted)]">
+                  <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[14px] text-[var(--text-muted)]">
                     <span className="capitalize">{method.group}</span>
                     <span className="capitalize">{method.methodType}</span>
                     <span>

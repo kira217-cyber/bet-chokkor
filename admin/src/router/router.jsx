@@ -30,6 +30,8 @@ import AutoDeposit from "../pages/AutoDeposit/AutoDeposit";
 import AutoDepositHistory from "../pages/AutoDepositHistory/AutoDepositHistory";
 import WithdrawMethods from "../pages/WithdrawMethods/WithdrawMethods";
 import WithdrawRequests from "../pages/WithdrawRequests/WithdrawRequests";
+import AutoWithdraw from "../pages/AutoWithdraw/AutoWithdraw";
+import AutoWithdrawHistory from "../pages/AutoWithdrawHistory/AutoWithdrawHistory";
 import AffWithdrawMethods from "../pages/AffWithdrawMethods/AffWithdrawMethods";
 import AffWithdrawRequests from "../pages/AffWithdrawRequests/AffWithdrawRequests";
 import TurnoverHistory from "../pages/TurnoverHistory/TurnoverHistory";
@@ -153,6 +155,15 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "withdraw-requests", element: <WithdrawRequests /> },
+      {
+        path: "auto-withdraw",
+        element: (
+          <PrivateRoute motherOnly>
+            <AutoWithdraw />
+          </PrivateRoute>
+        ),
+      },
+      { path: "auto-withdraw-history", element: <AutoWithdrawHistory /> },
       { path: "aff-withdraw-requests", element: <AffWithdrawRequests /> },
       {
         path: "aff-withdraw-methods",
