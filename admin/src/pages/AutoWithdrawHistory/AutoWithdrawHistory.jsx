@@ -4,6 +4,7 @@ import { Banknote, Loader2, RefreshCw, Search, X } from "lucide-react";
 
 import { api } from "../../api/axios";
 import { Pager, UserCell } from "../../components/HistoryBits/HistoryBits";
+import ImageLightbox from "../../components/ImageLightbox/ImageLightbox";
 
 const fetchWithdrawals = async (status, q, page) => {
   const params = new URLSearchParams({ page: String(page), limit: "20" });
@@ -46,6 +47,7 @@ const AutoWithdrawHistory = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState("");
+  const [zoom, setZoom] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -250,18 +252,18 @@ const AutoWithdrawHistory = () => {
                     {row.proofImages?.length ? (
                       <div className="flex gap-1">
                         {row.proofImages.slice(0, 3).map((url) => (
-                          <a
+                          <button
                             key={url}
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer noopener"
+                            type="button"
+                            onClick={() => setZoom(url)}
+                            className="cursor-pointer overflow-hidden rounded-md transition-[filter] hover:brightness-110"
                           >
                             <img
                               src={url}
                               alt="proof"
-                              className="h-9 w-9 rounded-md object-cover"
+                              className="h-9 w-9 object-cover"
                             />
-                          </a>
+                          </button>
                         ))}
                       </div>
                     ) : (
@@ -331,6 +333,8 @@ const AutoWithdrawHistory = () => {
           setPage(next);
         }}
       />
+
+      <ImageLightbox src={zoom} alt="proof" onClose={() => setZoom("")} />
     </div>
   );
 };

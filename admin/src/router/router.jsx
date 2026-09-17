@@ -15,6 +15,7 @@ import GameHistory from "../pages/GameHistory/GameHistory";
 import Maintenance from "../pages/Maintenance/Maintenance";
 import ContactLinks from "../pages/ContactLinks/ContactLinks";
 import AppDownload from "../pages/AppDownload/AppDownload";
+import Notifications from "../pages/Notifications/Notifications";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
 import Users from "../pages/Users/Users";
 import Affiliates from "../pages/Users/Affiliates";
@@ -72,6 +73,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <AppDownload />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <PrivateRoute motherOnly>
+            <Notifications />
           </PrivateRoute>
         ),
       },

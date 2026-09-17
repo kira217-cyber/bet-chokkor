@@ -33,6 +33,7 @@ import {
   X,
   LogOut,
   Eye,
+  Bell,
 } from "lucide-react";
 
 import { navItems, roleLabels } from "../data/navigation";
@@ -66,6 +67,7 @@ const ICONS = {
   Phone,
   Smartphone,
   User,
+  Bell,
 };
 
 /**

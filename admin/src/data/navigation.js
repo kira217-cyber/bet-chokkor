@@ -46,6 +46,7 @@ export const navItems = [
 
   { key: "contact-links", path: "/contact-links", label: "Contact Links", icon: "Phone", motherOnly: true },
   { key: "app-download", path: "/app-download", label: "App Download", icon: "Smartphone", motherOnly: true },
+  { key: "notifications", path: "/notifications", label: "Notifications", icon: "Bell", motherOnly: true },
   { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
 
   { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
