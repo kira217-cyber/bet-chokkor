@@ -156,6 +156,12 @@ const userSchema = new Schema(
       index: true,
     },
 
+    /*
+     * নোটিফিকেশন সবশেষ কখন দেখেছেন — এর পরে তৈরি হওয়া নোটিফিকেশনই
+     * "না-পড়া" ধরা হয়। পাতা খুললেই এটা এখনকার সময়ে বসে, তখন গণনা ০।
+     */
+    notificationsSeenAt: { type: Date, default: null },
+
     /* ── নিরাপত্তা ── */
     failedLoginAttempts: { type: Number, default: 0, select: false },
     lockedUntil: { type: Date, default: null, select: false },
