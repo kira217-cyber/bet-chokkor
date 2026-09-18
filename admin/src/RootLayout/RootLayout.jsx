@@ -34,6 +34,9 @@ import {
   LogOut,
   Eye,
   Bell,
+  Images,
+  Megaphone,
+  CalendarClock,
 } from "lucide-react";
 
 import { navItems, roleLabels } from "../data/navigation";
@@ -68,6 +71,9 @@ const ICONS = {
   Smartphone,
   User,
   Bell,
+  Images,
+  Megaphone,
+  CalendarClock,
 };
 
 /**

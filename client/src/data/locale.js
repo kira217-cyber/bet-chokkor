@@ -167,6 +167,12 @@ export const locale = {
   selectPromotion: { bn: "প্রমোশন সিলেক্ট করুন", en: "Select a promotion" },
   promotionLabel: { bn: "প্রমোশন", en: "Promotion" },
   noPromotion: { bn: "সাধারণ", en: "Normal" },
+  all: { bn: "সব", en: "All" },
+  promoEmpty: {
+    bn: "এখন কোনো প্রমোশন নেই",
+    en: "No promotions right now",
+  },
+  readMore: { bn: "আরও পড়ুন", en: "Read more" },
   selectPayment: { bn: "পেমেন্ট নির্বাচন করুন", en: "Select a payment" },
   selectChannel: { bn: "চ্যানেল সিলেক্ট করুন", en: "Select a channel" },
   depositChannel: { bn: "ডিপোজিট চ্যানেল", en: "Deposit channel" },

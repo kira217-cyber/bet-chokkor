@@ -8,6 +8,7 @@ import { fetchContacts } from "../../features/contact/contactApi";
 import {
   selectSideNavLinks,
   selectSliders,
+  selectPromotions,
 } from "../../features/global/globalSelectors";
 import { selectGameCategories } from "../../features/globalGame/globalGameSelectors";
 
@@ -63,6 +64,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
   const categories = useSelector(selectGameCategories);
   const sideNavLinks = useSelector(selectSideNavLinks);
   const sliders = useSelector(selectSliders);
+  const promoItems = useSelector(selectPromotions);
 
   const [openCategory, setOpenCategory] = useState(null);
   const [contactOpen, setContactOpen] = useState(false);
@@ -368,17 +370,18 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
               "calc(var(--u) * 2.133) calc(var(--u) * 4.267) calc(var(--u) * 4.267)",
           }}
         >
-          {sliders.map((slide) => (
+          {/* অ্যাডমিন-নিয়ন্ত্রিত প্রমোশনের ছবি; না থাকলে স্লাইডার ফলব্যাক */}
+          {(promoItems.length ? promoItems : sliders).map((item) => (
             <Link
-              key={slide.id}
-              to={slide.link}
+              key={item.id}
+              to="/promotion"
               onClick={onNavigate}
               className="shrink-0"
               style={{ width: "62%" }}
             >
               <img
-                src={slide.mobileImage}
-                alt={tv(slide.title)}
+                src={item.image || item.mobileImage}
+                alt={tv(item.title)}
                 className="w-full object-cover"
                 style={{
                   aspectRatio: "358.81 / 172.02",

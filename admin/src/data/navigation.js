@@ -47,6 +47,17 @@ export const navItems = [
   { key: "contact-links", path: "/contact-links", label: "Contact Links", icon: "Phone", motherOnly: true },
   { key: "app-download", path: "/app-download", label: "App Download", icon: "Smartphone", motherOnly: true },
   { key: "notifications", path: "/notifications", label: "Notifications", icon: "Bell", motherOnly: true },
+  {
+    key: "home-content",
+    label: "Home Content",
+    icon: "Images",
+    children: [
+      { key: "sliders", path: "/sliders", label: "Home Sliders", icon: "Images", motherOnly: true },
+      { key: "site-notice", path: "/site-notice", label: "Notice", icon: "Megaphone", motherOnly: true },
+      { key: "home-events", path: "/home-events", label: "Home Events", icon: "CalendarClock", motherOnly: true },
+      { key: "promotions", path: "/promotions", label: "Promotions", icon: "Gift", motherOnly: true },
+    ],
+  },
   { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
 
   { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },

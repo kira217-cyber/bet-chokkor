@@ -5,6 +5,7 @@ import Games from "../pages/Games/Games";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Login from "../pages/Login/Login";
 import AppDownload from "../pages/AppDownload/AppDownload";
+import Promotion from "../pages/Promotion/Promotion";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import PrivateRoute from "../PrivateRoute/PrivateRoute";
@@ -40,6 +41,10 @@ export const routes = createBrowserRouter([
       {
         path: "app-download",
         element: <AppDownload />,
+      },
+      {
+        path: "promotion",
+        element: <Promotion />,
       },
 
       // লগইন ছাড়া member পেজে ঢোকা যায় না — PrivateRoute হোমে ফেরত পাঠায়

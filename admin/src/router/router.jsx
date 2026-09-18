@@ -16,6 +16,10 @@ import Maintenance from "../pages/Maintenance/Maintenance";
 import ContactLinks from "../pages/ContactLinks/ContactLinks";
 import AppDownload from "../pages/AppDownload/AppDownload";
 import Notifications from "../pages/Notifications/Notifications";
+import Sliders from "../pages/Sliders/Sliders";
+import SiteNotice from "../pages/SiteNotice/SiteNotice";
+import HomeEvents from "../pages/HomeEvents/HomeEvents";
+import Promotions from "../pages/Promotions/Promotions";
 import OtpSetting from "../pages/OtpSetting/OtpSetting";
 import Users from "../pages/Users/Users";
 import Affiliates from "../pages/Users/Affiliates";
@@ -81,6 +85,38 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <Notifications />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "sliders",
+        element: (
+          <PrivateRoute motherOnly>
+            <Sliders />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "site-notice",
+        element: (
+          <PrivateRoute motherOnly>
+            <SiteNotice />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "home-events",
+        element: (
+          <PrivateRoute motherOnly>
+            <HomeEvents />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "promotions",
+        element: (
+          <PrivateRoute motherOnly>
+            <Promotions />
           </PrivateRoute>
         ),
       },
