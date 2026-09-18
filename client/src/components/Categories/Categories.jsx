@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useComingSoon } from "../../Context/comingSoonContext";
 import { useSelector } from "react-redux";
 import { ChevronRight } from "lucide-react";
@@ -28,6 +28,7 @@ import {
  */
 const Categories = () => {
   const { t, tv } = useLanguage();
+  const navigate = useNavigate();
   const { openComingSoon } = useComingSoon();
 
   const categories = useSelector(selectGameCategories);
@@ -155,9 +156,12 @@ const Categories = () => {
             style={{ gap: "calc(var(--u) * 2.133)" }}
           >
             {active.vendors.map((vendor) => {
-              // স্পোর্টসের কার্ডগুলো প্রোভাইডার নয়, গেম — তাই ক্লিকে
-              // গেম লিস্টে না গিয়ে "শীঘ্রই আসছে" মডাল খোলে
+              // স্পোর্টসের কার্ডগুলো প্রোভাইডার নয়, গেম — white-label থেকে
+              // আসা এন্ট্রিতে `code` (game_uid) থাকে, তাই ক্লিকে সরাসরি
+              // গেম লঞ্চ হয় (Bajiman এর মতো)। `code` না থাকলে (স্ট্যাটিক
+              // ফলব্যাক) "শীঘ্রই আসছে" মডাল খোলে
               const isSports = active.key === "sports";
+              const sportGameUid = vendor.code || "";
 
               const cellProps = {
                 className:
@@ -204,10 +208,12 @@ const Categories = () => {
                     key={`${active.key}-${vendor.key}`}
                     type="button"
                     onClick={() =>
-                      openComingSoon({
-                        name: vendor.name,
-                        image: vendor.icon,
-                      })
+                      sportGameUid
+                        ? navigate(`/play/${sportGameUid}`)
+                        : openComingSoon({
+                            name: vendor.name,
+                            image: vendor.icon,
+                          })
                     }
                     {...cellProps}
                     className={`${cellProps.className} cursor-pointer`}

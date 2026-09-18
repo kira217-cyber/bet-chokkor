@@ -1,51 +1,164 @@
 import express from "express";
 
 import { protectAdmin } from "../middleware/protectAdmin.js";
-import { successResponse } from "../utils/response.js";
+import { successResponse, errorResponse } from "../utils/response.js";
 import Admin from "../models/Admin.js";
+import User from "../models/User.js";
+import DepositRequest from "../models/DepositRequest.js";
+import WithdrawRequest from "../models/WithdrawRequest.js";
+import AutoDeposit from "../models/AutoDeposit.js";
+import AutoWithdraw from "../models/AutoWithdraw.js";
 
 const router = express.Router();
 
+const money = (v) => Math.round((Number(v) || 0) * 100) / 100;
+
+/** একটা aggregate থেকে প্রথম sum, না থাকলে ০ */
+const sumOf = async (Model, match, field = "amount") => {
+  const rows = await Model.aggregate([
+    { $match: match },
+    { $group: { _id: null, total: { $sum: `$${field}` } } },
+  ]);
+  return money(rows[0]?.total || 0);
+};
+
 /**
- * ড্যাশবোর্ডের সংখ্যা।
+ * ড্যাশবোর্ডের সারসংক্ষেপ — সব আসল ডেটাবেস থেকে (Bajiman এর মতো)।
  *
- * এখন বেশিরভাগ স্ট্যাটিক — user, deposit, withdraw মডেল তৈরি হলে
- * এখানে আসল query বসবে। অ্যাডমিনের সংখ্যাটা কিন্তু আসল ডেটাবেস থেকেই।
+ * ম্যানুয়াল + অটো — দুই ধরনের ডিপোজিট/উইথড্র মিলিয়ে হিসাব।
  */
-router.get("/stats", protectAdmin, async (req, res) => {
-  const adminCount = await Admin.countDocuments();
+router.get("/summary", protectAdmin, async (req, res) => {
+  try {
+    const [
+      allUsers,
+      activeUsers,
+      allAffiliateUsers,
+      pendingDepositRequest,
+      pendingWithdrawRequest,
+      pendingAutoWithdraw,
+      adminCount,
+      manualDeposit,
+      autoDeposit,
+      manualWithdraw,
+      autoWithdraw,
+      userBalance,
+    ] = await Promise.all([
+      User.countDocuments({ role: "user" }),
+      User.countDocuments({ role: "user", isActive: true }),
+      User.countDocuments({ role: "aff-user" }),
+      DepositRequest.countDocuments({ status: "pending" }),
+      WithdrawRequest.countDocuments({ status: "pending" }),
+      AutoWithdraw.countDocuments({ status: { $in: ["PENDING", "PROCESSING"] } }),
+      Admin.countDocuments(),
+      sumOf(DepositRequest, { status: "approved" }, "amount"),
+      sumOf(AutoDeposit, { status: "PAID" }, "amount"),
+      sumOf(WithdrawRequest, { status: "approved" }, "amount"),
+      sumOf(AutoWithdraw, { status: "COMPLETED" }, "amount"),
+      sumOf(User, { role: "user" }, "balance"),
+    ]);
 
-  return successResponse(res, "Dashboard stats loaded", {
-    stats: {
-      totalUsers: 12480,
-      activeUsers: 3162,
-      totalDeposit: 8420000,
-      totalWithdraw: 5130000,
-      pendingDeposits: 24,
-      pendingWithdraws: 11,
-      totalAffiliates: 318,
-      totalAdmins: adminCount,
-    },
+    // শেষ ৭ দিনের ডিপোজিট/উইথড্র (ম্যানুয়াল+অটো একসাথে)
+    const days = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i -= 1) {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      start.setDate(start.getDate() - i);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      days.push({ start, end, label: start.toLocaleDateString("en-US", { weekday: "short" }) });
+    }
 
-    // শেষ ৭ দিনের ডিপোজিট/উইথড্র — চার্টের জন্য
-    chart: [
-      { day: "Sat", deposit: 940000, withdraw: 560000 },
-      { day: "Sun", deposit: 1120000, withdraw: 610000 },
-      { day: "Mon", deposit: 1035000, withdraw: 720000 },
-      { day: "Tue", deposit: 1280000, withdraw: 690000 },
-      { day: "Wed", deposit: 1190000, withdraw: 810000 },
-      { day: "Thu", deposit: 1405000, withdraw: 880000 },
-      { day: "Fri", deposit: 1450000, withdraw: 860000 },
-    ],
+    const chart = await Promise.all(
+      days.map(async ({ start, end, label }) => {
+        const range = { $gte: start, $lt: end };
+        const [md, ad, mw, aw] = await Promise.all([
+          sumOf(DepositRequest, { status: "approved", createdAt: range }, "amount"),
+          sumOf(AutoDeposit, { status: "PAID", createdAt: range }, "amount"),
+          sumOf(WithdrawRequest, { status: "approved", createdAt: range }, "amount"),
+          sumOf(AutoWithdraw, { status: "COMPLETED", createdAt: range }, "amount"),
+        ]);
+        return { day: label, deposit: money(md + ad), withdraw: money(mw + aw) };
+      }),
+    );
 
-    recentActivity: [
-      { id: "a1", type: "deposit", user: "rai18", amount: 5000, status: "pending" },
-      { id: "a2", type: "withdraw", user: "sabbir77", amount: 12000, status: "approved" },
-      { id: "a3", type: "register", user: "nusrat_01", amount: 0, status: "done" },
-      { id: "a4", type: "deposit", user: "mehedi_bd", amount: 2500, status: "approved" },
-      { id: "a5", type: "withdraw", user: "arif.khan", amount: 7800, status: "rejected" },
-    ],
-  });
+    return successResponse(res, "Dashboard summary loaded", {
+      cards: {
+        allUsers,
+        activeUsers,
+        allAffiliateUsers,
+        allDepositBalances: money(manualDeposit + autoDeposit),
+        pendingDepositRequest,
+        allWithdrawBalances: money(manualWithdraw + autoWithdraw),
+        pendingWithdrawRequest: pendingWithdrawRequest + pendingAutoWithdraw,
+        totalUserBalance: money(userBalance),
+        totalAdmins: adminCount,
+      },
+      chart,
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+/**
+ * নির্দিষ্ট দিনের সারসংক্ষেপ — তারিখ বেছে দিলে সেই দিনের হিসাব।
+ */
+router.get("/today", protectAdmin, async (req, res) => {
+  try {
+    const dateStr = String(req.query.date || "").trim();
+    const base = dateStr ? new Date(dateStr) : new Date();
+
+    if (Number.isNaN(base.getTime())) {
+      return errorResponse(res, "Invalid date", 400);
+    }
+
+    const start = new Date(base);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
+    const range = { $gte: start, $lt: end };
+
+    const [
+      newUsers,
+      newAffiliates,
+      manualDeposit,
+      autoDeposit,
+      manualWithdraw,
+      autoWithdraw,
+      depositCount,
+      withdrawCount,
+      pendingDeposit,
+      pendingWithdraw,
+    ] = await Promise.all([
+      User.countDocuments({ role: "user", createdAt: range }),
+      User.countDocuments({ role: "aff-user", createdAt: range }),
+      sumOf(DepositRequest, { status: "approved", createdAt: range }, "amount"),
+      sumOf(AutoDeposit, { status: "PAID", createdAt: range }, "amount"),
+      sumOf(WithdrawRequest, { status: "approved", createdAt: range }, "amount"),
+      sumOf(AutoWithdraw, { status: "COMPLETED", createdAt: range }, "amount"),
+      DepositRequest.countDocuments({ status: "approved", createdAt: range }),
+      WithdrawRequest.countDocuments({ status: "approved", createdAt: range }),
+      DepositRequest.countDocuments({ status: "pending", createdAt: range }),
+      WithdrawRequest.countDocuments({ status: "pending", createdAt: range }),
+    ]);
+
+    return successResponse(res, "Day summary loaded", {
+      date: start.toISOString().slice(0, 10),
+      cards: {
+        newUsers,
+        newAffiliates,
+        deposit: money(manualDeposit + autoDeposit),
+        withdraw: money(manualWithdraw + autoWithdraw),
+        depositCount,
+        withdrawCount,
+        pendingDeposit,
+        pendingWithdraw,
+      },
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
 });
 
 export default router;
