@@ -444,12 +444,44 @@ router.get("/deposits/admin", protectAdmin, async (req, res) => {
         .limit(limit)
         .lean(),
       AutoDeposit.countDocuments(filter),
-      AutoDeposit.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
+      AutoDeposit.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            n: { $sum: 1 },
+            amt: { $sum: "$amount" },
+          },
+        },
+      ]),
     ]);
 
-    const summary = { PENDING: 0, PAID: 0, FAILED: 0 };
+    // গণনা + টাকার অঙ্ক — Bajiman এর সারাংশ কার্ডের মতো
+    const summary = {
+      PENDING: 0,
+      PAID: 0,
+      FAILED: 0,
+      paidAmount: 0,
+      pendingAmount: 0,
+      failedAmount: 0,
+      paidCount: 0,
+      pendingCount: 0,
+      failedCount: 0,
+    };
+
     counts.forEach((row) => {
-      summary[row._id] = row.n;
+      const st = String(row._id || "").toUpperCase();
+      summary[st] = row.n;
+
+      if (st === "PAID") {
+        summary.paidAmount = money(row.amt);
+        summary.paidCount = row.n;
+      } else if (st === "FAILED") {
+        summary.failedAmount = money(row.amt);
+        summary.failedCount = row.n;
+      } else if (st === "PENDING") {
+        summary.pendingAmount = money(row.amt);
+        summary.pendingCount = row.n;
+      }
     });
 
     return successResponse(res, "Auto deposits loaded", {

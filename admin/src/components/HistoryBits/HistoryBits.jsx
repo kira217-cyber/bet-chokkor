@@ -1,5 +1,98 @@
 import React from "react";
 import { useNavigate } from "react-router";
+import { RefreshCw } from "lucide-react";
+
+/** টাকার অঙ্ক দেখানো — ৳ 1,234.00 */
+export const taka = (value) => {
+  const num = Number(value || 0);
+  if (!Number.isFinite(num)) return "৳ 0.00";
+  return `৳ ${num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+/**
+ * ইতিহাস/রিকোয়েস্ট পাতার সোনালি গ্রেডিয়েন্ট হেডার — Bajiman এর মতো,
+ * রঙ আমাদের সাইটের (গোল্ড/ডার্ক)। বাঁয়ে আইকন + শিরোনাম, ডানে রিফ্রেশ।
+ */
+export const HistoryHeader = ({ title, subtitle, Icon, onRefresh, loading }) => (
+  <div
+    className="mb-5 overflow-hidden rounded-[24px] border px-5 py-5 md:px-6 md:py-6"
+    style={{
+      background:
+        "linear-gradient(90deg, var(--neutral1000), color-mix(in srgb, var(--primary500), transparent 82%), var(--neutral1000))",
+      borderColor: "color-mix(in srgb, var(--primary500), transparent 78%)",
+    }}
+  >
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex items-center gap-4">
+        <span
+          className="flex h-14 w-14 items-center justify-center rounded-[18px]"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--primary400), var(--primary500))",
+            color: "var(--neutral1000)",
+          }}
+        >
+          {Icon ? <Icon size={26} /> : null}
+        </span>
+
+        <div>
+          <h1 className="text-[24px] font-black tracking-tight text-[var(--neutral100)] md:text-[30px]">
+            {title}
+          </h1>
+          {subtitle ? (
+            <p className="mt-1 text-[13px] font-medium text-[var(--text-muted)]">
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {onRefresh ? (
+        <button
+          type="button"
+          onClick={onRefresh}
+          disabled={loading}
+          className="ad-btn ad-btn--primary"
+        >
+          <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      ) : null}
+    </div>
+  </div>
+);
+
+/** সারাংশ কার্ড — টাকা (বড়) + রেকর্ড সংখ্যা + আইকন */
+export const StatCard = ({ title, amount, count, color, Icon }) => (
+  <div className="ad-card">
+    <div className="flex items-start justify-between gap-4">
+      <div className="min-w-0">
+        <div className="text-[12px] font-bold uppercase tracking-wide text-[var(--text-muted)]">
+          {title}
+        </div>
+        <div className="mt-2 text-[22px] font-black" style={{ color }}>
+          {amount}
+        </div>
+        <div className="mt-1 text-[13px] font-semibold text-[var(--text-disabled)]">
+          {Number(count || 0)} records
+        </div>
+      </div>
+
+      <span
+        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px]"
+        style={{
+          background: `color-mix(in srgb, ${color}, transparent 86%)`,
+          color,
+        }}
+      >
+        {Icon ? <Icon size={22} /> : null}
+      </span>
+    </div>
+  </div>
+);
 
 /**
  * ইতিহাসের পাতাগুলোর সাধারণ অংশ।

@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Loader2, RefreshCw, Search, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Loader2,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
 
 import { api } from "../../api/axios";
 import { Pager } from "../../components/HistoryBits/HistoryBits";
@@ -24,6 +31,7 @@ const HistoryTable = ({
   userId,
   path,
   columns,
+  primaryKeys,
   statuses,
   summaryCards,
   minWidth = 900,
@@ -35,6 +43,7 @@ const HistoryTable = ({
 
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("all");
+  const [expandedId, setExpandedId] = useState("");
 
   // টাইপ করার সাথে সাথেই খোঁজা হয় না — Search চাপলে বা এন্টার দিলে
   const [term, setTerm] = useState("");
@@ -60,6 +69,7 @@ const HistoryTable = ({
         setMeta(data?.data?.meta || {});
         setSummary(data?.data?.summary || {});
         setCounts(data?.data?.counts || {});
+        setExpandedId("");
       })
       .catch((error) =>
         toast.error(error?.response?.data?.message || `Failed to load ${title}`),
@@ -92,6 +102,18 @@ const HistoryTable = ({
   };
 
   const cards = (summaryCards || []).map((card) => card(summary, counts));
+
+  /*
+   * ব্যবহারকারী-বান্ধব: টেবিলে শুধু জরুরি কলামগুলো (`primary`) দেখানো হয়,
+   * বাকি সব তথ্য সারি খুললে পরিষ্কার লেবেল-মান জোড়ায় দেখা যায়। কোনো
+   * কলামে `primary` না থাকলে আগের মতোই সব কলাম দেখায়।
+   */
+  const keySet = Array.isArray(primaryKeys) ? primaryKeys : [];
+  const compactCols = keySet.length
+    ? columns.filter((col) => keySet.includes(col.key))
+    : columns;
+  const hasDetail = compactCols.length < columns.length;
+  const compactMinWidth = hasDetail ? Math.min(minWidth, 760) : minWidth;
 
   return (
     <div className="ad-card mt-4">
@@ -224,11 +246,11 @@ const HistoryTable = ({
         <div className="ad-table-wrap ad-scroll">
           <table
             className="w-full border-collapse text-left"
-            style={{ minWidth: `${minWidth}px` }}
+            style={{ minWidth: `${compactMinWidth}px` }}
           >
             <thead>
               <tr className="border-b border-white/[0.07]">
-                {columns.map((col) => (
+                {compactCols.map((col) => (
                   <th
                     key={col.key}
                     className="px-3 py-2 text-[12px] font-bold uppercase tracking-wide text-[var(--text-muted)]"
@@ -236,25 +258,77 @@ const HistoryTable = ({
                     {col.label}
                   </th>
                 ))}
+                {hasDetail ? (
+                  <th className="px-3 py-2 text-right text-[12px] font-bold uppercase tracking-wide text-[var(--text-muted)]">
+                    Details
+                  </th>
+                ) : null}
               </tr>
             </thead>
 
             <tbody>
-              {rows.map((row) => (
-                <tr
-                  key={row._id}
-                  className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]"
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className="px-3 py-2 text-[13px] text-[var(--text-secondary)]"
-                    >
-                      {col.render(row)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
+              {rows.map((row) => {
+                const isOpen = expandedId === row._id;
+
+                return (
+                  <React.Fragment key={row._id}>
+                    <tr className="border-b border-white/[0.05] last:border-0 hover:bg-white/[0.03]">
+                      {compactCols.map((col) => (
+                        <td
+                          key={col.key}
+                          className="px-3 py-2.5 text-[13px] text-[var(--text-secondary)]"
+                        >
+                          {col.render(row)}
+                        </td>
+                      ))}
+
+                      {hasDetail ? (
+                        <td className="px-3 py-2.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedId(isOpen ? "" : row._id)
+                            }
+                            className="ad-btn ad-btn--ghost ad-btn--sm"
+                            aria-label="toggle details"
+                          >
+                            {isOpen ? (
+                              <ChevronUp size={14} />
+                            ) : (
+                              <ChevronDown size={14} />
+                            )}
+                          </button>
+                        </td>
+                      ) : null}
+                    </tr>
+
+                    {hasDetail && isOpen ? (
+                      <tr>
+                        <td
+                          colSpan={compactCols.length + 1}
+                          className="bg-black/20 p-0"
+                        >
+                          <div className="grid grid-cols-1 gap-x-6 gap-y-1 p-4 sm:grid-cols-2 xl:grid-cols-3">
+                            {columns.map((col) => (
+                              <div
+                                key={col.key}
+                                className="flex items-start justify-between gap-4 border-b border-white/[0.05] py-2"
+                              >
+                                <span className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">
+                                  {col.label}
+                                </span>
+                                <span className="break-all text-right text-[13px] font-semibold text-[var(--neutral100)]">
+                                  {col.render(row)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </React.Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

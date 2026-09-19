@@ -8,6 +8,8 @@ import AutoDeposit from "../models/AutoDeposit.js";
 import GameHistory from "../models/GameHistory.js";
 import TurnOver from "../models/TurnOver.js";
 import WithdrawRequest from "../models/WithdrawRequest.js";
+import AutoWithdraw from "../models/AutoWithdraw.js";
+import VipTransaction from "../models/VipTransaction.js";
 
 import {
   protectAdmin,
@@ -349,6 +351,33 @@ router.get("/:id/history/withdraws", protectAdmin, async (req, res) => {
     return await historyPage(req, res, WithdrawRequest, {
       searchFields: ["methodId", "walletSnapshot.walletNumber"],
       totals: { amount: "amount" },
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/auto-withdraws", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, AutoWithdraw, {
+      searchFields: ["paymentMethod", "accountNumber", "withdrawalId"],
+      totals: {
+        amount: "amount",
+        fee: "feeAmount",
+        deducted: "deductedAmount",
+      },
+    });
+  } catch (error) {
+    return errorResponse(res, error.message, 500);
+  }
+});
+
+router.get("/:id/history/vip", protectAdmin, async (req, res) => {
+  try {
+    return await historyPage(req, res, VipTransaction, {
+      statusField: "type",
+      searchFields: ["note"],
+      totals: { xp: "xp", points: "points", amount: "amount" },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);

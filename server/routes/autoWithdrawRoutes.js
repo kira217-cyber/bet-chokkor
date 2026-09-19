@@ -454,12 +454,40 @@ router.get("/withdrawals/admin", protectAdmin, async (req, res) => {
         .limit(limit)
         .lean(),
       AutoWithdraw.countDocuments(filter),
-      AutoWithdraw.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
+      AutoWithdraw.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            n: { $sum: 1 },
+            amt: { $sum: "$amount" },
+          },
+        },
+      ]),
     ]);
 
-    const summary = { PENDING: 0, PROCESSING: 0, COMPLETED: 0, REJECTED: 0 };
+    // গণনা + টাকার অঙ্ক — Bajiman এর সারাংশ কার্ডের মতো
+    const summary = {
+      PENDING: 0,
+      PROCESSING: 0,
+      COMPLETED: 0,
+      REJECTED: 0,
+      pendingAmount: 0,
+      processingAmount: 0,
+      completedAmount: 0,
+      rejectedAmount: 0,
+    };
+
+    const amountKey = {
+      PENDING: "pendingAmount",
+      PROCESSING: "processingAmount",
+      COMPLETED: "completedAmount",
+      REJECTED: "rejectedAmount",
+    };
+
     counts.forEach((row) => {
-      summary[row._id] = row.n;
+      const st = String(row._id || "").toUpperCase();
+      summary[st] = row.n;
+      if (amountKey[st]) summary[amountKey[st]] = money(row.amt);
     });
 
     return successResponse(res, "Auto withdrawals loaded", {

@@ -5,9 +5,11 @@ import {
   ArrowLeft,
   BadgeCheck,
   BanknoteArrowDown,
+  BanknoteArrowUp,
   CircleCheck,
   CircleX,
   Clock,
+  Crown,
   Dices,
   Eye,
   EyeOff,
@@ -25,6 +27,7 @@ import {
 
 import { api } from "../../api/axios";
 import HistoryTable from "./HistoryTable";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 
 const money = (value) => Number(value || 0).toFixed(2);
 
@@ -40,6 +43,13 @@ const STATUS_COLOR = {
   PENDING: "var(--status-pending)",
   PAID: "var(--status-success)",
   FAILED: "var(--status-danger)",
+  PROCESSING: "var(--status-pending)",
+  COMPLETED: "var(--status-success)",
+  REJECTED: "var(--status-danger)",
+  upgrade: "var(--primary500)",
+  convert: "var(--status-info)",
+  bonus: "var(--status-success)",
+  adjust: "var(--status-pending)",
 };
 
 const Section = ({ title, children }) => (
@@ -147,6 +157,10 @@ const UserDetails = ({ kind }) => {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [roleAsk, setRoleAsk] = useState(false);
+  const [rejectAsk, setRejectAsk] = useState(false);
+  const [rejectNote, setRejectNote] = useState("");
+  const [vipDraft, setVipDraft] = useState({ vipLevel: 1, vipXP: 0, vipPoints: 0 });
 
   const load = async (quiet = false) => {
     try {
@@ -195,6 +209,35 @@ const UserDetails = ({ kind }) => {
     setDraft((prev) => ({ ...prev, [key]: event.target.value }));
 
   const user = detail?.user;
+
+  // VIP অ্যাডজাস্ট ফর্ম আলাদা এন্ডপয়েন্টে যায়, তাই আলাদা স্টেট
+  useEffect(() => {
+    if (user) {
+      setVipDraft({
+        vipLevel: user.vipLevel ?? 1,
+        vipXP: user.vipXP ?? 0,
+        vipPoints: user.vipPoints ?? 0,
+      });
+    }
+  }, [user]);
+
+  const saveVip = async () => {
+    try {
+      setBusy("vip");
+      await api.post(`/api/vip/admin/user/${id}/adjust`, {
+        vipLevel: Number(vipDraft.vipLevel) || 1,
+        vipXP: Number(vipDraft.vipXP) || 0,
+        vipPoints: Number(vipDraft.vipPoints) || 0,
+        note: "Adjusted from user details",
+      });
+      toast.success("VIP updated");
+      await load(true);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Could not save VIP");
+    } finally {
+      setBusy("");
+    }
+  };
 
   const handleSave = async (event) => {
     event.preventDefault();
@@ -255,14 +298,8 @@ const UserDetails = ({ kind }) => {
    * তাই আলাদা করে আগে সেভ করতে হয় না। চারটে হারই শূন্য থাকলে সার্ভার
    * অনুমোদন আটকে দেয় — নইলে হার ছাড়াই অনুমোদন হয়ে যেত।
    */
-  const handleReview = async (status) => {
-    let note = "";
-
-    if (status === "rejected") {
-      note = window.prompt("Why is it rejected? The affiliate sees this.") || "";
-
-      if (!note.trim()) return;
-    }
+  const handleReview = async (status, note = "") => {
+    if (status === "rejected" && !note.trim()) return;
 
     try {
       setBusy(status);
@@ -289,22 +326,16 @@ const UserDetails = ({ kind }) => {
     }
   };
 
+  // ব্রাউজারের ডিফল্ট confirm নয় — নিজেদের মডাল দিয়ে নিশ্চিত করা হয়
   const handleRole = async () => {
     const next = isAffiliate ? "user" : "aff-user";
-
-    if (
-      !window.confirm(
-        `Make ${user?.userId} ${next === "aff-user" ? "an affiliate" : "a normal player"}?`,
-      )
-    ) {
-      return;
-    }
 
     try {
       setBusy("role");
       await api.patch(`/api/admin/manage/${id}/role`, { role: next });
 
       toast.success("Role changed");
+      setRoleAsk(false);
       navigate(next === "aff-user" ? "/affiliates" : "/users");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed");
@@ -409,7 +440,7 @@ const UserDetails = ({ kind }) => {
           <button
             type="button"
             disabled={Boolean(busy)}
-            onClick={handleRole}
+            onClick={() => setRoleAsk(true)}
             className="ad-btn ad-btn--ghost ad-btn--sm"
           >
             {busy === "role" ? (
@@ -521,7 +552,10 @@ const UserDetails = ({ kind }) => {
                 <button
                   type="button"
                   disabled={Boolean(busy)}
-                  onClick={() => handleReview("rejected")}
+                  onClick={() => {
+                    setRejectNote("");
+                    setRejectAsk(true);
+                  }}
                   className="ad-btn ad-btn--danger ad-btn--sm"
                 >
                   {busy === "rejected" ? (
@@ -759,6 +793,63 @@ const UserDetails = ({ kind }) => {
         </button>
       </form>
 
+      {/* ── VIP ──
+          লেভেল/XP/পয়েন্ট আলাদা এন্ডপয়েন্টে বসে (আলাদা লগ হয়), তাই
+          মূল ফর্মের বাইরে নিজের Save বোতাম */}
+      <Section title="VIP (level, XP & points)">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <Field label="VIP level" htmlFor="vip-level">
+            <input
+              id="vip-level"
+              type="number"
+              min="1"
+              value={vipDraft.vipLevel}
+              onChange={(e) => setVipDraft((p) => ({ ...p, vipLevel: e.target.value }))}
+              className="ad-input"
+            />
+          </Field>
+          <Field label="XP (experience)" htmlFor="vip-xp">
+            <input
+              id="vip-xp"
+              type="number"
+              min="0"
+              value={vipDraft.vipXP}
+              onChange={(e) => setVipDraft((p) => ({ ...p, vipXP: e.target.value }))}
+              className="ad-input"
+            />
+          </Field>
+          <Field label="VIP points" htmlFor="vip-points">
+            <input
+              id="vip-points"
+              type="number"
+              min="0"
+              value={vipDraft.vipPoints}
+              onChange={(e) => setVipDraft((p) => ({ ...p, vipPoints: e.target.value }))}
+              className="ad-input"
+            />
+          </Field>
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={saveVip}
+              disabled={Boolean(busy)}
+              className="ad-btn ad-btn--primary w-full"
+            >
+              {busy === "vip" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Save size={16} />
+              )}
+              Save VIP
+            </button>
+          </div>
+        </div>
+        <p className="mt-3 text-[12px] text-[var(--text-disabled)]">
+          XP drives the level automatically as the player bets. Set these only to
+          correct a figure — every change is logged in VIP history.
+        </p>
+      </Section>
+
       {/* ── ইতিহাস ──
           Bajiman এর single-user সেকশনগুলোর মতো: প্রতিটার নিজের
           সারাংশ, খোঁজা, ছাঁকনি আর পাতা। সারাংশের অঙ্কগুলো ছাঁকনি
@@ -769,6 +860,7 @@ const UserDetails = ({ kind }) => {
         icon={<Dices size={17} />}
         userId={id}
         path="games"
+        primaryKeys={["when", "game", "bet", "win", "net", "result"]}
         minWidth={1150}
         statuses={[
           { key: "all", label: "All" },
@@ -851,6 +943,7 @@ const UserDetails = ({ kind }) => {
         icon={<Wallet size={17} />}
         userId={id}
         path="deposits"
+        primaryKeys={["when", "method", "amount", "credited", "status"]}
         minWidth={1100}
         statuses={[
           { key: "all", label: "All" },
@@ -903,7 +996,8 @@ const UserDetails = ({ kind }) => {
         icon={<Landmark size={17} />}
         userId={id}
         path="auto-deposits"
-        minWidth={950}
+        primaryKeys={["when", "invoice", "amount", "credited", "status"]}
+        minWidth={1080}
         statuses={[
           { key: "all", label: "All" },
           { key: "PENDING", label: "Pending" },
@@ -931,11 +1025,29 @@ const UserDetails = ({ kind }) => {
         columns={[
           { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
           { key: "invoice", label: "Invoice", render: (r) => r.invoiceNumber },
+          { key: "method", label: "Method", render: (r) => r.bank || "—" },
           { key: "amount", label: "Amount", render: (r) => money(r.amount) },
           { key: "bonus", label: "Bonus", render: (r) => money(r.calc?.bonusAmount) },
           { key: "credited", label: "Credited", render: (r) => money(r.calc?.creditedAmount) },
           { key: "turnover", label: "Turnover", render: (r) => `x${r.calc?.turnoverMultiplier ?? 0}` },
           { key: "added", label: "Balance added", render: (r) => (r.balanceAdded ? "yes" : "—") },
+          {
+            key: "footprint",
+            label: "Footprint",
+            render: (r) =>
+              r.footprint ? (
+                <a
+                  href={r.footprint}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[var(--primary500)] underline underline-offset-2"
+                >
+                  Open
+                </a>
+              ) : (
+                "—"
+              ),
+          },
           { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
         ]}
       />
@@ -946,6 +1058,7 @@ const UserDetails = ({ kind }) => {
         icon={<BanknoteArrowDown size={17} />}
         userId={id}
         path="withdraws"
+        primaryKeys={["when", "method", "amount", "status"]}
         minWidth={1000}
         statuses={[
           { key: "all", label: "All" },
@@ -997,11 +1110,74 @@ const UserDetails = ({ kind }) => {
       />
 
       <HistoryTable
+        title="Auto withdraw history"
+        subtitle="Payouts this player took out through the gateway."
+        icon={<BanknoteArrowUp size={17} />}
+        userId={id}
+        path="auto-withdraws"
+        primaryKeys={["when", "method", "amount", "status"]}
+        minWidth={1050}
+        statuses={[
+          { key: "all", label: "All" },
+          { key: "PENDING", label: "Pending" },
+          { key: "PROCESSING", label: "Processing" },
+          { key: "COMPLETED", label: "Completed" },
+          { key: "REJECTED", label: "Rejected" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "Total withdraw",
+            value: money(sum.amount),
+            tone: "var(--status-danger)",
+            sub: `${sum.count || 0} requests`,
+          }),
+          (sum, counts) => ({
+            label: "Completed",
+            value: counts.COMPLETED || 0,
+            tone: "var(--status-success)",
+          }),
+          (sum, counts) => ({
+            label: "Pending / processing",
+            value: `${counts.PENDING || 0} / ${counts.PROCESSING || 0}`,
+            tone:
+              counts.PENDING || counts.PROCESSING
+                ? "var(--status-pending)"
+                : undefined,
+          }),
+          (sum, counts) => ({
+            label: "Rejected (refunded)",
+            value: counts.REJECTED || 0,
+            tone: counts.REJECTED ? "var(--status-danger)" : undefined,
+          }),
+        ]}
+        columns={[
+          { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
+          { key: "method", label: "Method", render: (r) => r.paymentMethod || "—" },
+          {
+            key: "wallet",
+            label: "Wallet",
+            render: (r) => r.accountNumber || r.userIdentityAddress || "—",
+          },
+          { key: "amount", label: "Amount", render: (r) => money(r.amount) },
+          {
+            key: "fee",
+            label: "Fee",
+            render: (r) =>
+              r.feeAmount ? `${money(r.feeAmount)} (${r.feePercentage || 0}%)` : "—",
+          },
+          { key: "wid", label: "Withdrawal ID", render: (r) => r.withdrawalId || "—" },
+          { key: "refunded", label: "Refunded", render: (r) => (r.refunded ? "yes" : "—") },
+          { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
+        ]}
+      />
+
+      <HistoryTable
         title="Turnover history"
         subtitle="How much play is still owed on each bonus."
         icon={<RotateCcw size={17} />}
         userId={id}
         path="turnovers"
+        primaryKeys={["when", "source", "required", "progress", "status"]}
         minWidth={1050}
         statuses={[
           { key: "all", label: "All" },
@@ -1059,6 +1235,93 @@ const UserDetails = ({ kind }) => {
           { key: "status", label: "Status", render: (r) => <Pill value={r.status} /> },
         ]}
       />
+
+      <HistoryTable
+        title="VIP history"
+        subtitle="Level upgrades, point conversions, bonuses and adjustments."
+        icon={<Crown size={17} />}
+        userId={id}
+        path="vip"
+        primaryKeys={["when", "type", "level", "points", "amount"]}
+        minWidth={1000}
+        statuses={[
+          { key: "all", label: "All" },
+          { key: "upgrade", label: "Upgrade" },
+          { key: "convert", label: "Convert" },
+          { key: "bonus", label: "Bonus" },
+          { key: "adjust", label: "Adjust" },
+        ]}
+        summaryCards={[
+          (sum) => ({
+            label: "XP change",
+            value: money(sum.xp),
+            tone: "var(--primary500)",
+            sub: `${sum.count || 0} events`,
+          }),
+          (sum) => ({ label: "Points change", value: money(sum.points) }),
+          (sum) => ({
+            label: "Cash paid",
+            value: money(sum.amount),
+            tone: "var(--status-success)",
+          }),
+          (sum, counts) => ({
+            label: "Upgrades / converts",
+            value: `${counts.upgrade || 0} / ${counts.convert || 0}`,
+          }),
+        ]}
+        columns={[
+          { key: "when", label: "When", render: (r) => new Date(r.createdAt).toLocaleString() },
+          { key: "type", label: "Type", render: (r) => <Pill value={r.type} /> },
+          {
+            key: "level",
+            label: "Level",
+            render: (r) => (r.levelFrom ? `LV${r.levelFrom} → LV${r.levelTo}` : `LV${r.levelTo || "—"}`),
+          },
+          { key: "xp", label: "XP", render: (r) => (r.xp ? (r.xp > 0 ? `+${r.xp}` : r.xp) : "—") },
+          { key: "points", label: "Points", render: (r) => (r.points ? (r.points > 0 ? `+${r.points}` : r.points) : "—") },
+          { key: "amount", label: "Amount", render: (r) => (r.amount ? money(r.amount) : "—") },
+          { key: "note", label: "Note", render: (r) => r.note || "—" },
+        ]}
+      />
+
+      {/* ── ভূমিকা বদলের নিশ্চিতকরণ — ব্রাউজারের ডিফল্ট নয় ── */}
+      <ConfirmModal
+        open={roleAsk}
+        busy={busy === "role"}
+        title={isAffiliate ? "Make a normal player?" : "Make an affiliate?"}
+        message={
+          isAffiliate
+            ? `${user?.userId} will lose affiliate access and become a normal player.`
+            : `${user?.userId} will become an affiliate and move to the affiliates list.`
+        }
+        confirmText={isAffiliate ? "Make player" : "Make affiliate"}
+        onConfirm={handleRole}
+        onClose={() => busy !== "role" && setRoleAsk(false)}
+      />
+
+      {/* ── অ্যাফিলিয়েট আবেদন বাতিলের কারণ — ব্রাউজারের prompt নয় ── */}
+      <ConfirmModal
+        open={rejectAsk}
+        danger
+        busy={busy === "rejected"}
+        title="Reject this application?"
+        message="Write why it is rejected — the affiliate will see this note."
+        confirmText="Reject application"
+        onConfirm={async () => {
+          await handleReview("rejected", rejectNote);
+          if (rejectNote.trim()) setRejectAsk(false);
+        }}
+        onClose={() => busy !== "rejected" && setRejectAsk(false)}
+      >
+        <textarea
+          value={rejectNote}
+          onChange={(e) => setRejectNote(e.target.value)}
+          rows={3}
+          placeholder="Reason for rejection"
+          className="ad-input"
+          autoFocus
+        />
+      </ConfirmModal>
     </div>
   );
 };

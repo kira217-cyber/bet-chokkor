@@ -200,12 +200,38 @@ router.get("/admin", protectAdmin, async (req, res) => {
         .limit(limit)
         .lean(),
       DepositRequest.countDocuments(filter),
-      DepositRequest.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
+      DepositRequest.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            n: { $sum: 1 },
+            amt: { $sum: "$amount" },
+            credited: { $sum: "$calc.creditedAmount" },
+          },
+        },
+      ]),
     ]);
 
-    const summary = { pending: 0, approved: 0, rejected: 0 };
+    // গণনা + টাকার অঙ্ক (Bajiman এর সারাংশ কার্ডের মতো)
+    const summary = {
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+      pendingAmount: 0,
+      approvedAmount: 0,
+      rejectedAmount: 0,
+      approvedCredited: 0,
+    };
+
     counts.forEach((row) => {
-      summary[row._id] = row.n;
+      const st = String(row._id || "").toLowerCase();
+      summary[st] = row.n;
+
+      if (st === "pending") summary.pendingAmount = row.amt || 0;
+      else if (st === "approved") {
+        summary.approvedAmount = row.amt || 0;
+        summary.approvedCredited = row.credited || 0;
+      } else if (st === "rejected") summary.rejectedAmount = row.amt || 0;
     });
 
     return successResponse(res, "Requests loaded", {

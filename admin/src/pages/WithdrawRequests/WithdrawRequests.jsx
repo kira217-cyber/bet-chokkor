@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { Banknote, Check, Loader2, RefreshCw, Search, X } from "lucide-react";
+import {
+  Banknote,
+  Check,
+  CircleCheck,
+  Clock,
+  Loader2,
+  Search,
+  X,
+  XCircle,
+} from "lucide-react";
 
 import { api } from "../../api/axios";
-import { UserCell } from "../../components/HistoryBits/HistoryBits";
+import {
+  HistoryHeader,
+  StatCard,
+  taka,
+  UserCell,
+} from "../../components/HistoryBits/HistoryBits";
 
 const fetchRequests = async (status, q, page) => {
   const params = new URLSearchParams({ page: String(page), limit: "20" });
@@ -131,40 +145,37 @@ const WithdrawRequests = () => {
   };
 
   return (
-    <div className="mx-auto max-w-[1100px]">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="ad-title text-[26px] lg:text-[30px]">
-            Withdraw Requests
-          </h1>
-          <p className="mt-1 text-[14px] text-[var(--text-muted)]">
-            Money players want to take out.
-          </p>
-        </div>
+    <div className="mx-auto max-w-[1150px]">
+      <HistoryHeader
+        title="Manual Withdraw History"
+        subtitle="Money players want to take out — approve to pay or reject to refund."
+        Icon={Banknote}
+        onRefresh={load}
+        loading={loading}
+      />
 
-        <button
-          type="button"
-          onClick={load}
-          disabled={loading}
-          className="ad-btn ad-btn--ghost ad-btn--sm"
-        >
-          <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          Refresh
-        </button>
-      </div>
-
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        {["pending", "approved", "rejected"].map((key) => (
-          <div key={key} className="ad-card py-4">
-            <p className="text-[13px] capitalize text-[var(--text-muted)]">{key}</p>
-            <p
-              className="mt-1 text-[24px] font-black"
-              style={{ color: STATUS_COLOR[key] }}
-            >
-              {summary[key] ?? 0}
-            </p>
-          </div>
-        ))}
+      <div className="mb-4 grid gap-4 sm:grid-cols-3">
+        <StatCard
+          title="Pending"
+          amount={taka(summary.pendingAmount)}
+          count={summary.pending}
+          color="var(--status-pending)"
+          Icon={Clock}
+        />
+        <StatCard
+          title="Approved"
+          amount={taka(summary.approvedAmount)}
+          count={summary.approved}
+          color="var(--status-success)"
+          Icon={CircleCheck}
+        />
+        <StatCard
+          title="Rejected"
+          amount={taka(summary.rejectedAmount)}
+          count={summary.rejected}
+          color="var(--status-danger)"
+          Icon={XCircle}
+        />
       </div>
 
       <div className="ad-card mb-4 flex flex-wrap items-center gap-3">
