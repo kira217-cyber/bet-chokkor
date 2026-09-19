@@ -79,6 +79,13 @@ const userSchema = new Schema(
     totalTurnover: { type: Number, default: 0, min: 0 },
     totalDeposit: { type: Number, default: 0, min: 0 },
 
+    /* ── VIP ──
+       XP লেভেল ওঠায় (কখনো কমে না), points রিবেটে ক্যাশে রূপান্তরযোগ্য।
+       দুটোই টার্নওভার থেকে জমে; সেটিং ও লেভেল অ্যাডমিন থেকে নিয়ন্ত্রিত। */
+    vipLevel: { type: Number, default: 1, min: 1 },
+    vipXP: { type: Number, default: 0, min: 0 },
+    vipPoints: { type: Number, default: 0, min: 0 },
+
     pendingRegisterBonus: {
       type: pendingRegisterBonusSchema,
       default: () => ({}),
@@ -200,6 +207,9 @@ userSchema.methods.toSafeJSON = function toSafeJSON() {
     isActive: this.isActive,
     currency: this.currency,
     balance: this.balance,
+    vipLevel: this.vipLevel,
+    vipXP: this.vipXP,
+    vipPoints: this.vipPoints,
     referralCode: this.referralCode,
     referralCount: this.referralCount,
     firstName: this.firstName,

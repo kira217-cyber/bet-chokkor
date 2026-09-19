@@ -71,7 +71,7 @@ export const bottomNavItemsAuth = [
 
 // সাইডবারে দুটো আলাদা গ্রুপ — মাঝে বিভাজক রেখা (মূল সাইটের মতো)
 export const sideNavLinks = [
-  { key: "vip", group: "main", name: { bn: "ভিআইপি ক্লাব", en: "VIP Club" }, icon: "/assets/icons/utility/icon-crown.svg", path: "/vip" },
+  { key: "vip", group: "main", name: { bn: "ভিআইপি ক্লাব", en: "VIP Club" }, icon: "/assets/icons/utility/icon-crown.svg", path: "/vip-detail" },
   { key: "referral", group: "main", name: { bn: "রেফারেল প্রোগ্রাম", en: "Referral Program" }, icon: "/assets/icons/utility/icon-group.svg", path: "/member/referral?tab=info" },
   { key: "affiliate", group: "main", name: { bn: "অ্যাফিলিয়েট", en: "Affiliate" }, icon: "/assets/icons/utility/icon-affiliate.svg", path: "/affiliate", external: true },
   { key: "download", group: "main", name: { bn: "অ্যাপ ডাউনলোড", en: "App Download" }, icon: "/assets/icons/utility/icon-download.svg", path: "/app-download" },

@@ -6,6 +6,8 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import Login from "../pages/Login/Login";
 import AppDownload from "../pages/AppDownload/AppDownload";
 import Promotion from "../pages/Promotion/Promotion";
+import VipDetail from "../pages/Vip/VipDetail";
+import VipInfo from "../pages/Vip/VipInfo";
 import Register from "../pages/Register/Register";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import PrivateRoute from "../PrivateRoute/PrivateRoute";
@@ -45,6 +47,10 @@ export const routes = createBrowserRouter([
       {
         path: "promotion",
         element: <Promotion />,
+      },
+      {
+        path: "vip-detail",
+        element: <VipDetail />,
       },
 
       // লগইন ছাড়া member পেজে ঢোকা যায় না — PrivateRoute হোমে ফেরত পাঠায়
@@ -109,6 +115,14 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute>
             <Referral />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member/vip-info",
+        element: (
+          <PrivateRoute>
+            <VipInfo />
           </PrivateRoute>
         ),
       },

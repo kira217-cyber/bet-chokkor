@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import GameHistory from "../models/GameHistory.js";
 
 import { applyTurnoverProgress } from "../utils/turnoverProgress.js";
+import { applyVipEarning } from "../utils/vipEarning.js";
 import { peekGameInfo, resolveGameInfo } from "../utils/gameProviderCatalog.js";
 import { applyReferralCommission } from "../utils/referral.js";
 
@@ -262,6 +263,12 @@ router.post("/", async (req, res) => {
         },
         wager: betAmount,
         gameHistoryId: history._id,
+      }).catch(() => {});
+
+      // VIP XP ও পয়েন্ট — উত্তরের পরে, ননব্লকিং
+      applyVipEarning({
+        player: { _id: player._id, userId: player.userId, vipLevel: player.vipLevel },
+        wager: betAmount,
       }).catch(() => {});
     }
 
