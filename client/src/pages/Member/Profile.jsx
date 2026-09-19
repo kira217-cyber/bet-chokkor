@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { ChevronRight, Copy, LogOut, Wallet } from "lucide-react";
+import {
+  BanknoteArrowDown,
+  ChevronRight,
+  Coins,
+  Copy,
+  Crown,
+  LogOut,
+  Wallet,
+} from "lucide-react";
 
 import MemberPage from "../Deposit/MemberPage";
 import { api } from "../../api/axios";
@@ -11,6 +19,7 @@ import { selectUser } from "../../features/auth/authSelectors";
 import { logout, updateUser } from "../../features/auth/authSlice";
 import { selectUnread } from "../../features/notification/notificationSlice";
 import { fetchMyDeposits } from "../../features/deposit/depositApi";
+import { fetchVipMe } from "../../features/vip/vipApi";
 import { buildProfileMenu } from "../../components/Navber/profileMenuItems";
 
 const STATUS_COLOR = {
@@ -64,6 +73,7 @@ const Profile = () => {
   const [deposits, setDeposits] = useState([]);
   const [turnovers, setTurnovers] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [vip, setVip] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -78,6 +88,10 @@ const Profile = () => {
 
     fetchMyDeposits(5)
       .then((list) => alive && setDeposits(list))
+      .catch(() => {});
+
+    fetchVipMe()
+      .then((data) => alive && setVip(data))
       .catch(() => {});
 
     api
@@ -131,23 +145,110 @@ const Profile = () => {
             {user?.currency || "BDT"} {Number(user?.balance || 0).toFixed(2)}
           </p>
 
+          {/* ডিপোজিট + উইথড্র পাশাপাশি (উইথড্র মোবাইলে নেভবারে নেই) */}
+          <div className="mt-3 flex" style={{ gap: "calc(var(--u) * 2.667)" }}>
+            <button
+              type="button"
+              onClick={() => navigate("/member/wallet/deposit")}
+              className="flex flex-1 cursor-pointer items-center justify-center font-bold transition-[filter] hover:brightness-105"
+              style={{
+                height: "calc(var(--u) * 11.2)",
+                borderRadius: "var(--radius-10)",
+                fontSize: "var(--fs-larger)",
+                backgroundColor: "var(--primary500)",
+                color: "var(--btn-primary-txt)",
+                gap: "calc(var(--u) * 2.133)",
+              }}
+            >
+              <Wallet size={16} />
+              {t("deposit")}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate("/member/wallet/withdraw")}
+              className="flex flex-1 cursor-pointer items-center justify-center font-bold transition-colors hover:bg-[var(--neutral700)]"
+              style={{
+                height: "calc(var(--u) * 11.2)",
+                borderRadius: "var(--radius-10)",
+                fontSize: "var(--fs-larger)",
+                backgroundColor: "var(--neutral700)",
+                color: "var(--neutral100)",
+                gap: "calc(var(--u) * 2.133)",
+              }}
+            >
+              <BanknoteArrowDown size={16} />
+              {t("withdrawTitle")}
+            </button>
+          </div>
+        </div>
+
+        {/* ── VIP (মোবাইলে নেভবারে VP নেই, তাই এখানে দেখানো হয়) ── */}
+        {vip && vip.active !== false ? (
           <button
             type="button"
-            onClick={() => navigate("/member/wallet/deposit")}
-            className="mt-3 flex w-full cursor-pointer items-center justify-center font-bold transition-[filter] hover:brightness-105"
-            style={{
-              height: "calc(var(--u) * 11.2)",
-              borderRadius: "var(--radius-10)",
-              fontSize: "var(--fs-larger)",
-              backgroundColor: "var(--primary500)",
-              color: "var(--btn-primary-txt)",
-              gap: "calc(var(--u) * 2.133)",
-            }}
+            onClick={() => navigate("/member/vip-info")}
+            className="w-full cursor-pointer bg-[var(--neutral800)] text-left transition-[filter] hover:brightness-105"
+            style={card}
           >
-            <Wallet size={16} />
-            {t("deposit")}
+            <div className="flex items-center justify-between" style={{ gap: "calc(var(--u) * 3.2)" }}>
+              <div>
+                <p className="text-[var(--text-secondary)]" style={{ fontSize: "var(--fs-small)" }}>
+                  {t("myVip")}
+                </p>
+                <p
+                  className="flex items-center font-black text-[var(--neutral100)]"
+                  style={{ gap: "calc(var(--u) * 1.6)", fontSize: "var(--fs-h4)", marginTop: "calc(var(--u) * 0.5)" }}
+                >
+                  <Coins size={18} className="text-[var(--primary500)]" />
+                  {Math.floor(Number(vip.points || 0)).toLocaleString("en-US")}
+                  <span className="text-[var(--text-muted)]" style={{ fontSize: "var(--fs-small)" }}>VP</span>
+                </p>
+              </div>
+
+              <span
+                className="flex items-center font-bold"
+                style={{
+                  gap: "calc(var(--u) * 1.333)",
+                  padding: "calc(var(--u) * 1.333) calc(var(--u) * 2.667)",
+                  borderRadius: "999px",
+                  background: "color-mix(in srgb, var(--primary500), transparent 86%)",
+                  color: vip.levelColor || "var(--primary500)",
+                  fontSize: "var(--fs-base)",
+                }}
+              >
+                <Crown size={14} />
+                {tv(vip.levelName)}
+              </span>
+            </div>
+
+            {/* XP প্রোগ্রেস */}
+            <div style={{ marginTop: "calc(var(--u) * 2.667)" }}>
+              <div
+                className="flex items-center justify-between text-[var(--text-secondary)]"
+                style={{ fontSize: "var(--fs-small)", marginBottom: "calc(var(--u) * 1.067)" }}
+              >
+                <span>
+                  XP {Math.floor(Number(vip.xp || 0)).toLocaleString("en-US")}
+                  {vip.next ? ` / ${Math.floor(Number(vip.next.xpRequired || 0)).toLocaleString("en-US")}` : ""}
+                </span>
+                {vip.next ? <span>{tv(vip.next.name)}</span> : null}
+              </div>
+              <div
+                className="w-full overflow-hidden bg-[var(--neutral700)]"
+                style={{ height: "calc(var(--u) * 1.867)", borderRadius: "999px" }}
+              >
+                <div
+                  className="h-full"
+                  style={{
+                    width: `${vip.percent || 0}%`,
+                    background: "linear-gradient(90deg, var(--primary400), var(--primary500))",
+                  }}
+                />
+              </div>
+            </div>
           </button>
-        </div>
+        ) : null}
 
         {/* ── মেনু ──
             ডেস্কটপে এই তালিকাটা হেডারের প্রোফাইল ড্রপডাউনে; মোবাইলে

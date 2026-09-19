@@ -13,7 +13,6 @@
  */
 export const navItems = [
   { key: "dashboard", path: "/", label: "Dashboard", icon: "LayoutDashboard", perm: "dashboard" },
-  { key: "admins", path: "/admins", label: "Admin Accounts", icon: "UserCog", motherOnly: true },
 
   {
     key: "user",
@@ -41,28 +40,22 @@ export const navItems = [
         icon: "Scale",
         motherOnly: true,
       },
+      {
+        key: "verification",
+        path: "/verification",
+        label: "Verification",
+        icon: "ShieldCheck",
+        perm: "verification",
+      },
+      {
+        key: "affiliate-verification",
+        path: "/affiliate-verification",
+        label: "Affiliate Verification",
+        icon: "UserRoundCheck",
+        perm: "affiliate-verification",
+      },
     ],
   },
-
-  { key: "contact-links", path: "/contact-links", label: "Contact Links", icon: "Phone", motherOnly: true },
-  { key: "app-download", path: "/app-download", label: "App Download", icon: "Smartphone", motherOnly: true },
-  { key: "notifications", path: "/notifications", label: "Notifications", icon: "Bell", motherOnly: true },
-  {
-    key: "home-content",
-    label: "Home Content",
-    icon: "Images",
-    children: [
-      { key: "sliders", path: "/sliders", label: "Home Sliders", icon: "Images", motherOnly: true },
-      { key: "site-notice", path: "/site-notice", label: "Notice", icon: "Megaphone", motherOnly: true },
-      { key: "home-events", path: "/home-events", label: "Home Events", icon: "CalendarClock", motherOnly: true },
-      { key: "promotions", path: "/promotions", label: "Promotions", icon: "Gift", motherOnly: true },
-    ],
-  },
-  { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
-
-  { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
-
-  { key: "register-bonus", path: "/register-bonus", label: "Register Bonus", icon: "Gift", motherOnly: true },
 
   {
     key: "deposit",
@@ -179,27 +172,24 @@ export const navItems = [
   },
 
   {
-    key: "referral",
-    path: "/referral",
-    label: "Referral Program",
+    key: "vip",
+    label: "VIP",
+    icon: "Crown",
+    children: [
+      { key: "vip-history", path: "/vip-history", label: "VIP History", icon: "History", perm: "vip-history" },
+      { key: "vip-levels", path: "/vip-levels", label: "VIP Levels", icon: "Crown", motherOnly: true },
+      { key: "vip-settings", path: "/vip-settings", label: "VIP Settings", icon: "Settings", motherOnly: true },
+    ],
+  },
+
+  {
+    key: "bonus-referral",
+    label: "Bonus & Referral",
     icon: "Gift",
-    motherOnly: true,
-  },
-
-  {
-    key: "verification",
-    path: "/verification",
-    label: "Verification",
-    icon: "ShieldCheck",
-    perm: "verification",
-  },
-
-  {
-    key: "affiliate-verification",
-    path: "/affiliate-verification",
-    label: "Affiliate Verification",
-    icon: "UserRoundCheck",
-    perm: "affiliate-verification",
+    children: [
+      { key: "register-bonus", path: "/register-bonus", label: "Register Bonus", icon: "Gift", motherOnly: true },
+      { key: "referral", path: "/referral", label: "Referral Program", icon: "Gift", motherOnly: true },
+    ],
   },
 
   {
@@ -228,6 +218,44 @@ export const navItems = [
         icon: "Play",
         motherOnly: true,
       },
+    ],
+  },
+
+  {
+    key: "appearance",
+    label: "Site & Footer",
+    icon: "Image",
+    children: [
+      { key: "site-identity", path: "/site-identity", label: "Site Identity", icon: "Image", motherOnly: true },
+      { key: "footer-setting", path: "/footer-setting", label: "Footer Setting", icon: "PanelBottom", motherOnly: true },
+      { key: "aff-identity", path: "/aff-identity", label: "Affiliate Identity", icon: "UserRoundCheck", motherOnly: true },
+      { key: "aff-footer", path: "/aff-footer", label: "Affiliate Footer", icon: "Handshake", motherOnly: true },
+    ],
+  },
+
+  {
+    key: "home-content",
+    label: "Home Content",
+    icon: "Images",
+    children: [
+      { key: "sliders", path: "/sliders", label: "Home Sliders", icon: "Images", motherOnly: true },
+      { key: "site-notice", path: "/site-notice", label: "Notice", icon: "Megaphone", motherOnly: true },
+      { key: "home-events", path: "/home-events", label: "Home Events", icon: "CalendarClock", motherOnly: true },
+      { key: "promotions", path: "/promotions", label: "Promotions", icon: "Gift", motherOnly: true },
+    ],
+  },
+
+  {
+    key: "settings",
+    label: "Settings",
+    icon: "Settings",
+    children: [
+      { key: "admins", path: "/admins", label: "Admin Accounts", icon: "UserCog", motherOnly: true },
+      { key: "contact-links", path: "/contact-links", label: "Contact Links", icon: "Phone", motherOnly: true },
+      { key: "app-download", path: "/app-download", label: "App Download", icon: "Smartphone", motherOnly: true },
+      { key: "notifications", path: "/notifications", label: "Notifications", icon: "Bell", motherOnly: true },
+      { key: "otp-setting", path: "/otp-setting", label: "OTP Setting", icon: "MessageSquareLock", motherOnly: true },
+      { key: "maintenance", path: "/maintenance", label: "Site Maintenance", icon: "Wrench", motherOnly: true },
     ],
   },
 ];
@@ -266,6 +294,7 @@ export const allPermissions = [
     label: "All Turnover History",
     path: "/turnover-history",
   },
+  { key: "vip-history", label: "VIP History", path: "/vip-history" },
   {
     key: "aff-withdraw-requests",
     label: "Affiliate Withdraws",

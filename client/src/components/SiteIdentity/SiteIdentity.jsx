@@ -9,9 +9,8 @@ const SiteIdentity = () => {
   const siteIdentify = useSelector(selectSiteIdentify);
 
   useEffect(() => {
-    if (siteIdentify?.siteName) {
-      document.title = siteIdentify.siteName;
-    }
+    // অ্যাডমিন সেট না করলে টাইটেলে প্লেসহোল্ডার
+    document.title = siteIdentify?.siteName || "Site title not set";
 
     if (siteIdentify?.favicon) {
       let link = document.querySelector("link[rel='icon']");

@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { Menu, X } from "lucide-react";
 
+import { useSelector } from "react-redux";
+
 import { useLanguage } from "../../Context/LanguageProvider";
+import { selectSiteIdentify } from "../../features/global/globalSelectors";
 import LanguageMenu from "../LanguageMenu/LanguageMenu";
 
 // ল্যান্ডিং পেজের সেকশনগুলোতে স্ক্রল-লিংক
@@ -21,6 +24,14 @@ const Navber = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { pathname, hash } = useLocation();
+
+  const siteIdentify = useSelector(selectSiteIdentify);
+  const logo = siteIdentify?.logo || "";
+  const logoNode = logo ? (
+    <img src={logo} alt="Logo" className="h-8 w-auto object-contain lg:h-9" draggable="false" />
+  ) : (
+    <span className="text-[13px] font-bold text-[var(--text-muted)]">Logo not found</span>
+  );
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
@@ -58,12 +69,7 @@ const Navber = () => {
     <header className="aff-header fixed inset-x-0 top-0 z-50 border-b border-[var(--neutral800)] bg-[var(--header-bg)]">
       <div className="aff-container flex h-full items-center justify-between gap-4">
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <img
-            src="/assets/brand/header-logo.png"
-            alt="BET CHOKKOR"
-            className="h-8 w-auto object-contain lg:h-9"
-            draggable="false"
-          />
+          {logoNode}
           <span className="hidden text-[13px] font-semibold uppercase tracking-widest text-[var(--primary500)] sm:inline">
             Affiliates
           </span>
@@ -135,12 +141,7 @@ const Navber = () => {
         style={{ transform: menuOpen ? "translateX(0)" : "translateX(100%)" }}
       >
         <div className="flex h-[var(--header-height)] shrink-0 items-center justify-between px-5">
-          <img
-            src="/assets/brand/header-logo.png"
-            alt="BET CHOKKOR"
-            className="h-8 w-auto object-contain"
-            draggable="false"
-          />
+          {logoNode}
 
           <button
             type="button"

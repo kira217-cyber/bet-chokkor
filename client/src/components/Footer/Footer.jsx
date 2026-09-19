@@ -152,30 +152,42 @@ const Footer = () => {
             className="flex items-center"
             style={{ padding: "calc(var(--u) * 5.333) 0" }}
           >
-            <img
-              src={setting.brand.logo}
-              alt="BET CHOKKOR"
-              className="shrink-0 object-contain"
-              style={{
-                height: "calc(var(--u) * 10.66)",
-                marginInlineEnd: "calc(var(--u) * 4.267)",
-              }}
-              draggable="false"
-            />
+            {setting.brand.logo ? (
+              <img
+                src={setting.brand.logo}
+                alt="BET CHOKKOR"
+                className="shrink-0 object-contain"
+                style={{
+                  height: "calc(var(--u) * 10.66)",
+                  marginInlineEnd: "calc(var(--u) * 4.267)",
+                }}
+                draggable="false"
+              />
+            ) : (
+              <span
+                className="shrink-0 font-bold text-[var(--text-muted)]"
+                style={{
+                  fontSize: "var(--fs-normal)",
+                  marginInlineEnd: "calc(var(--u) * 4.267)",
+                }}
+              >
+                Logo not found
+              </span>
+            )}
 
             <div>
               <p
                 className="font-semibold text-[var(--primary500)]"
                 style={{ fontSize: "var(--fs-normal)" }}
               >
-                {t(setting.brand.subtitle)}
+                {t(setting.brand.subtitle) || "Not set"}
               </p>
 
               <p
                 className="text-[var(--text-muted)]"
                 style={{ fontSize: "var(--fs-normal)" }}
               >
-                {t(setting.brand.copyright)}
+                {t(setting.brand.copyright) || "Not set"}
               </p>
             </div>
           </div>
@@ -190,7 +202,7 @@ const Footer = () => {
               padding: "calc(var(--u) * 5.333) 0",
             }}
           >
-            {t(setting.license)}
+            {t(setting.license) || "Not set"}
           </p>
         </div>
       </div>

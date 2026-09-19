@@ -54,7 +54,7 @@ const Navber = ({ setDesktopOpen }) => {
     categories.find((item) => item.key === key),
   ).filter(Boolean);
 
-  const logo = siteIdentify?.logo || "/assets/brand/header-logo.png";
+  const logo = siteIdentify?.logo || "";
 
   // লগইন বাটন মোবাইলে সলিড (on-surface), ডেস্কটপে আউটলাইন (tertiary) —
   // মূল সাইটে দুই জায়গায় দুই রকম
@@ -92,15 +92,7 @@ const Navber = ({ setDesktopOpen }) => {
           </button>
 
           <Link to="/" className="flex items-center">
-            {loaded ? (
-              <img
-                src={logo}
-                alt={siteIdentify?.siteName || "BET CHOKKOR"}
-                className="w-auto object-contain"
-                style={{ height: "calc(var(--u) * 9.067)" }}
-                draggable="false"
-              />
-            ) : (
+            {!loaded ? (
               <div
                 className="animate-pulse rounded bg-[var(--neutral700)]"
                 style={{
@@ -108,6 +100,21 @@ const Navber = ({ setDesktopOpen }) => {
                   width: "calc(var(--u) * 18)",
                 }}
               />
+            ) : logo ? (
+              <img
+                src={logo}
+                alt={siteIdentify?.siteName || "Logo"}
+                className="w-auto object-contain"
+                style={{ height: "calc(var(--u) * 9.067)" }}
+                draggable="false"
+              />
+            ) : (
+              <span
+                className="font-bold text-[var(--text-muted)]"
+                style={{ fontSize: "var(--fs-larger)" }}
+              >
+                Logo not found
+              </span>
             )}
           </Link>
 

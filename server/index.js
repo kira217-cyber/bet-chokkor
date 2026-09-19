@@ -37,6 +37,8 @@ import withdrawMethodRoutes from "./routes/withdrawMethodRoutes.js";
 import eWalletRoutes from "./routes/eWalletRoutes.js";
 import withdrawRequestRoutes from "./routes/withdrawRequestRoutes.js";
 import autoWithdrawRoutes from "./routes/autoWithdrawRoutes.js";
+import vipRoutes from "./routes/vipRoutes.js";
+import siteSettingsRoutes from "./routes/siteSettingsRoutes.js";
 
 dotenv.config();
 
@@ -145,6 +147,8 @@ app.use("/api/withdraw-methods", withdrawMethodRoutes);
 app.use("/api/e-wallets", eWalletRoutes);
 app.use("/api/withdraw-requests", withdrawRequestRoutes);
 app.use("/api/auto-withdraw", autoWithdrawRoutes);
+app.use("/api/vip", vipRoutes);
+app.use("/api/site-settings", siteSettingsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

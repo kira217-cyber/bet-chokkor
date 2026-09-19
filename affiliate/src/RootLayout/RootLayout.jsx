@@ -7,7 +7,10 @@ import Footer from "../components/Footer/Footer";
 import SiteLoader from "../components/SiteLoader/SiteLoader";
 
 import { fetchAffiliateData } from "../features/global/globalSlice";
-import { selectGlobalLoaded } from "../features/global/globalSelectors";
+import {
+  selectGlobalLoaded,
+  selectSiteIdentify,
+} from "../features/global/globalSelectors";
 
 // ক্লায়েন্ট সাইটের মতোই — লোডার অন্তত এতক্ষণ দেখানো হয়
 const MIN_LOADER_MS = 2000;
@@ -20,7 +23,23 @@ const RootLayout = () => {
 
   const dispatch = useDispatch();
   const loaded = useSelector(selectGlobalLoaded);
+  const siteIdentify = useSelector(selectSiteIdentify);
   const { pathname } = useLocation();
+
+  // অ্যাডমিন-নিয়ন্ত্রিত টাইটেল ও favicon বসানো
+  useEffect(() => {
+    document.title = siteIdentify?.siteName || "Site title not set";
+
+    if (siteIdentify?.favicon) {
+      let link = document.querySelector("link[rel='icon']");
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = siteIdentify.favicon;
+    }
+  }, [siteIdentify]);
 
   useEffect(() => {
     if (minLoaderDone) return undefined;

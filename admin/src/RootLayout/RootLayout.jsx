@@ -37,6 +37,11 @@ import {
   Images,
   Megaphone,
   CalendarClock,
+  Crown,
+  Settings,
+  Coins,
+  Image,
+  PanelBottom,
 } from "lucide-react";
 
 import { navItems, roleLabels } from "../data/navigation";
@@ -74,6 +79,11 @@ const ICONS = {
   Images,
   Megaphone,
   CalendarClock,
+  Crown,
+  Settings,
+  Coins,
+  Image,
+  PanelBottom,
 };
 
 /**

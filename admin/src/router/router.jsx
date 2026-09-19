@@ -40,7 +40,25 @@ import AutoWithdrawHistory from "../pages/AutoWithdrawHistory/AutoWithdrawHistor
 import AffWithdrawMethods from "../pages/AffWithdrawMethods/AffWithdrawMethods";
 import AffWithdrawRequests from "../pages/AffWithdrawRequests/AffWithdrawRequests";
 import TurnoverHistory from "../pages/TurnoverHistory/TurnoverHistory";
+import VipSettings from "../pages/Vip/VipSettings";
+import VipLevels from "../pages/Vip/VipLevels";
+import VipHistory from "../pages/Vip/VipHistory";
+import IdentityPage from "../pages/SiteSettings/SiteIdentity";
+import FooterPage from "../pages/SiteSettings/FooterSetting";
+import { Image, PanelBottom, UserRoundCheck, Handshake } from "lucide-react";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
+
+const CLIENT_FOOTER_FIELDS = [
+  { key: "subtitle", label: "Brand subtitle" },
+  { key: "copyright", label: "Copyright" },
+  { key: "license", label: "License text", textarea: true, rows: 4 },
+];
+
+const AFF_FOOTER_FIELDS = [
+  { key: "description", label: "Description / CTA", textarea: true, rows: 3 },
+  { key: "copyright", label: "Copyright" },
+  { key: "ageNotice", label: "Age notice" },
+];
 
 export const routes = createBrowserRouter([
   { path: "/login", element: <Login />, errorElement: <NotFoundPage /> },
@@ -232,6 +250,79 @@ export const routes = createBrowserRouter([
         ),
       },
       { path: "turnover-history", element: <TurnoverHistory /> },
+      {
+        path: "vip-settings",
+        element: (
+          <PrivateRoute motherOnly>
+            <VipSettings />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "vip-levels",
+        element: (
+          <PrivateRoute motherOnly>
+            <VipLevels />
+          </PrivateRoute>
+        ),
+      },
+      { path: "vip-history", element: <VipHistory /> },
+      {
+        path: "site-identity",
+        element: (
+          <PrivateRoute motherOnly>
+            <IdentityPage
+              title="Site Identity"
+              subtitle="Client site logo, favicon and browser title."
+              endpoint="client-identify"
+              Icon={Image}
+            />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "footer-setting",
+        element: (
+          <PrivateRoute motherOnly>
+            <FooterPage
+              title="Footer Setting"
+              subtitle="Client footer brand, copyright and license text."
+              endpoint="client-footer"
+              logoKey="brandLogo"
+              fields={CLIENT_FOOTER_FIELDS}
+              Icon={PanelBottom}
+            />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "aff-identity",
+        element: (
+          <PrivateRoute motherOnly>
+            <IdentityPage
+              title="Affiliate Identity"
+              subtitle="Affiliate site logo, favicon and browser title."
+              endpoint="aff-identify"
+              Icon={UserRoundCheck}
+            />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "aff-footer",
+        element: (
+          <PrivateRoute motherOnly>
+            <FooterPage
+              title="Affiliate Footer"
+              subtitle="Affiliate footer logo, description and copyright."
+              endpoint="aff-footer"
+              logoKey="logo"
+              fields={AFF_FOOTER_FIELDS}
+              Icon={Handshake}
+            />
+          </PrivateRoute>
+        ),
+      },
       { path: "game-history", element: <GameHistory /> },
       {
         path: "game-api-key",

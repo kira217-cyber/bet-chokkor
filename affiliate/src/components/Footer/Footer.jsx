@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 
 import { useLanguage } from "../../Context/LanguageProvider";
+import { selectFooter } from "../../features/global/globalSelectors";
 
 const LICENSES = [
   { key: "curacao", src: "/assets/footer/gaming_license.png", alt: "Gaming Curacao" },
@@ -16,7 +18,13 @@ const RESPONSIBLE = [
 ];
 
 const Footer = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
+  const footer = useSelector(selectFooter);
+
+  const logo = footer?.logo || "";
+  const ctaText = tv(footer?.description) || t("ctaText");
+  const copyright = tv(footer?.copyright) || t("copyright");
+  const ageNotice = tv(footer?.ageNotice) || t("ageNotice");
 
   const clientUrl = import.meta.env.VITE_CLIENT_URL || "http://localhost:5173";
 
@@ -29,18 +37,24 @@ const Footer = () => {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="flex items-center gap-2">
-              <img
-                src="/assets/brand/header-logo.png"
-                alt="BET CHOKKOR"
-                className="h-8 w-auto object-contain"
-                draggable="false"
-              />
+              {logo ? (
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="h-8 w-auto object-contain"
+                  draggable="false"
+                />
+              ) : (
+                <span className="text-[13px] font-bold text-[var(--text-muted)]">
+                  Logo not found
+                </span>
+              )}
               <span className="text-[13px] font-semibold uppercase tracking-widest text-[var(--primary500)]">
                 Affiliates
               </span>
             </div>
 
-            <p className="aff-body mt-4 max-w-xs">{t("ctaText")}</p>
+            <p className="aff-body mt-4 max-w-xs">{ctaText}</p>
           </div>
 
           <div>
@@ -142,8 +156,8 @@ const Footer = () => {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-[var(--neutral800)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-[var(--text-muted)]">{t("copyright")}</p>
-          <p className="text-[13px] text-[var(--text-disabled)]">{t("ageNotice")}</p>
+          <p className="text-[13px] text-[var(--text-muted)]">{copyright}</p>
+          <p className="text-[13px] text-[var(--text-disabled)]">{ageNotice}</p>
         </div>
       </div>
     </footer>

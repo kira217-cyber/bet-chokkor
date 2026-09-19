@@ -61,6 +61,55 @@ export const fetchGlobalClientData = createAsyncThunk(
       // সার্ভার না পেলে স্ট্যাটিকটাই থাকে
     }
 
+    /*
+     * সাইট পরিচয় ও ফুটার ব্র্যান্ড — শুধুই অ্যাডমিন থেকে, কোনো স্ট্যাটিক
+     * ফলব্যাক নেই। অ্যাডমিন সেট না করলে খালি থাকে, তখন UI "Logo not found"
+     * ইত্যাদি দেখায়। (লিংক গ্রুপ ও লাইসেন্স আইকন কাঠামোগত, তাই স্ট্যাটিক।)
+     */
+    const EMPTY_LANG = { bn: "", en: "" };
+    base.siteIdentify = { siteName: "", logo: "", brandLogo: "", favicon: "" };
+    if (base.footerSetting) {
+      base.footerSetting = {
+        ...base.footerSetting,
+        brand: {
+          ...base.footerSetting.brand,
+          logo: "",
+          subtitle: { ...EMPTY_LANG },
+          copyright: { ...EMPTY_LANG },
+        },
+        license: { ...EMPTY_LANG },
+      };
+    }
+
+    try {
+      const res = await api.get("/api/site-settings/client/public");
+      const { identify, footer } = res?.data?.data || {};
+
+      if (identify) {
+        base.siteIdentify = {
+          siteName: identify.siteName || "",
+          logo: identify.logo ? imageUrl(identify.logo) : "",
+          brandLogo: identify.brandLogo ? imageUrl(identify.brandLogo) : "",
+          favicon: identify.favicon ? imageUrl(identify.favicon) : "",
+        };
+      }
+
+      if (footer && base.footerSetting) {
+        base.footerSetting = {
+          ...base.footerSetting,
+          brand: {
+            ...base.footerSetting.brand,
+            logo: footer.brandLogo ? imageUrl(footer.brandLogo) : "",
+            subtitle: footer.subtitle || { ...EMPTY_LANG },
+            copyright: footer.copyright || { ...EMPTY_LANG },
+          },
+          license: footer.license || { ...EMPTY_LANG },
+        };
+      }
+    } catch {
+      // সেটিং না পেলে খালি — UI প্লেসহোল্ডার দেখাবে
+    }
+
     return base;
   },
 );
