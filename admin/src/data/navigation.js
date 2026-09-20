@@ -172,6 +172,63 @@ export const navItems = [
   },
 
   {
+    key: "affiliate-site",
+    label: "Affiliate Site",
+    icon: "Handshake",
+    children: [
+      {
+        key: "aff-identity",
+        path: "/aff-identity",
+        label: "Affiliate Identity",
+        icon: "Image",
+        motherOnly: true,
+      },
+      {
+        key: "aff-footer",
+        path: "/aff-footer",
+        label: "Affiliate Footer",
+        icon: "PanelBottom",
+        motherOnly: true,
+      },
+      {
+        key: "affiliate-home-content",
+        path: "/affiliate-home-content",
+        label: "Affiliate Home Content",
+        icon: "Images",
+        motherOnly: true,
+      },
+      {
+        key: "affiliate-home-theme",
+        path: "/affiliate-home-theme",
+        label: "Affiliate Home Theme",
+        icon: "Palette",
+        motherOnly: true,
+      },
+      {
+        key: "affiliate-login-page",
+        path: "/affiliate-login-page",
+        label: "Affiliate Login Page",
+        icon: "Image",
+        motherOnly: true,
+      },
+      {
+        key: "affiliate-register-page",
+        path: "/affiliate-register-page",
+        label: "Affiliate Register Page",
+        icon: "Image",
+        motherOnly: true,
+      },
+      {
+        key: "affiliate-forgot-page",
+        path: "/affiliate-forgot-page",
+        label: "Affiliate Forgot Password Page",
+        icon: "Image",
+        motherOnly: true,
+      },
+    ],
+  },
+
+  {
     key: "vip",
     label: "VIP",
     icon: "Crown",
@@ -241,8 +298,6 @@ export const navItems = [
       { key: "promotion-theme", path: "/promotion-theme", label: "Promotion Theme", icon: "Palette", motherOnly: true },
       { key: "site-identity", path: "/site-identity", label: "Site Identity", icon: "Image", motherOnly: true },
       { key: "footer-setting", path: "/footer-setting", label: "Footer Setting", icon: "PanelBottom", motherOnly: true },
-      { key: "aff-identity", path: "/aff-identity", label: "Affiliate Identity", icon: "UserRoundCheck", motherOnly: true },
-      { key: "aff-footer", path: "/aff-footer", label: "Affiliate Footer", icon: "Handshake", motherOnly: true },
     ],
   },
 

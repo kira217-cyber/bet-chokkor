@@ -59,6 +59,9 @@ import FooterThemeSetting from "../pages/Theme/FooterThemeSetting";
 import AppDownloadThemeSetting from "../pages/Theme/AppDownloadThemeSetting";
 import PromotionThemeSetting from "../pages/Theme/PromotionThemeSetting";
 import AppDownloadContent from "../pages/AppDownload/AppDownloadContent";
+import AffiliateHomeContent from "../pages/Affiliate/AffiliateHomeContent";
+import AffiliateHomeTheme from "../pages/Theme/AffiliateHomeTheme";
+import AffiliateAuthPage from "../pages/Affiliate/AffiliateAuthPage";
 import { Image, PanelBottom, UserRoundCheck, Handshake } from "lucide-react";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
@@ -446,6 +449,46 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <AppDownloadContent />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "affiliate-home-content",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffiliateHomeContent />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "affiliate-home-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffiliateHomeTheme />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "affiliate-login-page",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffiliateAuthPage page="login" prefix="affl" title="Affiliate Login Page" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "affiliate-register-page",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffiliateAuthPage page="register" prefix="affr" title="Affiliate Register Page" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "affiliate-forgot-page",
+        element: (
+          <PrivateRoute motherOnly>
+            <AffiliateAuthPage page="forgot" prefix="afff" title="Affiliate Forgot Password Page" />
           </PrivateRoute>
         ),
       },
