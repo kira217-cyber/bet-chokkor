@@ -75,6 +75,20 @@ const vipSettingSchema = new Schema(
 
     tips: { type: LangTextSchema, default: () => ({}) },
     didYouKnow: { type: LangTextSchema, default: () => ({}) },
+
+    /** পেজের ছোট লেবেল/শিরোনাম — সব অ্যাডমিন থেকে (খালি হলে fallback) */
+    labels: {
+      pageTitle: { type: LangTextSchema, default: () => ({}) },
+      inviteOnly: { type: LangTextSchema, default: () => ({}) },
+      convertLine: { type: LangTextSchema, default: () => ({}) }, // {ratio} বসে
+      earnTitle: { type: LangTextSchema, default: () => ({}) },
+      earnText: { type: LangTextSchema, default: () => ({}) },
+      colProduct: { type: LangTextSchema, default: () => ({}) },
+      colTurnover: { type: LangTextSchema, default: () => ({}) },
+      colPoints: { type: LangTextSchema, default: () => ({}) },
+      tipsLabel: { type: LangTextSchema, default: () => ({}) },
+      didYouKnowLabel: { type: LangTextSchema, default: () => ({}) },
+    },
   },
   { timestamps: true },
 );
@@ -119,6 +133,23 @@ const DEFAULT_CONTENT = {
   },
 };
 
+/* ── vip-detail পেজের লেবেল ডিফল্ট (মূল সাইট থেকে) ── */
+const DEFAULT_LABELS = {
+  pageTitle: { bn: "ভিআইপি বিবরণ", en: "VIP Details" },
+  inviteOnly: { bn: "*শুধুমাত্র ইনভাইটেশনের মাধ্যমে", en: "*By invitation only" },
+  convertLine: { bn: "{ratio} VP = ১ BDT কনভার্সন", en: "{ratio} VP = 1 BDT conversion" },
+  earnTitle: { bn: "উচ্চতর মাল্টিপ্লায়ার, অসাধারণ রিওয়ার্ড", en: "Higher multipliers, greater rewards" },
+  earnText: {
+    bn: "স্লট, ফিশিং এবং ক্রাশ গেমের মাধ্যমে প্রতিটি টাকায় সর্বোচ্চ ভিআইপি পয়েন্ট অর্জন করুন— আরও বেশি খেলুন এবং ভিআইপি টিয়ারে দ্রুত উপরে উঠুন।",
+    en: "Earn the most VIP points per taka on Slots, Fishing and Crash — play more and climb the VIP tiers faster.",
+  },
+  colProduct: { bn: "প্রোডাক্ট টাইপ", en: "Product" },
+  colTurnover: { bn: "টার্নওভার (BDT)", en: "Turnover (BDT)" },
+  colPoints: { bn: "পয়েন্ট (VP)", en: "Points (VP)" },
+  tipsLabel: { bn: "কুইক টিপস", en: "Quick Tips" },
+  didYouKnowLabel: { bn: "আপনি কি জানেন?", en: "Did you know?" },
+};
+
 vipSettingSchema.statics.current = async function current() {
   const existing = await this.findOne().sort({ createdAt: 1 });
 
@@ -141,11 +172,20 @@ vipSettingSchema.statics.current = async function current() {
       existing.didYouKnow = DEFAULT_CONTENT.didYouKnow;
       touched = true;
     }
+    if (!existing.labels?.pageTitle?.en) {
+      existing.labels = DEFAULT_LABELS;
+      touched = true;
+    }
     if (touched) await existing.save();
     return existing;
   }
 
-  return this.create({ ...DEFAULT_CONTENT, benefits: DEFAULT_BENEFITS, earnRates: DEFAULT_EARN });
+  return this.create({
+    ...DEFAULT_CONTENT,
+    labels: DEFAULT_LABELS,
+    benefits: DEFAULT_BENEFITS,
+    earnRates: DEFAULT_EARN,
+  });
 };
 
 vipSettingSchema.methods.toClientJSON = function toClientJSON() {
@@ -163,6 +203,7 @@ vipSettingSchema.methods.toClientJSON = function toClientJSON() {
     earnRates: this.earnRates,
     tips: this.tips,
     didYouKnow: this.didYouKnow,
+    labels: this.labels,
   };
 };
 

@@ -286,6 +286,19 @@ router.put(
       if (b.tips !== undefined) setting.tips = langText(b.tips);
       if (b.didYouKnow !== undefined) setting.didYouKnow = langText(b.didYouKnow);
 
+      if (b.labels && typeof b.labels === "object") {
+        const L = b.labels;
+        const keys = [
+          "pageTitle", "inviteOnly", "convertLine", "earnTitle", "earnText",
+          "colProduct", "colTurnover", "colPoints", "tipsLabel", "didYouKnowLabel",
+        ];
+        const next = { ...(setting.labels?.toObject?.() || setting.labels || {}) };
+        keys.forEach((k) => {
+          if (L[k] !== undefined) next[k] = langText(L[k]);
+        });
+        setting.labels = next;
+      }
+
       if (Array.isArray(b.benefits)) {
         setting.benefits = b.benefits.map((x) => ({
           icon: text(x?.icon),

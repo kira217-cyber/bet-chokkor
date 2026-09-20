@@ -29,6 +29,9 @@ const VipDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sel, setSel] = useState(0);
 
+  // অ্যাডমিন লেবেল, নইলে স্ট্যাটিক fallback
+  const lbl = (key, bn, en) => tv(setting.labels?.[key]) || L(bn, en);
+
   useEffect(() => {
     let alive = true;
     fetchVipLevels()
@@ -100,7 +103,7 @@ const VipDetail = () => {
           <ChevronLeft size={18} className="text-[var(--neutral100)]" />
         </button>
         <h1 className="font-bold text-[var(--neutral100)]" style={{ fontSize: "var(--fs-h4)" }}>
-          {L("ভিআইপি বিবরণ", "VIP Details")}
+          {lbl("pageTitle", "ভিআইপি বিবরণ", "VIP Details")}
         </h1>
       </div>
 
@@ -221,7 +224,7 @@ const VipDetail = () => {
                 </span>
                 {tier.inviteOnly ? (
                   <span className="text-[var(--primary500)]" style={{ fontSize: "var(--fs-small)" }}>
-                    {L("*শুধুমাত্র ইনভাইটেশনের মাধ্যমে", "*By invitation only")}
+                    {lbl("inviteOnly", "*শুধুমাত্র ইনভাইটেশনের মাধ্যমে", "*By invitation only")}
                   </span>
                 ) : null}
               </div>
@@ -247,7 +250,11 @@ const VipDetail = () => {
                         </p>
                         <p className="text-[var(--text-muted)]" style={{ fontSize: "var(--fs-small)", marginTop: "calc(var(--u)*0.5)" }}>
                           {i === 0
-                            ? L(`${nf(tier.convertRatio)} VP = ১ BDT কনভার্সন`, `${nf(tier.convertRatio)} VP = 1 BDT conversion`)
+                            ? lbl(
+                                "convertLine",
+                                "{ratio} VP = ১ BDT কনভার্সন",
+                                "{ratio} VP = 1 BDT conversion",
+                              ).replace("{ratio}", nf(tier.convertRatio))
                             : tv(bnf.desc)}
                         </p>
                       </div>
@@ -280,10 +287,11 @@ const VipDetail = () => {
           {earnRates.length ? (
             <div className="bg-[var(--neutral900)]" style={{ borderRadius: "var(--radius-10)", padding: "calc(var(--u)*4.267)", marginBottom: "calc(var(--u)*4.267)" }}>
               <h3 className="font-bold text-[var(--primary500)]" style={{ fontSize: "var(--fs-larger)" }}>
-                {L("উচ্চতর মাল্টিপ্লায়ার, অসাধারণ রিওয়ার্ড", "Higher multipliers, greater rewards")}
+                {lbl("earnTitle", "উচ্চতর মাল্টিপ্লায়ার, অসাধারণ রিওয়ার্ড", "Higher multipliers, greater rewards")}
               </h3>
               <p className="text-[var(--text-secondary)]" style={{ fontSize: "var(--fs-base)", lineHeight: 1.7, marginTop: "calc(var(--u)*1.6)", marginBottom: "calc(var(--u)*3.2)" }}>
-                {L(
+                {lbl(
+                  "earnText",
                   "স্লট, ফিশিং এবং ক্রাশ গেমের মাধ্যমে প্রতিটি টাকায় সর্বোচ্চ ভিআইপি পয়েন্ট অর্জন করুন— আরও বেশি খেলুন এবং ভিআইপি টিয়ারে দ্রুত উপরে উঠুন।",
                   "Earn the most VIP points per taka on Slots, Fishing and Crash — play more and climb the VIP tiers faster.",
                 )}
@@ -292,9 +300,9 @@ const VipDetail = () => {
               <div className="overflow-hidden" style={{ borderRadius: "var(--radius-6)", border: "1px solid var(--neutral700)" }}>
                 <div className="grid" style={{ gridTemplateColumns: "1.4fr 1fr 1fr", background: "var(--neutral800)" }}>
                   {[
-                    L("প্রোডাক্ট টাইপ", "Product"),
-                    L("টার্নওভার (BDT)", "Turnover (BDT)"),
-                    L("পয়েন্ট (VP)", "Points (VP)"),
+                    lbl("colProduct", "প্রোডাক্ট টাইপ", "Product"),
+                    lbl("colTurnover", "টার্নওভার (BDT)", "Turnover (BDT)"),
+                    lbl("colPoints", "পয়েন্ট (VP)", "Points (VP)"),
                   ].map((h, i) => (
                     <div key={h} className="font-bold text-[var(--text-secondary)]" style={{ fontSize: "var(--fs-small)", padding: "calc(var(--u)*2.133) calc(var(--u)*2.667)", textAlign: i === 0 ? "left" : "center" }}>
                       {h}
@@ -320,7 +328,7 @@ const VipDetail = () => {
             {tipsLines.length ? (
               <div className="bg-[var(--neutral800)]" style={{ borderRadius: "var(--radius-10)", padding: "calc(var(--u)*4.267)" }}>
                 <p className="font-bold text-[var(--neutral100)]" style={{ fontSize: "var(--fs-larger)", marginBottom: "calc(var(--u)*2.133)" }}>
-                  🎯 {L("কুইক টিপস", "Quick Tips")}
+                  🎯 {lbl("tipsLabel", "কুইক টিপস", "Quick Tips")}
                 </p>
                 <ul className="flex flex-col" style={{ gap: "calc(var(--u)*1.6)" }}>
                   {tipsLines.map((line, i) => (
@@ -336,7 +344,7 @@ const VipDetail = () => {
             {tv(setting.didYouKnow) ? (
               <div className="bg-[var(--neutral800)]" style={{ borderRadius: "var(--radius-10)", padding: "calc(var(--u)*4.267)" }}>
                 <p className="font-bold text-[var(--neutral100)]" style={{ fontSize: "var(--fs-larger)", marginBottom: "calc(var(--u)*2.133)" }}>
-                  💡 {L("আপনি কি জানেন?", "Did you know?")}
+                  💡 {lbl("didYouKnowLabel", "আপনি কি জানেন?", "Did you know?")}
                 </p>
                 <p className="text-[var(--text-secondary)]" style={{ fontSize: "var(--fs-base)", lineHeight: 1.7 }}>
                   {tv(setting.didYouKnow)}

@@ -27,7 +27,22 @@ const blank = {
   dykEn: "",
   bannerDesktop: "",
   bannerMobile: "",
+  labels: {},
 };
+
+/* vip-detail পেজের ছোট লেবেল — key ↔ পরিচিত নাম */
+const LABEL_FIELDS = [
+  ["pageTitle", "Page header"],
+  ["inviteOnly", "Invite-only note"],
+  ["convertLine", "Convert line ({ratio} = number)"],
+  ["earnTitle", "Earn section title"],
+  ["earnText", "Earn section text"],
+  ["colProduct", "Table column: Product"],
+  ["colTurnover", "Table column: Turnover"],
+  ["colPoints", "Table column: Points"],
+  ["tipsLabel", "“Quick Tips” label"],
+  ["didYouKnowLabel", "“Did you know?” label"],
+];
 
 /**
  * VIP সেটিং (অ্যাডমিন) — আর্নিং রেট, পয়েন্ট→ক্যাশ রূপান্তরের হার,
@@ -41,6 +56,11 @@ const VipSettings = () => {
   const mobRef = useRef(null);
 
   const set = (k, v) => setDraft((p) => ({ ...p, [k]: v }));
+  const setLabel = (key, lang, v) =>
+    setDraft((p) => ({
+      ...p,
+      labels: { ...p.labels, [key]: { ...(p.labels?.[key] || {}), [lang]: v } },
+    }));
 
   const load = async () => {
     try {
@@ -66,6 +86,7 @@ const VipSettings = () => {
         dykEn: s.didYouKnow?.en || "",
         bannerDesktop: s.bannerDesktop || "",
         bannerMobile: s.bannerMobile || "",
+        labels: s.labels || {},
       });
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to load");
@@ -113,6 +134,7 @@ const VipSettings = () => {
         didYouKnow: { bn: draft.dykBn, en: draft.dykEn },
         bannerDesktop: draft.bannerDesktop,
         bannerMobile: draft.bannerMobile,
+        labels: draft.labels,
       });
       toast.success("Saved");
     } catch (error) {
@@ -209,6 +231,22 @@ const VipSettings = () => {
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Banner label="Banner (Desktop)" size="1200 × 320 px" k="bannerDesktop" inputRef={deskRef} />
           <Banner label="Banner (Mobile)" size="720 × 320 px" k="bannerMobile" inputRef={mobRef} />
+        </div>
+      </div>
+
+      <div className="ad-card mb-4">
+        <h2 className="mb-1 text-[16px] font-extrabold text-[var(--neutral100)]">Page labels</h2>
+        <p className="mb-4 text-[13px] text-[var(--text-muted)]">Small headings & labels on the VIP Details page (Bangla / English).</p>
+        <div className="flex flex-col gap-4">
+          {LABEL_FIELDS.map(([key, name]) => (
+            <div key={key}>
+              <label className="ad-label">{name}</label>
+              <div className="mt-1 grid gap-2 sm:grid-cols-2">
+                <input className="ad-input" placeholder="Bangla" value={draft.labels?.[key]?.bn || ""} onChange={(e) => setLabel(key, "bn", e.target.value)} />
+                <input className="ad-input" placeholder="English" value={draft.labels?.[key]?.en || ""} onChange={(e) => setLabel(key, "en", e.target.value)} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
