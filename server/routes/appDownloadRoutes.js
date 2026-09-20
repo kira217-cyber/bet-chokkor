@@ -5,6 +5,7 @@ import express from "express";
 import AppDownload from "../models/AppDownload.js";
 
 import apkUpload from "../config/apkUpload.js";
+import upload from "../config/multer.js";
 import {
   protectAdmin,
   requireMother,
@@ -15,6 +16,87 @@ import { successResponse, errorResponse } from "../utils/response.js";
 const router = express.Router();
 
 const text = (value) => String(value ?? "").trim();
+
+/* ── কনটেন্ট হেল্পার ── */
+const langText = (obj) => ({ bn: text(obj?.bn), en: text(obj?.en) });
+
+const parseMaybe = (value) => {
+  if (typeof value !== "string") return value || {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+};
+
+const fileUrl = (file) => (file ? `/uploads/${file.filename}` : "");
+
+/** আমাদের আপলোড হলে ডিস্ক থেকে ছবি মুছে ফেলা (apk এর বাইরে uploads/) */
+const removeContentImage = (url) => {
+  if (!url || !url.startsWith("/uploads/")) return;
+  fs.promises.unlink(path.join("uploads", path.basename(url))).catch(() => {});
+};
+
+/* কনটেন্টের সব ছবির নামের ফিল্ড — নতুন আপলোড হলে ঐ স্লট বদলায় */
+const contentImageFields = [
+  { name: "heroLogo", maxCount: 1 },
+  { name: "heroBg", maxCount: 1 },
+  { name: "heroMain", maxCount: 1 },
+  { name: "featImage", maxCount: 1 },
+  ...Array.from({ length: 6 }, (_, i) => ({ name: `card_${i}`, maxCount: 1 })),
+];
+const contentUpload = upload.fields(contentImageFields);
+
+/** পুরোনো কনটেন্টের সব /uploads/ ছবি — orphan পরিষ্কারে কাজে লাগে */
+const gatherImages = (content = {}) => {
+  const urls = [];
+  const h = content.hero || {};
+  urls.push(h.logo, h.bgImage, h.mainImage);
+  (content.experience?.cards || []).forEach((c) => urls.push(c.image));
+  urls.push(content.features?.image);
+  return urls.filter((u) => u && u.startsWith("/uploads/"));
+};
+
+/** body(JSON) + আপলোড ফাইল থেকে পরিচ্ছন্ন content বানানো */
+const buildContent = (incoming = {}, files = {}) => {
+  const slot = (name) => (files[name]?.[0] ? fileUrl(files[name][0]) : null);
+
+  const hero = incoming.hero || {};
+  const exp = incoming.experience || {};
+  const feat = incoming.features || {};
+
+  return {
+    hero: {
+      title: langText(hero.title),
+      lead: langText(hero.lead),
+      text: langText(hero.text),
+      helpNote: langText(hero.helpNote),
+      logo: slot("heroLogo") || text(hero.logo),
+      bgImage: slot("heroBg") || text(hero.bgImage),
+      mainImage: slot("heroMain") || text(hero.mainImage),
+    },
+    experience: {
+      eyebrow: langText(exp.eyebrow),
+      title: langText(exp.title),
+      sub: langText(exp.sub),
+      cards: (exp.cards || []).slice(0, 6).map((c, i) => ({
+        title: langText(c.title),
+        text: langText(c.text),
+        image: slot(`card_${i}`) || text(c.image),
+      })),
+    },
+    features: {
+      eyebrow: langText(feat.eyebrow),
+      title: langText(feat.title),
+      sub: langText(feat.sub),
+      image: slot("featImage") || text(feat.image),
+      items: (feat.items || []).slice(0, 12).map((it) => ({
+        label: langText(it.label),
+        icon: text(it.icon),
+      })),
+    },
+  };
+};
 
 const APK_DIR = "uploads/apk";
 
@@ -57,6 +139,7 @@ router.get("/public", async (req, res) => {
       size: ready ? row.size : 0,
       version: ready ? row.version : "",
       note: row.note,
+      content: row.content || {},
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -164,6 +247,57 @@ router.put("/admin", protectAdmin, requireMother, requireWrite, async (req, res)
     return errorResponse(res, error.message, 500);
   }
 });
+
+/* =========================
+   অ্যাডমিন — পেজ কনটেন্ট (টেক্সট + ছবি)
+   ========================= */
+
+router.get(
+  "/admin/content",
+  protectAdmin,
+  requireMother,
+  async (req, res) => {
+    try {
+      const row = await AppDownload.current();
+      return successResponse(res, "App content loaded", {
+        content: row.content || {},
+      });
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+router.put(
+  "/admin/content",
+  protectAdmin,
+  requireMother,
+  requireWrite,
+  contentUpload,
+  async (req, res) => {
+    try {
+      const row = await AppDownload.current();
+
+      const prevImages = gatherImages(
+        row.content?.toObject ? row.content.toObject() : row.content || {},
+      );
+
+      const next = buildContent(parseMaybe(req.body.content), req.files || {});
+      row.content = next;
+      await row.save();
+
+      // যে পুরোনো ছবি আর ব্যবহার হচ্ছে না সেগুলো ডিস্ক থেকে মুছে ফেলা
+      const nextImages = new Set(gatherImages(next));
+      prevImages.forEach((url) => {
+        if (!nextImages.has(url)) removeContentImage(url);
+      });
+
+      return successResponse(res, "App content saved", { content: row.content });
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
 
 router.delete(
   "/admin",
