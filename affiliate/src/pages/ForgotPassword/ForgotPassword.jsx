@@ -33,7 +33,7 @@ const ForgotPassword = () => {
   const phoneValid = phone.length === 11;
 
   const boxClass =
-    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--form-box-bg)]";
+    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--affauth-input-bg)]";
   const inputClass =
     "h-[48px] w-full bg-transparent px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]";
 
@@ -89,11 +89,12 @@ const ForgotPassword = () => {
 
   if (done) {
     return (
-      <AuthCard title={t("forgotPassword")} subtitle={t("passwordChanged")}>
+      <AuthCard variant="forgot" title={t("forgotPassword")} subtitle={t("passwordChanged")}>
         <button
           type="button"
           onClick={() => navigate("/login")}
           className="aff-btn aff-btn--primary w-full"
+          style={{ background: "var(--affauth-btn-bg)", color: "var(--affauth-btn-text)" }}
         >
           {t("login")}
         </button>
@@ -103,7 +104,7 @@ const ForgotPassword = () => {
 
   if (step === "otp") {
     return (
-      <AuthCard title={t("otpTitle")} subtitle={t("forgotPassword")}>
+      <AuthCard variant="forgot" title={t("otpTitle")} subtitle={t("forgotPassword")}>
         <OtpStep
           flow="forgotPassword"
           countryCode="+880"
@@ -117,6 +118,7 @@ const ForgotPassword = () => {
 
   return (
     <AuthCard
+      variant="forgot"
       title={t("forgotPassword")}
       subtitle={t("loginSubtitle")}
       footer={
@@ -124,7 +126,7 @@ const ForgotPassword = () => {
           {t("haveAccount")}{" "}
           <Link
             to="/login"
-            className="font-semibold text-[var(--primary500)] underline underline-offset-4"
+            className="font-semibold text-[var(--affauth-link)] underline underline-offset-4"
           >
             {t("login")}
           </Link>
@@ -176,11 +178,12 @@ const ForgotPassword = () => {
             type="submit"
             disabled={!phoneValid || busy}
             className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed"
-            style={
-              phoneValid && !busy
-                ? undefined
-                : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
-            }
+            style={{
+              background: phoneValid && !busy
+                ? "var(--affauth-btn-bg)"
+                : "color-mix(in srgb, var(--affauth-btn-bg), black 40%)",
+              color: "var(--affauth-btn-text)",
+            }}
           >
             {busy ? t("loading") : t("continue")}
           </button>
@@ -220,11 +223,12 @@ const ForgotPassword = () => {
             type="submit"
             disabled={password.length < 6 || busy}
             className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed"
-            style={
-              password.length >= 6 && !busy
-                ? undefined
-                : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
-            }
+            style={{
+              background: password.length >= 6 && !busy
+                ? "var(--affauth-btn-bg)"
+                : "color-mix(in srgb, var(--affauth-btn-bg), black 40%)",
+              color: "var(--affauth-btn-text)",
+            }}
           >
             {busy ? t("loading") : t("savePassword")}
           </button>

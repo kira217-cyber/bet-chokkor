@@ -128,7 +128,7 @@ const Register = () => {
   };
 
   const boxClass =
-    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--form-box-bg)]";
+    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--affauth-input-bg)]";
   const inputClass =
     "h-[48px] w-full bg-transparent px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]";
 
@@ -169,7 +169,7 @@ const Register = () => {
 
   if (submitted) {
     return (
-      <AuthCard title={t("applicationSentTitle")}>
+      <AuthCard variant="register" title={t("applicationSentTitle")}>
         <div className="flex flex-col items-center gap-4 py-4 text-center">
           <span className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[var(--status-pending)]/10 text-[var(--status-pending)]">
             <Clock size={34} />
@@ -189,7 +189,7 @@ const Register = () => {
 
   if (otpStep) {
     return (
-      <AuthCard title={t("otpTitle")} subtitle={t("registerSubtitle")}>
+      <AuthCard variant="register" title={t("otpTitle")} subtitle={t("registerSubtitle")}>
         <OtpStep
           flow="register"
           countryCode="+880"
@@ -203,6 +203,7 @@ const Register = () => {
 
   return (
     <AuthCard
+      variant="register"
       title={t("registerTitle")}
       subtitle={t("registerSubtitle")}
       width="560px"
@@ -211,7 +212,7 @@ const Register = () => {
           {t("haveAccount")}{" "}
           <Link
             to="/login"
-            className="font-semibold text-[var(--primary500)] underline underline-offset-4"
+            className="font-semibold text-[var(--affauth-link)] underline underline-offset-4"
           >
             {t("login")}
           </Link>
@@ -321,11 +322,12 @@ const Register = () => {
           type="submit"
           disabled={!canSubmit}
           className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed"
-          style={
-            canSubmit
-              ? undefined
-              : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
-          }
+          style={{
+            background: canSubmit
+              ? "var(--affauth-btn-bg)"
+              : "color-mix(in srgb, var(--affauth-btn-bg), black 40%)",
+            color: "var(--affauth-btn-text)",
+          }}
         >
           {busy ? t("loading") : t("signup")}
         </button>

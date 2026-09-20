@@ -114,13 +114,13 @@ const Login = () => {
   };
 
   const boxClass =
-    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--form-box-bg)]";
+    "flex w-full items-center overflow-hidden rounded-[12px] bg-[var(--affauth-input-bg)]";
   const inputClass =
     "h-[48px] w-full bg-transparent px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]";
 
   if (otpStep) {
     return (
-      <AuthCard title={t("otpTitle")} subtitle={t("loginSubtitle")}>
+      <AuthCard variant="login" title={t("otpTitle")} subtitle={t("loginSubtitle")}>
         <OtpStep
           flow="login"
           userId={form.username.trim()}
@@ -133,6 +133,7 @@ const Login = () => {
 
   return (
     <AuthCard
+      variant="login"
       title={t("loginTitle")}
       subtitle={t("loginSubtitle")}
       footer={
@@ -140,7 +141,7 @@ const Login = () => {
           {t("noAccount")}{" "}
           <Link
             to="/register"
-            className="font-semibold text-[var(--primary500)] underline underline-offset-4"
+            className="font-semibold text-[var(--affauth-link)] underline underline-offset-4"
           >
             {t("signup")}
           </Link>
@@ -188,7 +189,7 @@ const Login = () => {
         <div className="flex justify-end">
           <Link
             to="/forgot-password"
-            className="text-[14px] text-[var(--primary500)] underline underline-offset-4"
+            className="text-[14px] text-[var(--affauth-link)] underline underline-offset-4"
           >
             {t("forgotPassword")}
           </Link>
@@ -198,11 +199,12 @@ const Login = () => {
           type="submit"
           disabled={!canSubmit}
           className="aff-btn aff-btn--primary w-full disabled:cursor-not-allowed"
-          style={
-            canSubmit
-              ? undefined
-              : { background: "color-mix(in srgb, var(--primary500), black 40%)" }
-          }
+          style={{
+            background: canSubmit
+              ? "var(--affauth-btn-bg)"
+              : "color-mix(in srgb, var(--affauth-btn-bg), black 40%)",
+            color: "var(--affauth-btn-text)",
+          }}
         >
           {busy ? t("loading") : t("login")}
         </button>
