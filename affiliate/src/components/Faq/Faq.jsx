@@ -4,19 +4,25 @@ import { ChevronDown } from "lucide-react";
 
 import Section from "../Section/Section";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectFaqs } from "../../features/global/globalSelectors";
+import { selectFaqs, selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /** সাধারণ প্রশ্ন — একসাথে একটাই খোলা থাকে */
 const Faq = () => {
   const { t, tv } = useLanguage();
   const faqs = useSelector(selectFaqs);
+  const home = useSelector(selectAffiliateHome);
+  const c = home?.faq || {};
 
-  const [openKey, setOpenKey] = useState(faqs[0]?.key || null);
+  const list = c.items?.length
+    ? c.items.map((x, i) => ({ key: i, q: x.q, a: x.a }))
+    : faqs;
+
+  const [openKey, setOpenKey] = useState(list[0]?.key ?? null);
 
   return (
-    <Section id="faq" eyebrow={t("navFaq")} title={t("faqTitle")}>
+    <Section id="faq" eyebrow={tv(c.eyebrow) || t("navFaq")} title={tv(c.title) || t("faqTitle")}>
       <div className="mx-auto flex max-w-3xl flex-col gap-3">
-        {faqs.map((item) => {
+        {list.map((item) => {
           const isOpen = openKey === item.key;
 
           return (

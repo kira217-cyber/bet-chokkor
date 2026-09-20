@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 import Section from "../Section/Section";
 import Calculator from "../Calculator/Calculator";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectCommissionTiers } from "../../features/global/globalSelectors";
+import { selectCommissionTiers, selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /**
  * কমিশন স্ল্যাব — ডেস্কটপে টেবিল, মোবাইলে কার্ড (টেবিল ছোট স্ক্রিনে
@@ -13,16 +13,21 @@ import { selectCommissionTiers } from "../../features/global/globalSelectors";
  */
 const Commission = () => {
   const { t, tv } = useLanguage();
-  const tiers = useSelector(selectCommissionTiers);
+  const staticTiers = useSelector(selectCommissionTiers);
+  const c = useSelector(selectAffiliateHome)?.commission || {};
+
+  const tiers = c.tiers?.length
+    ? c.tiers.map((x, i) => ({ key: i, tier: i + 1, players: x.players, share: x.share }))
+    : staticTiers;
 
   const topTier = tiers.length ? tiers[tiers.length - 1] : null;
 
   return (
     <Section
       id="commission"
-      eyebrow={t("navCommission")}
-      title={t("commissionTitle")}
-      text={t("commissionText")}
+      eyebrow={tv(c.eyebrow) || t("navCommission")}
+      title={tv(c.title) || t("commissionTitle")}
+      text={tv(c.text) || t("commissionText")}
     >
       <div className="grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-10">
         {/* ── ডেস্কটপ টেবিল ── */}
@@ -31,13 +36,13 @@ const Commission = () => {
             <thead>
               <tr className="bg-[var(--neutral800)]">
                 <th className="px-5 py-4 text-start text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-                  {t("tierLabel")}
+                  {tv(c.tierLabel) || t("tierLabel")}
                 </th>
                 <th className="px-5 py-4 text-start text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
                   {t("activePlayers")}
                 </th>
                 <th className="px-5 py-4 text-end text-[13px] font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-                  {t("revenueShare")}
+                  {tv(c.revenueShare) || t("revenueShare")}
                 </th>
               </tr>
             </thead>
@@ -96,7 +101,7 @@ const Commission = () => {
               >
                 <div>
                   <p className="text-[12px] uppercase tracking-wide text-[var(--text-disabled)]">
-                    {t("tierLabel")} {tier.tier}
+                    {tv(c.tierLabel) || t("tierLabel")} {tier.tier}
                   </p>
                   <p className="mt-1 text-[15px] text-[var(--text-secondary)]">
                     {tv(tier.players)} {t("activePlayers")}

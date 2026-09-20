@@ -28,17 +28,23 @@ const ICONS = {
 
 import Section from "../Section/Section";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectFeatures } from "../../features/global/globalSelectors";
+import { selectFeatures, selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /** ছয়টি ফিচার কার্ড — মোবাইলে ১, ট্যাবলেটে ২, ডেস্কটপে ৩ কলাম */
 const WhyUs = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const features = useSelector(selectFeatures);
+  const home = useSelector(selectAffiliateHome);
+  const c = home?.whyUs || {};
+
+  const list = c.features?.length
+    ? c.features.map((f, i) => ({ key: i, icon: f.icon, title: tv(f.title), text: tv(f.text) }))
+    : features.map((f) => ({ key: f.key, icon: f.icon, title: t(f.titleKey), text: t(f.textKey) }));
 
   return (
-    <Section id="why-us" eyebrow={t("navWhyUs")} title={t("whyTitle")}>
+    <Section id="why-us" eyebrow={tv(c.eyebrow) || t("navWhyUs")} title={tv(c.title) || t("whyTitle")}>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((item) => {
+        {list.map((item) => {
           const Icon = ICONS[item.icon] || Circle;
 
           return (
@@ -47,8 +53,8 @@ const WhyUs = () => {
                 <Icon size={20} />
               </span>
 
-              <h3 className="aff-h3 mt-4">{t(item.titleKey)}</h3>
-              <p className="aff-body mt-2">{t(item.textKey)}</p>
+              <h3 className="aff-h3 mt-4">{item.title}</h3>
+              <p className="aff-body mt-2">{item.text}</p>
             </div>
           );
         })}

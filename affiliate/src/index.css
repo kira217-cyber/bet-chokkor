@@ -241,6 +241,46 @@ body {
   color: var(--text-muted);
 }
 
+/* ── Auth পেজ Login ও Register — আলাদা করে রঙযোগ্য ──
+   AuthCard শেয়ার্ড, তাই wrapper ক্লাসে base টোকেন থেকে ডিফল্ট, আর
+   admin section-theme affl ও affr সেট করলে সেটাই বসে। */
+.affauth {
+  --affauth-card-bg: var(--neutral900);
+  --affauth-title: var(--neutral100);
+  --affauth-subtitle: var(--text-muted);
+  --affauth-input-bg: var(--form-box-bg);
+  --affauth-btn-bg: var(--primary500);
+  --affauth-btn-text: var(--neutral600);
+  --affauth-link: var(--primary500);
+}
+.affauth--login {
+  --affauth-card-bg: var(--affl-card-bg, var(--neutral900));
+  --affauth-title: var(--affl-title, var(--neutral100));
+  --affauth-subtitle: var(--affl-subtitle, var(--text-muted));
+  --affauth-input-bg: var(--affl-input-bg, var(--form-box-bg));
+  --affauth-btn-bg: var(--affl-btn-bg, var(--primary500));
+  --affauth-btn-text: var(--affl-btn-text, var(--neutral600));
+  --affauth-link: var(--affl-link, var(--primary500));
+}
+.affauth--register {
+  --affauth-card-bg: var(--affr-card-bg, var(--neutral900));
+  --affauth-title: var(--affr-title, var(--neutral100));
+  --affauth-subtitle: var(--affr-subtitle, var(--text-muted));
+  --affauth-input-bg: var(--affr-input-bg, var(--form-box-bg));
+  --affauth-btn-bg: var(--affr-btn-bg, var(--primary500));
+  --affauth-btn-text: var(--affr-btn-text, var(--neutral600));
+  --affauth-link: var(--affr-link, var(--primary500));
+}
+.affauth--forgot {
+  --affauth-card-bg: var(--afff-card-bg, var(--neutral900));
+  --affauth-title: var(--afff-title, var(--neutral100));
+  --affauth-subtitle: var(--afff-subtitle, var(--text-muted));
+  --affauth-input-bg: var(--afff-input-bg, var(--form-box-bg));
+  --affauth-btn-bg: var(--afff-btn-bg, var(--primary500));
+  --affauth-btn-text: var(--afff-btn-text, var(--neutral600));
+  --affauth-link: var(--afff-link, var(--primary500));
+}
+
 /* কার্ড — উপরে হালকা গ্রেডিয়েন্ট বর্ডার, ক্লায়েন্টের গেম কার্ডের মতো */
 .aff-card {
   position: relative;

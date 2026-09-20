@@ -87,6 +87,27 @@ const SECTION_TOKENS = {
     "promo-title", "promo-tab-active-bg", "promo-tab-active-text",
     "promo-tab-bg", "promo-tab-text", "promo-card-bg", "promo-accent",
   ],
+  /* অ্যাফিলিয়েট হোম — বেস প্যালেট টোকেন সরাসরি override (পুরো
+     অ্যাফিলিয়েট সাইট একই প্যালেট ব্যবহার করে) */
+  "affiliate:home": [
+    "primary500", "primary400", "primary600",
+    "neutral1000", "neutral900", "neutral800", "neutral700",
+    "neutral100", "text-secondary", "text-muted",
+  ],
+  /* Login/Register আলাদা করে রঙ — AuthCard শেয়ার্ড, তাই scoped
+     ক্লাসে আলাদা টোকেন (affl-* login, affr-* register) */
+  "affiliate:auth-login": [
+    "affl-card-bg", "affl-title", "affl-subtitle",
+    "affl-input-bg", "affl-btn-bg", "affl-btn-text", "affl-link",
+  ],
+  "affiliate:auth-register": [
+    "affr-card-bg", "affr-title", "affr-subtitle",
+    "affr-input-bg", "affr-btn-bg", "affr-btn-text", "affr-link",
+  ],
+  "affiliate:auth-forgot": [
+    "afff-card-bg", "afff-title", "afff-subtitle",
+    "afff-input-bg", "afff-btn-bg", "afff-btn-text", "afff-link",
+  ],
 };
 
 const cleanScoped = (scope, input = {}) => {

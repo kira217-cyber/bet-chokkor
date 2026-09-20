@@ -28,22 +28,28 @@ const ICONS = {
 
 import Section from "../Section/Section";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectSteps } from "../../features/global/globalSelectors";
+import { selectSteps, selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /** তিন ধাপ — ডেস্কটপে পাশাপাশি, মাঝে ধাপের নম্বর বড় করে */
 const HowItWorks = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const steps = useSelector(selectSteps);
+  const home = useSelector(selectAffiliateHome);
+  const c = home?.howItWorks || {};
+
+  const list = c.steps?.length
+    ? c.steps.map((s, i) => ({ key: i, icon: s.icon, title: tv(s.title), text: tv(s.text) }))
+    : steps.map((s) => ({ key: s.key, icon: s.icon, title: t(s.titleKey), text: t(s.textKey) }));
 
   return (
     <Section
       id="how-it-works"
-      eyebrow={t("navHowItWorks")}
-      title={t("howTitle")}
+      eyebrow={tv(c.eyebrow) || t("navHowItWorks")}
+      title={tv(c.title) || t("howTitle")}
       className="bg-[var(--neutral900)]"
     >
       <div className="grid gap-5 md:grid-cols-3">
-        {steps.map((step, index) => {
+        {list.map((step, index) => {
           const Icon = ICONS[step.icon] || Circle;
 
           return (
@@ -58,8 +64,8 @@ const HowItWorks = () => {
                 </span>
               </div>
 
-              <h3 className="aff-h3 mt-5">{t(step.titleKey)}</h3>
-              <p className="aff-body mt-2">{t(step.textKey)}</p>
+              <h3 className="aff-h3 mt-5">{step.title}</h3>
+              <p className="aff-body mt-2">{step.text}</p>
             </div>
           );
         })}

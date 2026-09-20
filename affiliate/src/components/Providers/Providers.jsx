@@ -3,21 +3,26 @@ import { useSelector } from "react-redux";
 
 import Section from "../Section/Section";
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectProviders } from "../../features/global/globalSelectors";
+import { selectProviders, selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /** প্রোভাইডার লোগোর গ্রিড — ক্লায়েন্ট সাইটের আসল ভেন্ডর লোগো */
 const Providers = () => {
-  const { t } = useLanguage();
+  const { t, tv } = useLanguage();
   const providers = useSelector(selectProviders);
+  const c = useSelector(selectAffiliateHome)?.providers || {};
+
+  const list = c.items?.length
+    ? c.items.map((p, i) => ({ key: i, name: p.name, icon: p.image }))
+    : providers;
 
   return (
     <Section
-      title={t("providersTitle")}
-      text={t("providersText")}
+      title={tv(c.title) || t("providersTitle")}
+      text={tv(c.text) || t("providersText")}
       className="bg-[var(--neutral900)]"
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {providers.map((item) => (
+        {list.map((item) => (
           <div
             key={item.key}
             className="flex h-[84px] items-center justify-center rounded-[14px] bg-[var(--neutral800)] px-4"

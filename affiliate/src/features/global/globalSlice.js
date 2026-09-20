@@ -18,6 +18,8 @@ export const fetchAffiliateData = createAsyncThunk(
       ...affiliateData,
       footer: null,
       siteIdentify: { siteName: "", logo: "", brandLogo: "", favicon: "" },
+      home: null,
+      auth: null,
     };
 
     try {
@@ -45,6 +47,41 @@ export const fetchAffiliateData = createAsyncThunk(
       // সার্ভার না পেলে স্ট্যাটিকটাই থাকে
     }
 
+    // হোম পেজের কনটেন্ট (admin থেকে; খালি হলে কম্পোনেন্ট স্ট্যাটিক দেখায়)
+    try {
+      const res = await api.get("/api/affiliate-home/public");
+      const h = res?.data?.data || null;
+      if (h) {
+        if (h.hero) {
+          h.hero.desktopImage = img(h.hero.desktopImage);
+          h.hero.mobileImage = img(h.hero.mobileImage);
+        }
+        if (Array.isArray(h.providers?.items)) {
+          h.providers.items = h.providers.items.map((p) => ({
+            ...p,
+            image: img(p.image),
+          }));
+        }
+        base.home = h;
+      }
+    } catch {
+      // হোম কনটেন্ট না পেলে স্ট্যাটিকটাই থাকে
+    }
+
+    // Login/Register পেজের কনটেন্ট (admin থেকে)
+    try {
+      const res = await api.get("/api/affiliate-auth/public");
+      const a = res?.data?.data || null;
+      if (a) {
+        ["login", "register", "forgot"].forEach((k) => {
+          if (a[k]?.image) a[k].image = img(a[k].image);
+        });
+        base.auth = a;
+      }
+    } catch {
+      // না পেলে স্ট্যাটিকটাই থাকে
+    }
+
     return base;
   },
 );
@@ -58,6 +95,8 @@ const initialState = {
   features: [],
   providers: [],
   faqs: [],
+  home: null,
+  auth: null,
 
   loading: false,
   loaded: false,
@@ -87,6 +126,8 @@ const globalSlice = createSlice({
         state.features = data.features || [];
         state.providers = data.providers || [];
         state.faqs = data.faqs || [];
+        state.home = data.home || null;
+        state.auth = data.auth || null;
 
         state.loading = false;
         state.loaded = true;

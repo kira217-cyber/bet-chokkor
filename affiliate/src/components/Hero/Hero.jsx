@@ -1,8 +1,10 @@
 import React from "react";
 import { Link } from "react-router";
+import { useSelector } from "react-redux";
 import { ArrowRight, TrendingUp, Users } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
+import { selectAffiliateHome } from "../../features/global/globalSelectors";
 
 /**
  * হিরো — বাঁয়ে লেখা ও CTA, ডানে আয়ের ছোট প্রিভিউ কার্ড।
@@ -10,26 +12,28 @@ import { useLanguage } from "../../Context/LanguageProvider";
  * (ছবিটা ৩৮৪০×৪২০ — খুব চওড়া, তাই নিজের অনুপাতেই দেখানো হয়)।
  */
 const Hero = () => {
-  const { t, isBangla } = useLanguage();
+  const { t, tv, isBangla } = useLanguage();
+  const home = useSelector(selectAffiliateHome);
+  const h = home?.hero || {};
 
   return (
     <section className="aff-glow overflow-hidden border-b border-[var(--neutral800)]">
       <div className="aff-container grid items-center gap-10 py-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:py-20">
         <div className="text-center lg:text-start">
-          <p className="aff-eyebrow">{t("heroBadge")}</p>
+          <p className="aff-eyebrow">{tv(h.badge) || t("heroBadge")}</p>
 
-          <h1 className="aff-h1">{t("heroTitle")}</h1>
+          <h1 className="aff-h1">{tv(h.title) || t("heroTitle")}</h1>
 
-          <p className="aff-lead mx-auto max-w-xl lg:mx-0">{t("heroText")}</p>
+          <p className="aff-lead mx-auto max-w-xl lg:mx-0">{tv(h.text) || t("heroText")}</p>
 
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center lg:justify-start">
             <Link to="/register" className="aff-btn aff-btn--primary">
-              {t("joinNow")}
+              {tv(h.joinBtn) || t("joinNow")}
               <ArrowRight size={18} />
             </Link>
 
             <Link to="/login" className="aff-btn aff-btn--ghost">
-              {t("login")}
+              {tv(h.loginBtn) || t("login")}
             </Link>
           </div>
         </div>
@@ -43,12 +47,12 @@ const Hero = () => {
 
             <span className="flex items-center gap-1 rounded-full bg-[var(--neutral800)] px-2.5 py-1 text-[12px] font-semibold text-[var(--primary500)]">
               <TrendingUp size={13} />
-              {isBangla ? "৫০%" : "50%"}
+              {tv(h.pill) || (isBangla ? "৫০%" : "50%")}
             </span>
           </div>
 
           <p className="mt-2 text-[34px] font-extrabold leading-none text-[var(--primary500)] lg:text-[40px]">
-            ৳{isBangla ? "৫,০০,০০০" : "500,000"}
+            {tv(h.earnFigure) || (isBangla ? "৳৫,০০,০০০" : "৳500,000")}
           </p>
 
           {/* সরল বার-চার্ট — ছয় মাসের বাড়তে থাকা আয় */}
@@ -75,10 +79,10 @@ const Hero = () => {
 
             <div>
               <p className="text-[15px] font-bold text-[var(--neutral100)]">
-                {isBangla ? "১২৪ জন" : "124"}
+                {tv(h.activePlayersValue) || (isBangla ? "১২৪ জন" : "124")}
               </p>
               <p className="text-[13px] text-[var(--text-muted)]">
-                {t("activePlayers")}
+                {tv(h.activePlayersLabel) || t("activePlayers")}
               </p>
             </div>
           </div>
@@ -90,11 +94,11 @@ const Hero = () => {
         <picture>
           <source
             media="(min-width: 768px)"
-            srcSet="/assets/banners/affiliate-desktop.jpg"
+            srcSet={h.desktopImage || "/assets/banners/affiliate-desktop.jpg"}
           />
           <img
-            src="/assets/banners/affiliate-mobile.jpg"
-            alt={t("heroTitle")}
+            src={h.mobileImage || "/assets/banners/affiliate-mobile.jpg"}
+            alt={tv(h.title) || t("heroTitle")}
             className="hero-banner w-full rounded-2xl object-cover"
             draggable="false"
           />

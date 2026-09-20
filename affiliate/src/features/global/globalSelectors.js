@@ -10,3 +10,5 @@ export const selectSteps = (state) => state.global.steps;
 export const selectFeatures = (state) => state.global.features;
 export const selectProviders = (state) => state.global.providers;
 export const selectFaqs = (state) => state.global.faqs;
+export const selectAffiliateHome = (state) => state.global.home;
+export const selectAffiliateAuth = (state) => state.global.auth;

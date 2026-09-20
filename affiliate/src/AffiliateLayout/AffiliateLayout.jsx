@@ -19,6 +19,8 @@ import { money } from "../components/Panel/panelFormat";
 import { useLanguage } from "../Context/LanguageProvider";
 import { logout, updateUser } from "../features/auth/authSlice";
 import { selectUser } from "../features/auth/authSelectors";
+import { selectSiteIdentify, selectGlobalLoaded } from "../features/global/globalSelectors";
+import { fetchAffiliateData } from "../features/global/globalSlice";
 import { fetchMe } from "../features/affiliate/affiliateApi";
 
 const NAV = [
@@ -50,8 +52,17 @@ const AffiliateLayout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const siteIdentify = useSelector(selectSiteIdentify);
+  const globalLoaded = useSelector(selectGlobalLoaded);
+  const sideLogo = siteIdentify?.logo || "";
 
   const [open, setOpen] = useState(false);
+
+  // ড্যাশবোর্ড আলাদা রুট-ট্রি — পাবলিক RootLayout এর fetch এখানে চলে না,
+  // তাই লোগো/পরিচয়ের জন্য একবার নিজেই আনতে হয়
+  useEffect(() => {
+    if (!globalLoaded) dispatch(fetchAffiliateData());
+  }, [globalLoaded, dispatch]);
   const [langOpen, setLangOpen] = useState(false);
 
   useEffect(() => {
@@ -92,12 +103,18 @@ const AffiliateLayout = () => {
        * দুই লাইনে ভেঙে যেত, আর লেখাটা হেডারেও আছে।
        */}
       <div className="flex h-[64px] shrink-0 items-center px-5">
-        <img
-          src="/assets/brand/header-logo.png"
-          alt="BET CHOKKOR"
-          className="h-8 w-auto object-contain"
-          draggable="false"
-        />
+        {sideLogo ? (
+          <img
+            src={sideLogo}
+            alt="BET CHOKKOR"
+            className="h-8 w-auto object-contain"
+            draggable="false"
+          />
+        ) : (
+          <span className="text-[13px] font-bold text-[var(--text-muted)]">
+            Logo not found
+          </span>
+        )}
       </div>
 
       {/* কে আছেন আর হাতে কত — সাইডবারের উপরেই, খুঁজতে হয় না */}
