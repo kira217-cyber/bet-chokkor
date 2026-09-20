@@ -234,18 +234,16 @@ const Dashboard = () => {
                   className={cardCls}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[14px] font-medium text-[var(--text-muted)]">
-                        {card.label}
-                      </p>
-                      <h3 className="mt-3 break-words text-[24px] font-black text-[var(--neutral100)] md:text-[28px]">
-                        {value}
-                      </h3>
-                    </div>
+                    <p className="min-w-0 text-[14px] font-medium text-[var(--text-muted)]">
+                      {card.label}
+                    </p>
                     <IconBox size={52}>
                       <card.Icon size={22} />
                     </IconBox>
                   </div>
+                  <h3 className="mt-3 truncate text-[22px] font-black text-[var(--neutral100)] md:text-[28px]">
+                    {value}
+                  </h3>
                   <div className="mt-5 text-[12px] text-[var(--primary500)]">
                     Click to open
                   </div>

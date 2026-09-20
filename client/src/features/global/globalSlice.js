@@ -11,7 +11,7 @@ import { imageUrl } from "../deposit/imageUrl";
 export const fetchGlobalClientData = createAsyncThunk(
   "global/fetchGlobalClientData",
   async (_, { rejectWithValue }) => {
-    const base = { ...siteData, events: [], promotions: [] };
+    const base = { ...siteData, events: [], promotions: [], promoPage: null };
 
     try {
       const res = await api.get("/api/site-content/public");
@@ -56,6 +56,13 @@ export const fetchGlobalClientData = createAsyncThunk(
           startAt: p.startAt || null,
           endAt: p.endAt || null,
         }));
+      }
+
+      if (c.promoPage) {
+        base.promoPage = {
+          heading: c.promoPage.heading || { bn: "", en: "" },
+          subheading: c.promoPage.subheading || { bn: "", en: "" },
+        };
       }
     } catch {
       // সার্ভার না পেলে স্ট্যাটিকটাই থাকে
@@ -120,6 +127,7 @@ const initialState = {
   sliders: [],
   events: [],
   promotions: [],
+  promoPage: null,
   bottomNavItems: [],
   sideNavLinks: [],
   socialLinks: [],
@@ -141,6 +149,7 @@ const globalSlice = createSlice({
       state.sliders = [];
       state.events = [];
       state.promotions = [];
+      state.promoPage = null;
       state.bottomNavItems = [];
       state.sideNavLinks = [];
       state.socialLinks = [];
@@ -169,6 +178,7 @@ const globalSlice = createSlice({
         state.promotions = Array.isArray(payload.promotions)
           ? payload.promotions
           : [];
+        state.promoPage = payload.promoPage || null;
         state.bottomNavItems = Array.isArray(payload.bottomNavItems)
           ? payload.bottomNavItems
           : [];

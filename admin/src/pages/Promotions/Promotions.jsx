@@ -66,7 +66,41 @@ const Promotions = () => {
   const [preview, setPreview] = useState("");
   const fileRef = useRef(null);
 
+  // পেজ হেডিং (কার্ড থেকে আলাদা)
+  const [page, setPage] = useState({ headingBn: "", headingEn: "", subBn: "", subEn: "" });
+  const [pageBusy, setPageBusy] = useState(false);
+
   const editing = Boolean(draft.id);
+
+  const loadPage = async () => {
+    try {
+      const { data } = await api.get("/api/site-content/admin/promo-page");
+      const d = data?.data || {};
+      setPage({
+        headingBn: d.heading?.bn || "",
+        headingEn: d.heading?.en || "",
+        subBn: d.subheading?.bn || "",
+        subEn: d.subheading?.en || "",
+      });
+    } catch {
+      /* খালি থাকলে ফর্ম ফাঁকা */
+    }
+  };
+
+  const savePage = async () => {
+    try {
+      setPageBusy(true);
+      await api.put("/api/site-content/admin/promo-page", {
+        heading: { bn: page.headingBn, en: page.headingEn },
+        subheading: { bn: page.subBn, en: page.subEn },
+      });
+      toast.success("Heading saved");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Save failed");
+    } finally {
+      setPageBusy(false);
+    }
+  };
 
   const load = async () => {
     try {
@@ -82,9 +116,11 @@ const Promotions = () => {
 
   useEffect(() => {
     load();
+    loadPage();
   }, []);
 
   const set = (k, v) => setDraft((p) => ({ ...p, [k]: v }));
+  const setPageField = (k, v) => setPage((p) => ({ ...p, [k]: v }));
 
   const reset = () => {
     setDraft(empty);
@@ -185,6 +221,34 @@ const Promotions = () => {
           <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
           Refresh
         </button>
+      </div>
+
+      {/* পেজ হেডিং */}
+      <div className="ad-card mb-6 flex flex-col gap-4">
+        <h2 className="text-[16px] font-extrabold text-[var(--neutral100)]">Page heading</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="ad-label">Heading (Bangla)</label>
+            <input className="ad-input mt-1" value={page.headingBn} onChange={(e) => setPageField("headingBn", e.target.value)} placeholder="প্রমোশন" />
+          </div>
+          <div>
+            <label className="ad-label">Heading (English)</label>
+            <input className="ad-input mt-1" value={page.headingEn} onChange={(e) => setPageField("headingEn", e.target.value)} placeholder="Promotion" />
+          </div>
+          <div>
+            <label className="ad-label">Subheading (Bangla, optional)</label>
+            <input className="ad-input mt-1" value={page.subBn} onChange={(e) => setPageField("subBn", e.target.value)} />
+          </div>
+          <div>
+            <label className="ad-label">Subheading (English, optional)</label>
+            <input className="ad-input mt-1" value={page.subEn} onChange={(e) => setPageField("subEn", e.target.value)} />
+          </div>
+        </div>
+        <div>
+          <button type="button" onClick={savePage} disabled={pageBusy} className="ad-btn ad-btn--primary">
+            {pageBusy ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save heading
+          </button>
+        </div>
       </div>
 
       <form onSubmit={submit} className="ad-card mb-6 flex flex-col gap-4">

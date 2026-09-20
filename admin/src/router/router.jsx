@@ -9,6 +9,7 @@ import Admins from "../pages/Admins/Admins";
 import Verification from "../pages/Verification/Verification";
 import AffiliateVerification from "../pages/Verification/AffiliateVerification";
 import Referral from "../pages/Referral/Referral";
+import ReferralContent from "../pages/Referral/ReferralContent";
 import GameApiKey from "../pages/GameApiKey/GameApiKey";
 import GameLaunchKey from "../pages/GameLaunchKey/GameLaunchKey";
 import GameHistory from "../pages/GameHistory/GameHistory";
@@ -45,6 +46,19 @@ import VipLevels from "../pages/Vip/VipLevels";
 import VipHistory from "../pages/Vip/VipHistory";
 import IdentityPage from "../pages/SiteSettings/SiteIdentity";
 import FooterPage from "../pages/SiteSettings/FooterSetting";
+import ClientTheme from "../pages/Theme/ClientTheme";
+import NavbarSetting from "../pages/Theme/NavbarSetting";
+import SidebarSetting from "../pages/Theme/SidebarSetting";
+import BottomNavSetting from "../pages/Theme/BottomNavSetting";
+import HomeContentSetting from "../pages/Theme/HomeContentSetting";
+import MatchOddsSetting from "../pages/Theme/MatchOddsSetting";
+import ModalSetting from "../pages/Theme/ModalSetting";
+import AuthSetting from "../pages/Theme/AuthSetting";
+import MemberSetting from "../pages/Theme/MemberSetting";
+import FooterThemeSetting from "../pages/Theme/FooterThemeSetting";
+import AppDownloadThemeSetting from "../pages/Theme/AppDownloadThemeSetting";
+import PromotionThemeSetting from "../pages/Theme/PromotionThemeSetting";
+import AppDownloadContent from "../pages/AppDownload/AppDownloadContent";
 import { Image, PanelBottom, UserRoundCheck, Handshake } from "lucide-react";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
@@ -249,6 +263,14 @@ export const routes = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: "referral-content",
+        element: (
+          <PrivateRoute motherOnly>
+            <ReferralContent />
+          </PrivateRoute>
+        ),
+      },
       { path: "turnover-history", element: <TurnoverHistory /> },
       {
         path: "vip-settings",
@@ -320,6 +342,110 @@ export const routes = createBrowserRouter([
               fields={AFF_FOOTER_FIELDS}
               Icon={Handshake}
             />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "client-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <ClientTheme />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "navbar-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <NavbarSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "sidebar-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <SidebarSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "bottom-nav-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <BottomNavSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "home-content-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <HomeContentSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "match-odds-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <MatchOddsSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "modal-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <ModalSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "auth-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <AuthSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "member-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <MemberSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "footer-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <FooterThemeSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "app-download-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <AppDownloadThemeSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "promotion-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <PromotionThemeSetting />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "app-download-content",
+        element: (
+          <PrivateRoute motherOnly>
+            <AppDownloadContent />
           </PrivateRoute>
         ),
       },

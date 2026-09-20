@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Clock, X } from "lucide-react";
 
 import { useLanguage } from "../../Context/LanguageProvider";
-import { selectPromotions } from "../../features/global/globalSelectors";
+import { selectPromotions, selectPromoPage } from "../../features/global/globalSelectors";
 
 /**
  * প্রমোশন পাতা — মূল সাইটের /promotion এর হুবহু।
@@ -38,6 +38,7 @@ const fmt = (d) => {
 const Promotion = () => {
   const { t, tv, isBangla } = useLanguage();
   const promotions = useSelector(selectPromotions);
+  const promoPage = useSelector(selectPromoPage);
 
   // মূল সাইটের মতোই সব ক্যাটাগরি ট্যাব দেখায়
   const tabs = CATEGORIES;
@@ -62,11 +63,20 @@ const Promotion = () => {
       }}
     >
       <h1
-        className="font-bold text-[var(--neutral100)]"
-        style={{ fontSize: "var(--fs-h3)", marginBottom: "calc(var(--u) * 4.267)" }}
+        className="font-bold text-[var(--promo-title)]"
+        style={{ fontSize: "var(--fs-h3)", marginBottom: tv(promoPage?.subheading) ? "calc(var(--u) * 1.6)" : "calc(var(--u) * 4.267)" }}
       >
-        {t("promotion")}
+        {tv(promoPage?.heading) || t("promotion")}
       </h1>
+
+      {tv(promoPage?.subheading) ? (
+        <p
+          className="text-[var(--text-secondary)]"
+          style={{ fontSize: "var(--fs-larger)", marginBottom: "calc(var(--u) * 4.267)" }}
+        >
+          {tv(promoPage.subheading)}
+        </p>
+      ) : null}
 
       {/* ── ক্যাটাগরি ট্যাব ── */}
       {tabs.length > 0 && (
@@ -87,8 +97,8 @@ const Promotion = () => {
                   paddingInline: "calc(var(--u) * 4.267)",
                   borderRadius: "999px",
                   fontSize: "var(--fs-larger)",
-                  background: on ? "var(--primary500)" : "var(--neutral800)",
-                  color: on ? "var(--btn-primary-txt)" : "var(--text-secondary)",
+                  background: on ? "var(--promo-tab-active-bg)" : "var(--promo-tab-bg)",
+                  color: on ? "var(--promo-tab-active-text)" : "var(--promo-tab-text)",
                 }}
               >
                 {isBangla ? c.bn : c.en}
@@ -110,7 +120,7 @@ const Promotion = () => {
           {list.map((promo) => (
             <div
               key={promo.id}
-              className="overflow-hidden bg-[var(--neutral800)]"
+              className="overflow-hidden bg-[var(--promo-card-bg)]"
               style={{ borderRadius: "var(--radius-10)" }}
             >
               <img
@@ -126,9 +136,9 @@ const Promotion = () => {
                 <div className="flex flex-wrap items-center" style={{ gap: "calc(var(--u) * 1.6)" }}>
                   {promo.tag ? (
                     <span
-                      className="font-bold text-[var(--btn-primary-txt)]"
+                      className="font-bold text-[var(--promo-tab-active-text)]"
                       style={{
-                        background: "var(--primary500)",
+                        background: "var(--promo-accent)",
                         borderRadius: "var(--radius-3)",
                         padding: "calc(var(--u) * 0.5) calc(var(--u) * 1.6)",
                         fontSize: "var(--fs-small)",
@@ -179,7 +189,7 @@ const Promotion = () => {
                 <button
                   type="button"
                   onClick={() => setDetail(promo)}
-                  className="flex cursor-pointer items-center font-semibold text-[var(--primary500)]"
+                  className="flex cursor-pointer items-center font-semibold text-[var(--promo-accent)]"
                   style={{ gap: "calc(var(--u) * 1.067)", marginTop: "calc(var(--u) * 2.667)", fontSize: "var(--fs-larger)" }}
                 >
                   {t("readMore")} ›

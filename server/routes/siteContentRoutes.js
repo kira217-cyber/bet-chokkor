@@ -7,6 +7,7 @@ import Slider from "../models/Slider.js";
 import SiteNotice from "../models/SiteNotice.js";
 import HomeEvent from "../models/HomeEvent.js";
 import Promotion from "../models/Promotion.js";
+import PromoPage from "../models/PromoPage.js";
 
 import {
   protectAdmin,
@@ -49,11 +50,12 @@ const fileUrl = (file) => (file ? `/uploads/${file.filename}` : "");
 
 router.get("/public", async (req, res) => {
   try {
-    const [sliders, notice, events, promotions] = await Promise.all([
+    const [sliders, notice, events, promotions, promoPage] = await Promise.all([
       Slider.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean(),
       SiteNotice.current(),
       HomeEvent.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean(),
       Promotion.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean(),
+      PromoPage.current(),
     ]);
 
     return successResponse(res, "Site content loaded", {
@@ -61,6 +63,7 @@ router.get("/public", async (req, res) => {
       notice: notice?.isActive ? notice.text : null,
       events,
       promotions,
+      promoPage: { heading: promoPage.heading, subheading: promoPage.subheading },
     });
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -412,6 +415,51 @@ router.delete(
 
       removeImage(promotion.image);
       return successResponse(res, "Promotion deleted");
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+/* =========================
+   অ্যাডমিন — প্রমোশন পেজের হেডিং
+   ========================= */
+
+router.get(
+  "/admin/promo-page",
+  protectAdmin,
+  requireMother,
+  async (req, res) => {
+    try {
+      const page = await PromoPage.current();
+      return successResponse(res, "Promo page loaded", {
+        heading: page.heading,
+        subheading: page.subheading,
+      });
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+router.put(
+  "/admin/promo-page",
+  protectAdmin,
+  requireMother,
+  requireWrite,
+  async (req, res) => {
+    try {
+      const page = await PromoPage.current();
+      const body = req.body || {};
+      if (body.heading !== undefined) page.heading = langText(body.heading);
+      if (body.subheading !== undefined) {
+        page.subheading = langText(body.subheading);
+      }
+      await page.save();
+      return successResponse(res, "Promo page saved", {
+        heading: page.heading,
+        subheading: page.subheading,
+      });
     } catch (error) {
       return errorResponse(res, error.message, 500);
     }
