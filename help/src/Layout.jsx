@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from "react-router";
 import { ChevronDown, Menu, X } from "lucide-react";
 
 import { useLang } from "./LangContext.jsx";
-import { UI, FOOTER_QUICK, FOOTER_INFO } from "./data.js";
+import { useHelp } from "./HelpData.jsx";
 
 const CLIENT_URL = import.meta.env.VITE_CLIENT_URL || "https://betchokkor.com";
 
@@ -62,8 +62,12 @@ const LangMenu = () => {
 
 const Layout = () => {
   const { t } = useLang();
+  const { UI, FOOTER_QUICK, FOOTER_INFO, identity } = useHelp();
   const { pathname } = useLocation();
   const [drawer, setDrawer] = useState(false);
+
+  const logoSrc = identity?.logo || "/assets/brand/header-logo.png";
+  const footerBg = identity?.footerBg || "/assets/footer-bg-scaled.webp";
 
   const nav = [
     { label: UI.navHome, to: "/" },
@@ -77,7 +81,7 @@ const Layout = () => {
         <div className="hv-container flex h-[68px] items-center gap-4">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <img
-              src="/assets/brand/header-logo.png"
+              src={logoSrc}
               alt="BET CHOKKOR"
               className="h-7 w-auto object-contain"
               draggable="false"
@@ -181,13 +185,13 @@ const Layout = () => {
       {/* ── ফুটার ── */}
       <footer
         className="border-t border-[var(--line)] bg-cover bg-center"
-        style={{ backgroundImage: "url(/assets/footer-bg-scaled.webp)" }}
+        style={{ backgroundImage: `url(${footerBg})` }}
       >
         <div className="hv-container grid gap-8 py-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="max-w-[320px]">
             <div className="flex items-center gap-2">
               <img
-                src="/assets/brand/header-logo.png"
+                src={logoSrc}
                 alt="BET CHOKKOR"
                 className="h-7 w-auto object-contain"
                 draggable="false"

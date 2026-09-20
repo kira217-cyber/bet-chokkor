@@ -62,6 +62,8 @@ import AppDownloadContent from "../pages/AppDownload/AppDownloadContent";
 import AffiliateHomeContent from "../pages/Affiliate/AffiliateHomeContent";
 import AffiliateHomeTheme from "../pages/Theme/AffiliateHomeTheme";
 import AffiliateAuthPage from "../pages/Affiliate/AffiliateAuthPage";
+import HelpContentPage from "../pages/Help/HelpContent";
+import HelpTheme from "../pages/Theme/HelpTheme";
 import { Image, PanelBottom, UserRoundCheck, Handshake } from "lucide-react";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 
@@ -489,6 +491,22 @@ export const routes = createBrowserRouter([
         element: (
           <PrivateRoute motherOnly>
             <AffiliateAuthPage page="forgot" prefix="afff" title="Affiliate Forgot Password Page" />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "help-content",
+        element: (
+          <PrivateRoute motherOnly>
+            <HelpContentPage />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "help-theme",
+        element: (
+          <PrivateRoute motherOnly>
+            <HelpTheme />
           </PrivateRoute>
         ),
       },

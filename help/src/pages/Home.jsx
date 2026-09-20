@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { useLang } from "../LangContext.jsx";
-import { UI, TOPICS } from "../data.js";
+import { useHelp } from "../HelpData.jsx";
 
 const ICONS = {
   user: User,
@@ -31,6 +31,7 @@ const ICONS = {
  */
 const Home = () => {
   const { t } = useLang();
+  const { UI, TOPICS } = useHelp();
   const [query, setQuery] = useState("");
 
   const results = useMemo(() => {

@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router";
 import { ChevronDown, ChevronLeft } from "lucide-react";
 
 import { useLang } from "../LangContext.jsx";
-import { UI, TOPICS } from "../data.js";
+import { useHelp } from "../HelpData.jsx";
 
 /**
  * একটা টপিকের প্রশ্ন-উত্তর — অ্যাকর্ডিয়ন।
@@ -13,6 +13,7 @@ import { UI, TOPICS } from "../data.js";
  */
 const Topic = () => {
   const { t } = useLang();
+  const { UI, TOPICS } = useHelp();
   const { key } = useParams();
   const [open, setOpen] = useState({});
 

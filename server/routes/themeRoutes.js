@@ -108,6 +108,12 @@ const SECTION_TOKENS = {
     "afff-card-bg", "afff-title", "afff-subtitle",
     "afff-input-bg", "afff-btn-bg", "afff-btn-text", "afff-link",
   ],
+  /* হেল্প সাইট — বেস প্যালেট টোকেন সরাসরি override */
+  "help:site": [
+    "bg", "bg-soft", "panel", "gold", "gold-bright",
+    "gold-grad-top", "gold-grad-bottom",
+    "text", "text-soft", "text-mute", "line",
+  ],
 };
 
 const cleanScoped = (scope, input = {}) => {

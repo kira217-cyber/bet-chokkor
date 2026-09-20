@@ -43,6 +43,7 @@ import sportsRoutes from "./routes/sportsRoutes.js";
 import themeRoutes from "./routes/themeRoutes.js";
 import affiliateHomeRoutes from "./routes/affiliateHomeRoutes.js";
 import affiliateAuthRoutes from "./routes/affiliateAuthRoutes.js";
+import helpContentRoutes from "./routes/helpContentRoutes.js";
 
 dotenv.config();
 
@@ -157,6 +158,7 @@ app.use("/api/sports", sportsRoutes);
 app.use("/api/theme", themeRoutes);
 app.use("/api/affiliate-home", affiliateHomeRoutes);
 app.use("/api/affiliate-auth", affiliateAuthRoutes);
+app.use("/api/help-content", helpContentRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
