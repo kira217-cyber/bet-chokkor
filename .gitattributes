@@ -1,0 +1,21 @@
+# রিপোতে সব টেক্সট ফাইল LF-এ রাখা হয়, চেকআউটে OS যা চায় তাই পায়।
+# উইন্ডোজ এডিটর CRLF দিয়ে সেভ করলেও git এ আর পুরো ফাইল rewrite দেখাবে না।
+* text=auto eol=lf
+
+# বাইনারি — কোনো লাইন-এন্ডিং কনভার্শন নয়
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.mp4   binary
+*.webm  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.pdf   binary
+*.zip   binary
