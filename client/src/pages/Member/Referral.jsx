@@ -13,6 +13,7 @@ import {
   PrizeSteps,
 } from "./referralBits";
 import { formatDate, money } from "./historyFormat";
+import { imageUrl } from "../../features/deposit/imageUrl";
 import { useLanguage } from "../../Context/LanguageProvider";
 import { useAlert } from "../../Context/alertContext";
 import { selectUser } from "../../features/auth/authSelectors";
@@ -35,6 +36,13 @@ import {
  *
  * মোবাইলে সবই এক কলামে নামে, ঠিক মূল সাইটের মতো।
  */
+
+/* "কীভাবে কাজ করে" ধাপের স্ট্যাটিক fallback — অ্যাডমিন সেট না করলে */
+const STATIC_PRIZE_STEPS = [
+  { img: "/assets/referral/referral-program-flowch-1.webp", titleKey: "refStep1Title", textKey: "refStep1Text" },
+  { img: "/assets/referral/referral-program-flowch-2.webp", titleKey: "refStep2Title", textKey: "refStep2Text" },
+  { img: "/assets/referral/referral-program-flowch-3.webp", titleKey: "refStep3Title", textKey: "refStep3Text" },
+];
 
 /** ট্যাব সারি — বড়ি নয়, নিচে দাগ (মূল সাইটের মতো) */
 const TabBar = ({ tabs, value, onChange }) => (
@@ -177,7 +185,7 @@ const Referral = () => {
   /** পাতার খোলস — শিরোনাম আর কেন্দ্রীভূত কলাম */
   const shell = (children) => (
     <div
-      className="mx-auto w-full"
+      className="member-area mx-auto w-full"
       style={{
         maxWidth: "1200px",
         paddingInline: "calc(var(--u) * 4.267)",
@@ -536,7 +544,7 @@ const Referral = () => {
             <>
               {/* রেফারেল প্রোগ্রাম কি? */}
               <DarkPanel
-                title={t("refWhatIsTitle")}
+                title={tv(setting.infoTitles?.whatIs) || t("refWhatIsTitle")}
                 action={
                   /* নিয়মাবলী → রেফারেল প্রোগ্রামের মূল পাতা (বিস্তারিত ট্যাব),
                      যেখানে কমিশনের টেবিল ও নিজের হিসাব থাকে */
@@ -591,24 +599,22 @@ const Referral = () => {
               </DarkPanel>
 
               <PrizeSteps
-                title={t("refMorePrizeTitle")}
-                steps={[
-                  {
-                    img: "/assets/referral/referral-program-flowch-1.webp",
-                    title: t("refStep1Title"),
-                    text: t("refStep1Text"),
-                  },
-                  {
-                    img: "/assets/referral/referral-program-flowch-2.webp",
-                    title: t("refStep2Title"),
-                    text: t("refStep2Text"),
-                  },
-                  {
-                    img: "/assets/referral/referral-program-flowch-3.webp",
-                    title: t("refStep3Title"),
-                    text: t("refStep3Text"),
-                  },
-                ]}
+                title={tv(setting.infoTitles?.morePrize) || t("refMorePrizeTitle")}
+                steps={
+                  Array.isArray(setting.prizeSteps) && setting.prizeSteps.length
+                    ? setting.prizeSteps.map((s, i) => ({
+                        img: s.image
+                          ? imageUrl(s.image)
+                          : STATIC_PRIZE_STEPS[i]?.img || "",
+                        title: tv(s.title) || t(`refStep${i + 1}Title`),
+                        text: tv(s.text) || t(`refStep${i + 1}Text`),
+                      }))
+                    : STATIC_PRIZE_STEPS.map((s) => ({
+                        img: s.img,
+                        title: t(s.titleKey),
+                        text: t(s.textKey),
+                      }))
+                }
               />
 
               {/* মাইলফলক বোনাস — কতজন আনলে কত */}

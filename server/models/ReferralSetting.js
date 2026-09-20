@@ -51,6 +51,25 @@ const milestoneSchema = new mongoose.Schema(
   { _id: false },
 );
 
+/**
+ * "কীভাবে কাজ করে" ফ্লোচার্টের একটা ধাপ — ইনফো ট্যাবে দেখানো।
+ * ছবি খালি হলে ক্লায়েন্ট আগের স্ট্যাটিক ছবি/লেখা দেখায়।
+ */
+const prizeStepSchema = new mongoose.Schema(
+  {
+    title: {
+      bn: { type: String, default: "", trim: true },
+      en: { type: String, default: "", trim: true },
+    },
+    text: {
+      bn: { type: String, default: "", trim: true },
+      en: { type: String, default: "", trim: true },
+    },
+    image: { type: String, default: "", trim: true },
+  },
+  { _id: false },
+);
+
 const referralSettingSchema = new mongoose.Schema(
   {
     isActive: { type: Boolean, default: false },
@@ -86,6 +105,21 @@ const referralSettingSchema = new mongoose.Schema(
       bn: { type: String, default: "", trim: true },
       en: { type: String, default: "", trim: true },
     },
+
+    /** ইনফো ট্যাবের সেকশন শিরোনাম (খালি হলে স্ট্যাটিক fallback) */
+    infoTitles: {
+      whatIs: {
+        bn: { type: String, default: "", trim: true },
+        en: { type: String, default: "", trim: true },
+      },
+      morePrize: {
+        bn: { type: String, default: "", trim: true },
+        en: { type: String, default: "", trim: true },
+      },
+    },
+
+    /** "কীভাবে কাজ করে" ফ্লোচার্টের ধাপগুলো */
+    prizeSteps: { type: [prizeStepSchema], default: [] },
   },
   { timestamps: true },
 );

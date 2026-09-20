@@ -1,9 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
 import express from "express";
 import mongoose from "mongoose";
 
 import ReferralSetting from "../models/ReferralSetting.js";
 import ReferralReward from "../models/ReferralReward.js";
 import User from "../models/User.js";
+import upload from "../config/multer.js";
 
 import { protectUser } from "../middleware/protectUser.js";
 import {
@@ -24,6 +27,26 @@ const router = express.Router();
 const text = (value) => String(value ?? "").trim();
 const isId = (value) => mongoose.Types.ObjectId.isValid(String(value));
 
+/* ── ইনফো-কনটেন্ট হেল্পার (prizeSteps + শিরোনাম, ছবি সহ) ── */
+const langText = (obj) => ({ bn: text(obj?.bn), en: text(obj?.en) });
+const parseMaybe = (value) => {
+  if (typeof value !== "string") return value || {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+};
+const fileUrl = (file) => (file ? `/uploads/${file.filename}` : "");
+const removeImage = (url) => {
+  if (!url || !url.startsWith("/uploads/")) return;
+  fs.promises.unlink(path.join("uploads", path.basename(url))).catch(() => {});
+};
+/* ধাপের ছবির নাম — step_0 .. step_5 */
+const stepUpload = upload.fields(
+  Array.from({ length: 6 }, (_, i) => ({ name: `step_${i}`, maxCount: 1 })),
+);
+
 /** ব্যবহারকারীকে দেখানোর মতো অংশটুকু — ভিতরের কলকব্জা নয় */
 const publicSetting = (setting) => ({
   isActive: setting.isActive,
@@ -33,6 +56,8 @@ const publicSetting = (setting) => ({
   commissionBands: setting.commissionBands,
   achievement: setting.achievement,
   rules: setting.rules,
+  infoTitles: setting.infoTitles || {},
+  prizeSteps: setting.prizeSteps || [],
 });
 
 /* =========================
@@ -306,6 +331,71 @@ router.put(
       await setting.save();
 
       return successResponse(res, "Setting saved", { setting });
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+/* ── ইনফো ট্যাবের কনটেন্ট (শিরোনাম + ফ্লোচার্ট ধাপ, ছবি সহ) ── */
+router.get(
+  "/admin/content",
+  protectAdmin,
+  requireMother,
+  async (req, res) => {
+    try {
+      const setting = await ReferralSetting.current();
+      return successResponse(res, "Referral content loaded", {
+        infoTitles: setting.infoTitles || {},
+        prizeSteps: setting.prizeSteps || [],
+      });
+    } catch (error) {
+      return errorResponse(res, error.message, 500);
+    }
+  },
+);
+
+router.put(
+  "/admin/content",
+  protectAdmin,
+  requireMother,
+  requireWrite,
+  stepUpload,
+  async (req, res) => {
+    try {
+      const setting = await ReferralSetting.current();
+      const body = parseMaybe(req.body.content);
+      const files = req.files || {};
+
+      const prevImages = (setting.prizeSteps || [])
+        .map((s) => s.image)
+        .filter((u) => u && u.startsWith("/uploads/"));
+
+      setting.infoTitles = {
+        whatIs: langText(body.infoTitles?.whatIs),
+        morePrize: langText(body.infoTitles?.morePrize),
+      };
+
+      setting.prizeSteps = (body.prizeSteps || []).slice(0, 6).map((s, i) => ({
+        title: langText(s.title),
+        text: langText(s.text),
+        image: files[`step_${i}`]?.[0] ? fileUrl(files[`step_${i}`][0]) : text(s.image),
+      }));
+
+      await setting.save();
+
+      // orphan ছবি মুছে ফেলা
+      const nextImages = new Set(
+        setting.prizeSteps.map((s) => s.image).filter(Boolean),
+      );
+      prevImages.forEach((url) => {
+        if (!nextImages.has(url)) removeImage(url);
+      });
+
+      return successResponse(res, "Referral content saved", {
+        infoTitles: setting.infoTitles,
+        prizeSteps: setting.prizeSteps,
+      });
     } catch (error) {
       return errorResponse(res, error.message, 500);
     }
