@@ -39,6 +39,8 @@ import withdrawRequestRoutes from "./routes/withdrawRequestRoutes.js";
 import autoWithdrawRoutes from "./routes/autoWithdrawRoutes.js";
 import vipRoutes from "./routes/vipRoutes.js";
 import siteSettingsRoutes from "./routes/siteSettingsRoutes.js";
+import sportsRoutes from "./routes/sportsRoutes.js";
+import themeRoutes from "./routes/themeRoutes.js";
 
 dotenv.config();
 
@@ -149,6 +151,8 @@ app.use("/api/withdraw-requests", withdrawRequestRoutes);
 app.use("/api/auto-withdraw", autoWithdrawRoutes);
 app.use("/api/vip", vipRoutes);
 app.use("/api/site-settings", siteSettingsRoutes);
+app.use("/api/sports", sportsRoutes);
+app.use("/api/theme", themeRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
