@@ -7,7 +7,7 @@ const NotFoundPage = () => (
 
     <span className="relative z-10 flex h-16 w-16 items-center justify-center rounded-3xl border border-[var(--primary500)]/30 bg-white/10 shadow-[0_0_35px_rgba(249,185,1,0.22)] backdrop-blur">
       <img
-        src="/assets/brand/header-logo.png"
+        src={`${import.meta.env.BASE_URL}assets/brand/header-logo.png`}
         alt="BET CHOKKOR"
         className="h-8 w-auto object-contain"
         draggable="false"

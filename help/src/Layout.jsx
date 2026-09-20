@@ -66,8 +66,8 @@ const Layout = () => {
   const { pathname } = useLocation();
   const [drawer, setDrawer] = useState(false);
 
-  const logoSrc = identity?.logo || "/assets/brand/header-logo.png";
-  const footerBg = identity?.footerBg || "/assets/footer-bg-scaled.webp";
+  const logoSrc = identity?.logo || `${import.meta.env.BASE_URL}assets/brand/header-logo.png`;
+  const footerBg = identity?.footerBg || `${import.meta.env.BASE_URL}assets/footer-bg-scaled.webp`;
 
   const nav = [
     { label: UI.navHome, to: "/" },

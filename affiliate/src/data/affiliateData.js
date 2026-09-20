@@ -7,9 +7,9 @@
 
 export const siteIdentify = {
   siteName: "BET CHOKKOR Affiliates",
-  logo: "/assets/brand/header-logo.png",
-  brandLogo: "/assets/brand/logo.png",
-  favicon: "/assets/icons/pwa/PWAicon-192px.png",
+  logo: `${import.meta.env.BASE_URL}assets/brand/header-logo.png`,
+  brandLogo: `${import.meta.env.BASE_URL}assets/brand/logo.png`,
+  favicon: `${import.meta.env.BASE_URL}assets/icons/pwa/PWAicon-192px.png`,
 };
 
 /** হিরোর নিচের চারটি সংখ্যা */
@@ -48,16 +48,16 @@ export const features = [
 
 /** প্রোভাইডার স্ট্রিপ — client সাইটের আসল ভেন্ডর লোগো */
 export const providers = [
-  { key: "jili", name: "JILI", icon: "/assets/vendors/vendor-awcmjili.png" },
-  { key: "evolution", name: "Evolution", icon: "/assets/vendors/vendor-evo.png" },
-  { key: "spribe", name: "Spribe", icon: "/assets/vendors/vendor-spribe.png" },
-  { key: "pg", name: "PG Soft", icon: "/assets/vendors/vendor-pg.png" },
-  { key: "pp", name: "Pragmatic Play", icon: "/assets/vendors/vendor-awcmpp.png" },
-  { key: "jdb", name: "JDB", icon: "/assets/vendors/vendor-jdb.png" },
-  { key: "sexy", name: "Sexy", icon: "/assets/vendors/vendor-awcmsexy.png" },
-  { key: "fc", name: "Fa Chai", icon: "/assets/vendors/vendor-awcmfc.png" },
-  { key: "mg", name: "Microgaming", icon: "/assets/vendors/vendor-mg.png" },
-  { key: "pt", name: "Playtech", icon: "/assets/vendors/vendor-awcmpt.png" },
+  { key: "jili", name: "JILI", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-awcmjili.png` },
+  { key: "evolution", name: "Evolution", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-evo.png` },
+  { key: "spribe", name: "Spribe", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-spribe.png` },
+  { key: "pg", name: "PG Soft", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-pg.png` },
+  { key: "pp", name: "Pragmatic Play", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-awcmpp.png` },
+  { key: "jdb", name: "JDB", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-jdb.png` },
+  { key: "sexy", name: "Sexy", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-awcmsexy.png` },
+  { key: "fc", name: "Fa Chai", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-awcmfc.png` },
+  { key: "mg", name: "Microgaming", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-mg.png` },
+  { key: "pt", name: "Playtech", icon: `${import.meta.env.BASE_URL}assets/vendors/vendor-awcmpt.png` },
 ];
 
 /** সাধারণ প্রশ্ন */

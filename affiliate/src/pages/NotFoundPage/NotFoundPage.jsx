@@ -9,7 +9,7 @@ const NotFoundPage = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[var(--neutral1000)] px-6 text-center">
       <img
-        src="/assets/brand/header-logo.png"
+        src={`${import.meta.env.BASE_URL}assets/brand/header-logo.png`}
         alt="BET CHOKKOR"
         className="h-9 w-auto object-contain"
         draggable="false"

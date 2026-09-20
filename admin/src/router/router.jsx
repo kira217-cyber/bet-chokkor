@@ -529,4 +529,4 @@ export const routes = createBrowserRouter([
       },
     ],
   },
-]);
+], { basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });

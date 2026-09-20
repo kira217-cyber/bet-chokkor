@@ -2,11 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// অ্যাডমিন প্যানেল ৫১৭৫ পোর্টে (client ৫১৭৩, affiliate ৫১৭৪)
-export default defineConfig({
+// dev এ root (/), production build এ /admin/
+export default defineConfig(({ mode }) => ({
+  base: mode === "production" ? "/admin/" : "/",
   plugins: [react(), tailwindcss()],
-  server: {
-    port: 5176,
-    strictPort: true,
-  },
-});
+  server: { port: 5176, strictPort: true },
+}));

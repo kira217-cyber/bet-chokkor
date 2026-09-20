@@ -94,10 +94,10 @@ const Hero = () => {
         <picture>
           <source
             media="(min-width: 768px)"
-            srcSet={h.desktopImage || "/assets/banners/affiliate-desktop.jpg"}
+            srcSet={h.desktopImage || `${import.meta.env.BASE_URL}assets/banners/affiliate-desktop.jpg`}
           />
           <img
-            src={h.mobileImage || "/assets/banners/affiliate-mobile.jpg"}
+            src={h.mobileImage || `${import.meta.env.BASE_URL}assets/banners/affiliate-mobile.jpg`}
             alt={tv(h.title) || t("heroTitle")}
             className="hero-banner w-full rounded-2xl object-cover"
             draggable="false"

@@ -247,7 +247,7 @@ const Register = () => {
                 style={{ background: "var(--neutral900)" }}
               >
                 <img
-                  src="/assets/icons/flag/BD.png"
+                  src={`${import.meta.env.BASE_URL}assets/icons/flag/BD.png`}
                   alt=""
                   className="h-5 w-5 rounded-full object-cover"
                   draggable="false"

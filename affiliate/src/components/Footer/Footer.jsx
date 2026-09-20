@@ -6,15 +6,15 @@ import { useLanguage } from "../../Context/LanguageProvider";
 import { selectFooter } from "../../features/global/globalSelectors";
 
 const LICENSES = [
-  { key: "curacao", src: "/assets/footer/gaming_license.png", alt: "Gaming Curacao" },
-  { key: "anjouan", src: "/assets/footer/anjouan_license.png", alt: "Anjouan eGaming" },
-  { key: "montenegro", src: "/assets/footer/montenegro_license.png", alt: "Montenegro" },
+  { key: "curacao", src: `${import.meta.env.BASE_URL}assets/footer/gaming_license.png`, alt: "Gaming Curacao" },
+  { key: "anjouan", src: `${import.meta.env.BASE_URL}assets/footer/anjouan_license.png`, alt: "Anjouan eGaming" },
+  { key: "montenegro", src: `${import.meta.env.BASE_URL}assets/footer/montenegro_license.png`, alt: "Montenegro" },
 ];
 
 const RESPONSIBLE = [
-  { key: "regulations", src: "/assets/icons/trivial/regulations.svg", alt: "Regulations" },
-  { key: "gamcare", src: "/assets/icons/trivial/gamcare.svg", alt: "GamCare" },
-  { key: "age", src: "/assets/icons/trivial/age-limit.svg", alt: "18+" },
+  { key: "regulations", src: `${import.meta.env.BASE_URL}assets/icons/trivial/regulations.svg`, alt: "Regulations" },
+  { key: "gamcare", src: `${import.meta.env.BASE_URL}assets/icons/trivial/gamcare.svg`, alt: "GamCare" },
+  { key: "age", src: `${import.meta.env.BASE_URL}assets/icons/trivial/age-limit.svg`, alt: "18+" },
 ];
 
 const Footer = () => {

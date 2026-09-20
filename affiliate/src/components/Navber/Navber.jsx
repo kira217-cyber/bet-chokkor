@@ -96,7 +96,7 @@ const Navber = () => {
             className="h-7 w-7 shrink-0 cursor-pointer overflow-hidden rounded-full"
           >
             <img
-              src="/assets/icons/flag/BD.png"
+              src={`${import.meta.env.BASE_URL}assets/icons/flag/BD.png`}
               alt="BD"
               className="h-full w-full object-cover"
               draggable="false"

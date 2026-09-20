@@ -101,7 +101,7 @@ const LanguageMenu = ({ open, onClose }) => {
             }}
           >
             <img
-              src="/assets/icons/flag/BD.png"
+              src={`${import.meta.env.BASE_URL}assets/icons/flag/BD.png`}
               alt=""
               className="rounded-full object-cover"
               style={{

@@ -20,7 +20,7 @@ const SiteLoader = () => {
         <span className="site-loader__disc" />
         <span className="site-loader__arc" />
         <img
-          src="/assets/brand/logo.png"
+          src={`${import.meta.env.BASE_URL}assets/brand/logo.png`}
           alt="BET CHOKKOR"
           className="site-loader__logo"
           draggable="false"

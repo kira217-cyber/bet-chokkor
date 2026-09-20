@@ -51,6 +51,6 @@ export const routes = createBrowserRouter([
       { path: "profile", element: <Profile /> },
     ],
   },
-]);
+], { basename: import.meta.env.BASE_URL.replace(/\/$/, "") || "/" });
 
 export default routes;
