@@ -43,6 +43,7 @@ import {
   Image,
   PanelBottom,
   Palette,
+  LifeBuoy,
 } from "lucide-react";
 
 import { navItems, roleLabels } from "../data/navigation";
@@ -51,6 +52,7 @@ import { selectAdmin } from "../features/auth/authSelectors";
 
 const ICONS = {
   LayoutDashboard,
+  LifeBuoy,
   UserCog,
   Gamepad2,
   KeyRound,
@@ -162,15 +164,6 @@ const RootLayout = () => {
   const sidebar = (
     <>
       <div className="flex h-[var(--topbar-height)] shrink-0 items-center gap-2.5 px-5">
-        <span className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-[var(--primary500)]/30 bg-white/10 shadow-[0_0_25px_rgba(249,185,1,0.20)] backdrop-blur">
-          <img
-            src="/assets/brand/header-logo.png"
-            alt="BET CHOKKOR"
-            className="h-6 w-auto object-contain"
-            draggable="false"
-          />
-        </span>
-
         <span className="ad-title text-[13px] uppercase tracking-widest">
           Admin
         </span>
@@ -311,12 +304,9 @@ const RootLayout = () => {
           </button>
 
           <Link to="/" className="flex items-center gap-2 lg:hidden">
-            <img
-              src="/assets/brand/header-logo.png"
-              alt="BET CHOKKOR"
-              className="h-7 w-auto object-contain"
-              draggable="false"
-            />
+            <span className="ad-title text-[13px] uppercase tracking-widest">
+              Admin
+            </span>
           </Link>
 
           <div className="ms-auto flex items-center gap-3">
