@@ -64,24 +64,11 @@ app.set("trust proxy", 1);
 app.use(helmet());
 
 /**
- * CORS — অরিজিন তালিকা env থেকে। খালি রাখলে সব অরিজিন allowed।
- * API টোকেন-ভিত্তিক (কুকি নয়), তাই খোলা CORS এ CSRF ঝুঁকি নেই;
- * তবু ডিপ্লয়ে তালিকা দিয়ে দিলে আরও কড়া হয়।
+ * CORS — সব অরিজিন allowed (Bajiman এর মতো `app.use(cors())`)।
+ * API টোকেন-ভিত্তিক (কুকি নয়), তাই খোলা CORS এ CSRF ঝুঁকি নেই।
+ * ফলে localhost/লাইভ/যেকোনো ফ্রন্টএন্ড থেকেই API কল করা যায়।
  */
-const allowedOrigins = (process.env.CORS_ORIGINS || "")
-  .split(",")
-  .map((item) => item.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.length === 0) return callback(null, true);
-      return callback(null, allowedOrigins.includes(origin));
-    },
-    credentials: false,
-  }),
-);
+app.use(cors());
 
 // বড় পে-লোড দিয়ে মেমরি ভরানো ঠেকাতে সীমা
 app.use(express.json({ limit: "1mb" }));
