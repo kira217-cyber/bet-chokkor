@@ -54,9 +54,9 @@ const ForgotPassword = () => {
     borderRadius: "var(--radius-10)",
     fontSize: "var(--fs-larger)",
     backgroundColor: enabled
-      ? "var(--primary500)"
-      : "color-mix(in srgb, var(--primary500), black 40%)",
-    color: "var(--btn-primary-txt)",
+      ? "var(--auth-btn-bg)"
+      : "color-mix(in srgb, var(--auth-btn-bg), black 40%)",
+    color: "var(--auth-btn-text)",
   });
 
   const buttonClass =
@@ -126,7 +126,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="forgot-page min-h-screen">
-      <header className="forgot-header fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[var(--header-bg)]">
+      <header className="forgot-header fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[var(--auth-header-bg)]">
         <Link to="/">
           <img
             src="/assets/brand/header-logo.png"
@@ -283,7 +283,7 @@ const ForgotPassword = () => {
           background:
             radial-gradient(60% 45% at 3% 32%, rgba(12, 52, 44, 0.95), transparent 70%),
             radial-gradient(45% 40% at 28% 92%, rgba(12, 52, 44, 0.85), transparent 70%),
-            var(--neutral1000);
+            var(--auth-page-bg);
         }
 
         .forgot-header {

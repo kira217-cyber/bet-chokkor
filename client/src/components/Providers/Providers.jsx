@@ -51,7 +51,7 @@ const Providers = () => {
         return (
           <Link
             to={`/games/${categoryKey}?vendor=${item.key}`}
-            className="flex h-full items-center justify-between bg-[var(--neutral800)] transition-colors hover:bg-[var(--neutral700)]"
+            className="flex h-full items-center justify-between bg-[var(--home-card-bg)] transition-colors hover:bg-[var(--home-card-hover)]"
             style={{ padding: "7.1%", borderRadius: "var(--radius-10)" }}
           >
             <img
@@ -62,7 +62,7 @@ const Providers = () => {
             />
 
             <span
-              className="truncate ps-2 text-[var(--text-secondary)]"
+              className="truncate ps-2 text-[var(--home-card-text)]"
               style={{ fontSize: "var(--fs-larger)" }}
             >
               {item.name}

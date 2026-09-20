@@ -42,6 +42,7 @@ import {
   Coins,
   Image,
   PanelBottom,
+  Palette,
 } from "lucide-react";
 
 import { navItems, roleLabels } from "../data/navigation";
@@ -84,6 +85,7 @@ const ICONS = {
   Coins,
   Image,
   PanelBottom,
+  Palette,
 };
 
 /**

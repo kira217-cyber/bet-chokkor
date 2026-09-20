@@ -22,7 +22,7 @@ const NavButton = ({ label, icon, onClick }) => (
     type="button"
     aria-label={label}
     onClick={onClick}
-    className="flex shrink-0 cursor-pointer items-center justify-center bg-[var(--neutral800)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--neutral700)]"
+    className="flex shrink-0 cursor-pointer items-center justify-center bg-[var(--home-card-bg)] text-[var(--home-card-text)] transition-colors hover:bg-[var(--home-card-hover)]"
     style={{
       height: "calc(var(--u) * 9.067)",
       width: "calc(var(--u) * 9.067)",
@@ -72,7 +72,7 @@ const LabeledCarousel = ({
         }}
       >
         <span
-          className="shrink-0 bg-[var(--primary500)]"
+          className="shrink-0 bg-[var(--home-title-bar)]"
           style={{
             width: "calc(var(--u) * 1.067)",
             height: "calc(var(--u) * 5.333)",
@@ -82,7 +82,7 @@ const LabeledCarousel = ({
         />
 
         <h2
-          className="font-semibold text-[var(--neutral100)]"
+          className="font-semibold text-[var(--home-title)]"
           style={{ fontSize: "var(--fs-body)", lineHeight: 1 }}
         >
           {title}

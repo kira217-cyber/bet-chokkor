@@ -17,7 +17,7 @@ const MemberPage = ({ title, onBack, children, footer, maxWidth = "618px" }) => 
 
   return (
     <div
-      className="mx-auto flex w-full flex-col"
+      className="member-area mx-auto flex w-full flex-col"
       style={{
         maxWidth,
         paddingInline: "calc(var(--u) * 4.267)",

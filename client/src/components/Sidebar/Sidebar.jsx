@@ -111,7 +111,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
   const label = (item) => tv(item.name);
 
   const rowClass =
-    "side-row group flex h-[52px] shrink-0 items-center bg-[var(--neutral800)] transition-colors hover:bg-[var(--neutral700)]";
+    "side-row group flex h-[52px] shrink-0 items-center bg-[var(--side-row-bg)] transition-colors hover:bg-[var(--side-row-hover)]";
 
   const icon = (src) => (
     <img
@@ -124,7 +124,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
 
   const title = (text) => (
     <span
-      className="truncate font-medium text-[var(--text-secondary)] group-hover:text-[var(--neutral100)]"
+      className="truncate font-medium text-[var(--side-text)] group-hover:text-[var(--neutral100)]"
       style={{ fontSize: "var(--fs-larger)" }}
     >
       {text}
@@ -141,7 +141,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
         className="side-collapse shrink-0 overflow-hidden"
         style={{
           borderRadius: "var(--radius-10)",
-          background: isOpen ? "var(--neutral900)" : "transparent",
+          background: isOpen ? "var(--side-bg)" : "transparent",
         }}
       >
         <button
@@ -155,7 +155,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
           </span>
 
           <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--neutral700)] text-[var(--text-secondary)]"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--side-icon-bg)] text-[var(--side-text)]"
             aria-hidden="true"
           >
             <ChevronDown
@@ -184,13 +184,13 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
                 <Link
                   to={`/games/${item.key}?vendor=${vendor.key}`}
                   onClick={onNavigate}
-                  className="flex h-[52px] items-center gap-3 bg-[var(--neutral800)] px-4 font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--neutral700)] hover:text-[var(--neutral100)]"
+                  className="flex h-[52px] items-center gap-3 bg-[var(--side-row-bg)] px-4 font-medium text-[var(--side-text)] transition-colors hover:bg-[var(--side-row-hover)] hover:text-[var(--neutral100)]"
                   style={{
                     fontSize: "var(--fs-larger)",
                     borderRadius: "var(--radius-10)",
                   }}
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--side-icon-bg)]">
                     <img
                       src={vendor.icon}
                       alt=""
@@ -282,7 +282,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
         className={`${rowClass} w-full cursor-pointer justify-center gap-2`}
       >
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--side-icon-bg)]"
           style={{ color: look.color }}
         >
           <Icon size={15} />
@@ -321,7 +321,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
       className="side-collapse shrink-0 overflow-hidden"
       style={{
         borderRadius: "var(--radius-10)",
-        background: promoOpen ? "var(--neutral900)" : "transparent",
+        background: promoOpen ? "var(--side-bg)" : "transparent",
       }}
     >
       <div className={`${rowClass} justify-between gap-3`}>
@@ -344,7 +344,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
             type="button"
             onClick={() => setPromoOpen((prev) => !prev)}
             aria-label="toggle promotions"
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-[8px] bg-[var(--neutral700)] text-[var(--text-secondary)]"
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-[8px] bg-[var(--side-icon-bg)] text-[var(--side-text)]"
           >
             <ChevronDown
               size={16}
@@ -403,7 +403,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
       className="side-collapse shrink-0 overflow-hidden"
       style={{
         borderRadius: "var(--radius-10)",
-        background: contactOpen ? "var(--neutral900)" : "transparent",
+        background: contactOpen ? "var(--side-bg)" : "transparent",
       }}
     >
       <button
@@ -417,7 +417,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
         </span>
 
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--neutral700)] text-[var(--text-secondary)]"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--side-icon-bg)] text-[var(--side-text)]"
           aria-hidden="true"
         >
           <ChevronDown
@@ -455,14 +455,14 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
                   href={row.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="flex h-[52px] items-center gap-3 bg-[var(--neutral800)] px-4 font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--neutral700)] hover:text-[var(--neutral100)]"
+                  className="flex h-[52px] items-center gap-3 bg-[var(--side-row-bg)] px-4 font-medium text-[var(--side-text)] transition-colors hover:bg-[var(--side-row-hover)] hover:text-[var(--neutral100)]"
                   style={{
                     fontSize: "var(--fs-larger)",
                     borderRadius: "var(--radius-10)",
                   }}
                 >
                   <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--neutral700)]"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--side-icon-bg)]"
                     style={{ color: look.color }}
                   >
                     <Icon size={15} />
@@ -524,7 +524,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
         {contactSection(expanded)}
       </div>
 
-      <span className="side-divider h-px shrink-0 bg-[var(--neutral700)]" />
+      <span className="side-divider h-px shrink-0 bg-[var(--side-divider)]" />
 
       <div className="side-section flex shrink-0 flex-col">
         {expanded
@@ -534,7 +534,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
             )}
       </div>
 
-      <span className="side-divider h-px shrink-0 bg-[var(--neutral700)]" />
+      <span className="side-divider h-px shrink-0 bg-[var(--side-divider)]" />
 
       <div className="side-section flex shrink-0 flex-col">
         {expanded ? (
@@ -552,7 +552,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
         {linkGroup("main", expanded, onNavigate)}
       </div>
 
-      <span className="side-divider h-px shrink-0 bg-[var(--neutral700)]" />
+      <span className="side-divider h-px shrink-0 bg-[var(--side-divider)]" />
 
       <div className="side-section flex shrink-0 flex-col">
         {linkGroup("support", expanded, onNavigate)}
@@ -621,7 +621,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
     <>
       {/* ── ডেস্কটপ রেল — হেডারের নিচ থেকে ── */}
       <aside
-        className={`side-nav fixed left-0 z-40 hidden flex-col bg-[var(--neutral900)] transition-[width] duration-300 ease-in-out lg:flex ${
+        className={`side-nav fixed left-0 z-40 hidden flex-col bg-[var(--side-bg)] transition-[width] duration-300 ease-in-out lg:flex ${
           desktopOpen
             ? "side-nav--open w-[var(--side-nav-width-open)]"
             : "w-[var(--side-nav-width)]"
@@ -643,7 +643,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
       />
 
       <aside
-        className={`side-nav side-nav--open fixed left-0 top-0 z-[61] flex h-screen w-[350px] max-w-[88vw] flex-col bg-[var(--neutral900)] transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`side-nav side-nav--open fixed left-0 top-0 z-[61] flex h-screen w-[350px] max-w-[88vw] flex-col bg-[var(--side-bg)] transition-transform duration-300 ease-in-out lg:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -663,7 +663,7 @@ const Sidebar = ({ open, setOpen, desktopOpen }) => {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="close menu"
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[var(--radius-10)] bg-[var(--neutral800)] text-[var(--primary500)] transition-colors hover:bg-[var(--neutral700)]"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-[var(--radius-10)] bg-[var(--side-row-bg)] text-[var(--primary500)] transition-colors hover:bg-[var(--side-row-hover)]"
           >
             <X size={20} />
           </button>

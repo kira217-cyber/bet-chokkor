@@ -62,14 +62,14 @@ const AlertModal = ({ alert, onClose, onConfirm }) => {
       />
 
       <div
-        className="relative w-full max-w-[360px] rounded-[16px] border border-[var(--neutral700)] bg-[var(--neutral900)] p-6 text-center"
+        className="relative w-full max-w-[360px] rounded-[16px] border border-[var(--modal-border)] bg-[var(--modal-bg)] p-6 text-center"
         style={{ boxShadow: "0 24px 60px rgba(0,0,0,.55)" }}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label={t("close")}
-          className="absolute end-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--neutral800)] text-[var(--neutral300)] transition-colors hover:text-[var(--neutral100)]"
+          className="absolute end-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-[var(--modal-btn-bg)] text-[var(--modal-text)] transition-colors hover:text-[var(--modal-title)]"
         >
           <X size={16} />
         </button>
@@ -85,13 +85,13 @@ const AlertModal = ({ alert, onClose, onConfirm }) => {
         </span>
 
         {title && (
-          <p className="mt-4 text-[17px] font-extrabold text-[var(--neutral100)]">
+          <p className="mt-4 text-[17px] font-extrabold text-[var(--modal-title)]">
             {title}
           </p>
         )}
 
         {message && (
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--neutral300)]">
+          <p className="mt-2 text-[14px] leading-relaxed text-[var(--modal-text)]">
             {message}
           </p>
         )}
@@ -105,7 +105,7 @@ const AlertModal = ({ alert, onClose, onConfirm }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="h-[44px] flex-1 cursor-pointer rounded-[10px] bg-[var(--neutral800)] text-[14px] font-bold text-[var(--text-primary)] transition-colors hover:bg-[var(--neutral700)]"
+                className="h-[44px] flex-1 cursor-pointer rounded-[10px] bg-[var(--modal-btn-bg)] text-[14px] font-bold text-[var(--text-primary)] transition-colors hover:bg-[var(--modal-btn-hover)]"
               >
                 {alert.cancelText || t("no")}
               </button>
@@ -113,7 +113,7 @@ const AlertModal = ({ alert, onClose, onConfirm }) => {
               <button
                 type="button"
                 onClick={onConfirm}
-                className="h-[44px] flex-1 cursor-pointer rounded-[10px] bg-[var(--primary500)] text-[14px] font-bold text-[var(--neutral900)] transition-[filter] hover:brightness-[1.06]"
+                className="h-[44px] flex-1 cursor-pointer rounded-[10px] bg-[var(--modal-primary-bg)] text-[14px] font-bold text-[var(--modal-primary-text)] transition-[filter] hover:brightness-[1.06]"
               >
                 {alert.confirmText || t("yes")}
               </button>
@@ -122,7 +122,7 @@ const AlertModal = ({ alert, onClose, onConfirm }) => {
             <button
               type="button"
               onClick={onClose}
-              className="h-[44px] w-full cursor-pointer rounded-[10px] bg-[var(--primary500)] text-[14px] font-bold text-[var(--neutral900)] transition-[filter] hover:brightness-[1.06]"
+              className="h-[44px] w-full cursor-pointer rounded-[10px] bg-[var(--modal-primary-bg)] text-[14px] font-bold text-[var(--modal-primary-text)] transition-[filter] hover:brightness-[1.06]"
             >
               {alert.okText || t("ok")}
             </button>

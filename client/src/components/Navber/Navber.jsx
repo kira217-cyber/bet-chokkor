@@ -58,24 +58,42 @@ const Navber = ({ setDesktopOpen }) => {
 
   // লগইন বাটন মোবাইলে সলিড (on-surface), ডেস্কটপে আউটলাইন (tertiary) —
   // মূল সাইটে দুই জায়গায় দুই রকম
-  const authButton = (to, text, variant) => (
-    <Link
-      to={to}
-      className={`auth-btn auth-btn--${variant} flex cursor-pointer items-center justify-center transition-[filter] hover:brightness-110`}
-      style={{
-        height: "calc(var(--u) * 9.067)",
-        minWidth: "calc(var(--u) * 24)",
-        padding: "0 calc(var(--u) * 2.667)",
-        borderRadius: "var(--radius-10)",
-        fontSize: "var(--fs-larger)",
-      }}
-    >
-      {text}
-    </Link>
-  );
+  const authButton = (to, text, variant) => {
+    // login/signup রঙ nav-* থেকে (fallback: আগের auth-btn টোকেন)
+    const isSignup = variant === "primary";
+    const navStyle = isSignup
+      ? {
+          background: "var(--nav-signup-bg, var(--btn-primary-bg))",
+          color: "var(--nav-signup-text, var(--btn-primary-txt))",
+        }
+      : {
+          background: "var(--nav-login-bg, var(--btn-secondary-bg))",
+          color: "var(--nav-login-text, var(--btn-secondary-txt))",
+        };
+
+    return (
+      <Link
+        to={to}
+        className="auth-btn flex cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
+        style={{
+          height: "calc(var(--u) * 9.067)",
+          minWidth: "calc(var(--u) * 24)",
+          padding: "0 calc(var(--u) * 2.667)",
+          borderRadius: "var(--radius-10)",
+          fontSize: "var(--fs-larger)",
+          ...navStyle,
+        }}
+      >
+        {text}
+      </Link>
+    );
+  };
 
   return (
-    <header className="bc-header fixed left-0 right-0 top-0 z-50 flex items-center bg-[var(--header-bg)]">
+    <header
+      className="bc-header fixed left-0 right-0 top-0 z-50 flex items-center bg-[var(--header-bg)]"
+      style={{ background: "var(--nav-header-bg, var(--header-bg))" }}
+    >
       <div className="bc-header__inner flex w-full items-center justify-between">
         <div
           className="flex items-center"

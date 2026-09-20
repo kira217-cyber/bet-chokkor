@@ -46,18 +46,25 @@ const UserBar = () => {
   const vipPoints = Math.floor(Number(user?.vipPoints || 0));
 
   // দুই আলাদা কার্ডের সাধারণ স্টাইল (মূল সাইটের মতো পাশাপাশি পিল)
+  // রঙ nav-* ভ্যারিয়েবল থেকে (অ্যাডমিন সেট না করলে বেস টোকেন follow করে)
   const cardStyle = {
     height: "calc(var(--u) * 9.067)",
     borderRadius: "var(--radius-10)",
     paddingInline: "calc(var(--u) * 2.667)",
     gap: "calc(var(--u) * 1.6)",
+    background: "var(--nav-card-bg, var(--neutral800))",
+    color: "var(--nav-card-text, var(--neutral100))",
   };
+  const cardText = { color: "var(--nav-card-text, var(--neutral100))" };
 
   // মোবাইলে ছোট গোল বাটন, ডেস্কটপে বড় — ব্যালেন্স কার্ডের সমান উঁচু
   const circleClass =
-    "flex shrink-0 cursor-pointer items-center justify-center rounded-full text-[var(--text-disabled)] transition-colors hover:text-[var(--text-secondary)] " +
+    "flex shrink-0 cursor-pointer items-center justify-center rounded-full transition-colors hover:brightness-125 " +
     "h-[calc(var(--u)*6.4)] w-[calc(var(--u)*6.4)] lg:h-[calc(var(--u)*9.067)] lg:w-[calc(var(--u)*9.067)]";
-  const circleBg = { background: "var(--neutral1000)" };
+  const circleBg = {
+    background: "var(--nav-circle-bg, var(--neutral1000))",
+    color: "var(--nav-icon, var(--text-disabled))",
+  };
 
   return (
     <>
@@ -77,8 +84,8 @@ const UserBar = () => {
           draggable="false"
         />
         <span
-          className="font-bold text-[var(--neutral100)]"
-          style={{ fontSize: "var(--fs-larger)" }}
+          className="font-bold"
+          style={{ fontSize: "var(--fs-larger)", ...cardText }}
         >
           {hidden ? "••••" : vipPoints}
         </span>
@@ -86,7 +93,7 @@ const UserBar = () => {
 
       {/* ── ব্যালেন্স কার্ড ── */}
       <span
-        className="flex shrink-0 items-center bg-[var(--neutral800)] font-bold text-[var(--neutral100)]"
+        className="flex shrink-0 items-center font-bold"
         style={{ ...cardStyle, fontSize: "var(--fs-larger)" }}
       >
         <img
@@ -139,12 +146,14 @@ const UserBar = () => {
       <Link
         to="/member/wallet/withdraw"
         aria-label={t("withdrawTitle")}
-        className="auth-btn auth-btn--secondary hidden shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110 lg:flex"
+        className="auth-btn hidden shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110 lg:flex"
         style={{
           height: "calc(var(--u) * 9.067)",
           borderRadius: "var(--radius-10)",
           fontSize: "var(--fs-larger)",
           paddingInline: "calc(var(--u) * 2.667)",
+          background: "var(--nav-withdraw-bg, var(--btn-secondary-bg))",
+          color: "var(--nav-withdraw-text, var(--btn-secondary-txt))",
         }}
       >
         <span>{t("withdrawTitle")}</span>
@@ -153,12 +162,14 @@ const UserBar = () => {
       <Link
         to="/member/wallet/deposit"
         aria-label={t("deposit")}
-        className="auth-btn auth-btn--primary flex shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
+        className="auth-btn flex shrink-0 cursor-pointer items-center justify-center transition-[filter] hover:brightness-110"
         style={{
           height: "calc(var(--u) * 9.067)",
           borderRadius: "var(--radius-10)",
           fontSize: "var(--fs-larger)",
           paddingInline: "calc(var(--u) * 2.667)",
+          background: "var(--nav-deposit-bg, var(--btn-primary-bg))",
+          color: "var(--nav-deposit-text, var(--btn-primary-txt))",
         }}
       >
         <Plus size={16} className="lg:hidden" />

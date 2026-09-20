@@ -209,7 +209,7 @@ const Login = () => {
         >
           <Link
             to="/forgot-password"
-            className="text-[var(--primary500)] underline underline-offset-4"
+            className="text-[var(--auth-link)] underline underline-offset-4"
             style={{ fontSize: "var(--fs-larger)" }}
           >
             {t("forgotPassword")}
@@ -225,9 +225,9 @@ const Login = () => {
             borderRadius: "var(--radius-10)",
             fontSize: "var(--fs-larger)",
             backgroundColor: canSubmit
-              ? "var(--primary500)"
-              : "color-mix(in srgb, var(--primary500), black 40%)",
-            color: "var(--btn-primary-txt)",
+              ? "var(--auth-btn-bg)"
+              : "color-mix(in srgb, var(--auth-btn-bg), black 40%)",
+            color: "var(--auth-btn-text)",
           }}
         >
           {busy ? t("loading") : t("login")}

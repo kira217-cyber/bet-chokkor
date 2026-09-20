@@ -66,7 +66,7 @@ export const ProfileShell = ({ title, children }) => {
 
   return (
     <div
-      className="mx-auto w-full"
+      className="member-area mx-auto w-full"
       style={{
         maxWidth: "1232px",
         paddingInline: "calc(var(--u) * 4.267)",

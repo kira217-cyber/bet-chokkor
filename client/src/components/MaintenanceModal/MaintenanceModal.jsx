@@ -23,10 +23,10 @@ const MaintenanceModal = ({ setting }) => {
       className="fixed inset-0 z-[300] flex items-center justify-center bg-[var(--neutral1000)] px-4"
     >
       <div
-        className="w-full max-w-[400px] rounded-[16px] border border-[var(--neutral700)] bg-[var(--neutral900)] p-7 text-center"
+        className="w-full max-w-[400px] rounded-[16px] border border-[var(--modal-border)] bg-[var(--modal-bg)] p-7 text-center"
         style={{ boxShadow: "0 24px 60px rgba(0,0,0,.55)" }}
       >
-        <span className="mx-auto flex h-[84px] w-[84px] items-center justify-center rounded-full bg-[var(--primary500)]/10 text-[var(--primary500)]">
+        <span className="mx-auto flex h-[84px] w-[84px] items-center justify-center rounded-full bg-[var(--modal-primary-bg)]/10 text-[var(--primary500)]">
           <Wrench size={36} />
         </span>
 
@@ -41,14 +41,14 @@ const MaintenanceModal = ({ setting }) => {
           {title}
         </p>
 
-        <p className="mt-3 text-[14px] leading-relaxed text-[var(--neutral300)]">
+        <p className="mt-3 text-[14px] leading-relaxed text-[var(--modal-text)]">
           {message}
         </p>
 
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="mt-6 h-[44px] w-full cursor-pointer rounded-[10px] bg-[var(--primary500)] text-[14px] font-bold text-[var(--neutral900)] transition-[filter] hover:brightness-[1.06]"
+          className="mt-6 h-[44px] w-full cursor-pointer rounded-[10px] bg-[var(--modal-primary-bg)] text-[14px] font-bold text-[var(--modal-primary-text)] transition-[filter] hover:brightness-[1.06]"
         >
           {t("tryAgain")}
         </button>

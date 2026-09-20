@@ -26,7 +26,7 @@ const Notice = () => {
   return (
     <section className="bc-pad w-full">
       <div
-        className="flex items-center overflow-hidden bg-[var(--neutral800)]"
+        className="flex items-center overflow-hidden bg-[var(--home-card-bg)]"
         style={{
           height: "calc(var(--u) * 8)",
           borderRadius: "var(--radius-70)",

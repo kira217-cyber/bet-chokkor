@@ -34,7 +34,7 @@ const Footer = () => {
       }}
     >
       <h3
-        className="font-semibold text-[var(--primary500)]"
+        className="font-semibold text-[var(--footer-accent)]"
         style={{
           fontSize: "var(--fs-larger)",
           lineHeight: 1,
@@ -64,7 +64,7 @@ const Footer = () => {
   );
 
   return (
-    <footer className="w-full bg-[var(--neutral1000)] lg:bg-transparent">
+    <footer className="w-full bg-[var(--footer-bg)] lg:bg-transparent">
       <div className="bc-page">
         <div className="bc-pad lg:px-0">
           {/* ── লিংক সেকশন ── */}
@@ -78,12 +78,12 @@ const Footer = () => {
               return (
                 <div
                   key={group.key}
-                  className="border-b border-white/10 lg:border-0"
+                  className="border-b border-[var(--footer-divider)] lg:border-0"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenKey(isOpen ? null : group.key)}
-                    className="flex w-full cursor-pointer items-center justify-between text-[var(--text-secondary)] lg:pointer-events-none lg:text-[var(--text-primary)]"
+                    className="flex w-full cursor-pointer items-center justify-between text-[var(--footer-heading)] lg:pointer-events-none lg:text-[var(--footer-heading)]"
                     style={{
                       padding: "calc(var(--u) * 5.067) 0",
                       fontSize: "var(--fs-larger)",
@@ -93,7 +93,7 @@ const Footer = () => {
 
                     <ChevronDown
                       size={18}
-                      className={`text-[var(--text-muted)] transition-transform duration-300 lg:hidden ${
+                      className={`text-[var(--footer-link)] transition-transform duration-300 lg:hidden ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     />
@@ -106,7 +106,7 @@ const Footer = () => {
                   >
                     {group.items.map((item) => {
                       const linkClass =
-                        "block text-[var(--text-muted)] transition-colors hover:text-[var(--primary500)]";
+                        "block text-[var(--footer-link)] transition-colors hover:text-[var(--footer-accent)]";
                       const linkStyle = {
                         paddingBlock: "calc(var(--u) * 2.133)",
                         fontSize: "var(--fs-normal)",
@@ -145,7 +145,7 @@ const Footer = () => {
             {iconBlock(setting.responsibleGaming, 8.2)}
           </div>
 
-          <div className="h-px w-full bg-white/10" />
+          <div className="h-px w-full bg-[var(--footer-divider)]" />
 
           {/* ── ব্র্যান্ড ── */}
           <div
@@ -165,7 +165,7 @@ const Footer = () => {
               />
             ) : (
               <span
-                className="shrink-0 font-bold text-[var(--text-muted)]"
+                className="shrink-0 font-bold text-[var(--footer-text)]"
                 style={{
                   fontSize: "var(--fs-normal)",
                   marginInlineEnd: "calc(var(--u) * 4.267)",
@@ -177,14 +177,14 @@ const Footer = () => {
 
             <div>
               <p
-                className="font-semibold text-[var(--primary500)]"
+                className="font-semibold text-[var(--footer-accent)]"
                 style={{ fontSize: "var(--fs-normal)" }}
               >
                 {t(setting.brand.subtitle) || "Not set"}
               </p>
 
               <p
-                className="text-[var(--text-muted)]"
+                className="text-[var(--footer-text)]"
                 style={{ fontSize: "var(--fs-normal)" }}
               >
                 {t(setting.brand.copyright) || "Not set"}
@@ -192,11 +192,11 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="h-px w-full bg-white/10" />
+          <div className="h-px w-full bg-[var(--footer-divider)]" />
 
           {/* ── লাইসেন্স ── */}
           <p
-            className="font-light leading-relaxed text-[var(--text-muted)]"
+            className="font-light leading-relaxed text-[var(--footer-text)]"
             style={{
               fontSize: "var(--fs-larger)",
               padding: "calc(var(--u) * 5.333) 0",

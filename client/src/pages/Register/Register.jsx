@@ -533,9 +533,9 @@ const Register = () => {
             fontSize: "var(--fs-larger)",
             backgroundColor:
               stepValid[step] && !busy
-                ? "var(--primary500)"
-                : "color-mix(in srgb, var(--primary500), black 40%)",
-            color: "var(--btn-primary-txt)",
+                ? "var(--auth-btn-bg)"
+                : "color-mix(in srgb, var(--auth-btn-bg), black 40%)",
+            color: "var(--auth-btn-text)",
           }}
         >
           {busy

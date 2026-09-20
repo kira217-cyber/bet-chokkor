@@ -23,9 +23,9 @@ const AuthLayout = ({ active, children }) => {
   ];
 
   return (
-    <div className="auth-page min-h-screen bg-[var(--neutral1000)]">
+    <div className="auth-page min-h-screen bg-[var(--auth-page-bg)]">
       {/* ── হেডার ── */}
-      <header className="auth-header fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[var(--header-bg)]">
+      <header className="auth-header fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-[var(--auth-header-bg)]">
         <Link to="/">
           <img
             src="/assets/brand/header-logo.png"
@@ -115,8 +115,8 @@ const AuthLayout = ({ active, children }) => {
                     height: "calc(var(--u) * 11.73)",
                     fontSize: "var(--fs-larger)",
                     color: isActive
-                      ? "var(--neutral100)"
-                      : "var(--text-secondary)",
+                      ? "var(--auth-tab-active)"
+                      : "var(--auth-tab-inactive)",
                   }}
                 >
                   {tab.label}
@@ -126,7 +126,7 @@ const AuthLayout = ({ active, children }) => {
                     style={{
                       height: "calc(var(--u) * 0.8)",
                       background: isActive
-                        ? "var(--primary500)"
+                        ? "var(--auth-tab-underline)"
                         : "var(--neutral700)",
                     }}
                   />
@@ -154,7 +154,7 @@ const AuthLayout = ({ active, children }) => {
           width: 100%;
           height: calc(var(--u) * 48);
           overflow: hidden;
-          background: var(--neutral1000);
+          background: var(--auth-page-bg);
         }
 
         .auth-hero > *,
@@ -173,7 +173,7 @@ const AuthLayout = ({ active, children }) => {
         }
 
         .auth-hero__beam-color {
-          background: var(--primary600);
+          background: var(--auth-hero-beam);
           opacity: 0.7;
           -webkit-mask: url("/assets/auth/mobile-login-welcome-bg-light.png")
             center / cover no-repeat;
@@ -187,7 +187,7 @@ const AuthLayout = ({ active, children }) => {
         }
 
         .auth-hero__overlay {
-          background: var(--primary500);
+          background: var(--auth-hero-overlay);
           mix-blend-mode: overlay;
           opacity: 0.07;
         }

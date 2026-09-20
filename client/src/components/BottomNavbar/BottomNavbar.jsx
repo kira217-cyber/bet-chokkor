@@ -32,7 +32,9 @@ const BottomNavbar = ({ setSidebarOpen }) => {
   const content = (item, isActive) => {
     const Icon = item.lucide ? LUCIDE[item.lucide] : null;
 
-    const color = isActive ? "var(--primary500)" : "var(--text-secondary)";
+    const color = isActive
+      ? "var(--bnav-active, var(--primary500))"
+      : "var(--bnav-inactive, var(--text-secondary))";
 
     return (
       <>
@@ -68,8 +70,8 @@ const BottomNavbar = ({ setSidebarOpen }) => {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 rounded-t-[var(--radius-10)] bg-[var(--neutral800)] lg:hidden"
-      style={{ height: "var(--bottom-bar-height)" }}
+      className="fixed bottom-0 left-0 right-0 z-40 rounded-t-[var(--radius-10)] lg:hidden"
+      style={{ height: "var(--bottom-bar-height)", background: "var(--bnav-bg, var(--neutral800))" }}
     >
       <div className="flex h-full items-stretch">
         {items.map((item) => {

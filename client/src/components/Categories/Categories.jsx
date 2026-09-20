@@ -73,8 +73,8 @@ const Categories = () => {
                   height: "calc(var(--u) * 22.93)",
                   borderRadius: "var(--radius-10)",
                   backgroundColor: isActive
-                    ? "var(--primary500)"
-                    : "var(--neutral800)",
+                    ? "var(--home-cat-active-bg)"
+                    : "var(--home-card-bg)",
                 }}
               >
                 {item && (
@@ -95,7 +95,7 @@ const Categories = () => {
                       style={{
                         fontSize: "var(--fs-larger)",
                         color: isActive
-                          ? "var(--neutral600)"
+                          ? "var(--home-cat-active-text)"
                           : "var(--neutral200)",
                       }}
                     >

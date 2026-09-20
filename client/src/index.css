@@ -63,6 +63,95 @@
   --btn-secondary-bg: var(--neutral700);
   --btn-secondary-txt: var(--neutral200);
 
+  /* ── সেকশন-স্কোপড টোকেন (অ্যাডমিন override করে; নইলে বেস follow) ── */
+  /* Sidebar */
+  --side-bg: var(--neutral900);
+  --side-row-bg: var(--neutral800);
+  --side-row-hover: var(--neutral700);
+  --side-text: var(--text-secondary);
+  --side-icon-bg: var(--neutral700);
+  --side-divider: var(--neutral700);
+  /* Bottom navigation (mobile) */
+  --bnav-bg: var(--neutral800);
+  --bnav-active: var(--primary500);
+  --bnav-inactive: var(--text-secondary);
+  /* Home content (section titles, cards) */
+  --home-title: var(--neutral100);
+  --home-title-bar: var(--primary500);
+  --home-card-bg: var(--neutral800);
+  --home-card-hover: var(--neutral700);
+  --home-card-text: var(--text-secondary);
+  --home-cat-active-bg: var(--primary500);
+  --home-cat-active-text: var(--neutral600);
+  /* Match Odds */
+  --mo-bg: var(--neutral1000);
+  --mo-rail-bg: #141413;
+  --mo-card-bg: #1e1e1e;
+  --mo-card-header: #1d2ab8;
+  --mo-live: #00b585;
+  --mo-odds-bg: #262626;
+  --mo-status: #7b8cff;
+  /* Modals (alert / confirm / coming-soon / maintenance) */
+  --modal-bg: var(--neutral900);
+  --modal-border: var(--neutral700);
+  --modal-title: var(--neutral100);
+  --modal-text: var(--neutral300);
+  --modal-btn-bg: var(--neutral800);
+  --modal-btn-hover: var(--neutral700);
+  --modal-primary-bg: var(--primary500);
+  --modal-primary-text: var(--neutral900);
+  /* Auth pages (login / register / forgot-password) */
+  --auth-page-bg: var(--neutral1000);
+  --auth-header-bg: var(--header-bg);
+  --auth-hero-beam: var(--primary600);
+  --auth-hero-overlay: var(--primary500);
+  --auth-tab-active: var(--neutral100);
+  --auth-tab-inactive: var(--text-secondary);
+  --auth-tab-underline: var(--primary500);
+  --auth-input-bg: var(--neutral800);
+  --auth-link: var(--primary500);
+  --auth-btn-bg: var(--primary500);
+  --auth-btn-text: var(--btn-primary-txt);
+
+  /* Member পেজ (profile / deposit / withdraw / history / referral …)
+     এই সেকশনে সরাসরি অনেক base token (neutral900/800/700, primary500,
+     neutral100, text-secondary) ব্যবহৃত হয়। তাই .member-area স্কোপে ওই
+     base token গুলোকে এই member token এ রি-ম্যাপ করা হয় — এক সেটে পুরো
+     member এলাকা একসাথে theme হয়, শেয়ার্ড bits সহ।
+     ডিফল্ট হেক্স লিটারাল রাখা হলো (base palette এর মান) — কারণ স্কোপে
+     একই token রি-ম্যাপ হয় বলে var(--neutralX) দিলে circular হয়ে যেত;
+     member এর নিজের theme পেজ থেকেই এগুলো override করা যায়। */
+  --member-card-bg: #292926;       /* = neutral900: কার্ড/সেকশন bg */
+  --member-surface-bg: #383835;    /* = neutral800: ব্যাক বাটন, অ্যাক্টিভ মেনু, ইনপুট */
+  --member-surface-hover: #3d3d39; /* = neutral700: hover/বর্ডার */
+  --member-accent: #f9b901;        /* = primary500: বাটন ও অ্যাকসেন্ট */
+  --member-title: #ffffff;         /* = neutral100: শিরোনাম/লেবেল */
+  --member-text: #cdcdcb;          /* = text-secondary: বডি/মান লেখা */
+
+  /* Promotion পেজ */
+  --promo-title: var(--neutral100);
+  --promo-tab-active-bg: var(--primary500);
+  --promo-tab-active-text: var(--btn-primary-txt);
+  --promo-tab-bg: var(--neutral800);
+  --promo-tab-text: var(--text-secondary);
+  --promo-card-bg: var(--neutral800);
+  --promo-accent: var(--primary500);
+
+  /* App Download পেজ */
+  --appdl-section-bg: #0a0a09;   /* হিরো ও ফিচার সেকশনের কালো bg */
+  --appdl-band-top: #241802;      /* মাঝের সোনালি ব্যান্ড — উপরে গাঢ় */
+  --appdl-band-bottom: #f9b901;   /* মাঝের সোনালি ব্যান্ড — নিচে উজ্জ্বল */
+  --appdl-card-bg: #22221e;       /* অভিজ্ঞতা কার্ডের bg */
+  --appdl-accent: var(--primary500); /* গোল্ড অ্যাকসেন্ট */
+
+  /* Footer */
+  --footer-bg: var(--neutral1000);
+  --footer-heading: var(--text-primary);  /* কলাম শিরোনাম */
+  --footer-accent: var(--primary500);      /* ব্লক টাইটেল, ব্র্যান্ড সাবটাইটেল, লিংক hover */
+  --footer-link: var(--text-muted);        /* নেভ লিংক */
+  --footer-text: var(--text-muted);        /* কপিরাইট, লাইসেন্স, প্লেসহোল্ডার */
+  --footer-divider: #ffffff1a;             /* বিভাজক রেখা */
+
   /* radius */
   --radius-1: calc(var(--u) * 0.2666666667);
   --radius-3: calc(var(--u) * 0.8);
@@ -112,6 +201,29 @@ body {
   color: var(--text-primary);
   font-family: Outfit, "Helvetica Neue", Helvetica, Tahoma, "Nirmala UI",
     "Noto Sans Bengali", sans-serif;
+}
+
+/* অথ পেজের ভিতরে সব ইনপুট বক্স (নিজস্ব + শেয়ার্ড FormField/PasswordInput)
+   auth-input-bg follow করে — বাকি সাইটে --form-box-bg অপরিবর্তিত থাকে */
+.auth-page,
+.forgot-page {
+  --form-box-bg: var(--auth-input-bg);
+}
+
+/* Member এলাকার ভিতরে base token গুলো member token follow করে — বাইরে
+   অপরিবর্তিত। --form-box-bg (=neutral800) ও এখানেই রি-ম্যাপ হয়ে যায়,
+   কারণ CSS var use-site এ resolve হয়। */
+.member-area {
+  --neutral900: var(--member-card-bg);
+  --content-bg: var(--member-card-bg);
+  --neutral800: var(--member-surface-bg);
+  --neutral700: var(--member-surface-hover);
+  --primary500: var(--member-accent);
+  --neutral100: var(--member-title);
+  --text-secondary: var(--member-text);
+  /* semantic token গুলো :root এ substitute হয়ে যায় বলে এখানে আবার
+     ঘোষণা করতে হয়, নইলে scoped neutral override এদের ছোঁয় না */
+  --form-box-bg: var(--member-surface-bg);
 }
 
 /* ── লেআউট ──
